@@ -126,6 +126,17 @@ public class ApplicationFrameController {
                 }
             }
         });
+        logoutLabel.addMouseListener(new MouseAdapter(){
+            @Override
+            public void mouseClicked(MouseEvent e) {
+
+            ConfigManager.setLoggedUser("");
+            ConfigManager.setJwtToken("");
+            applicationFrame.setVisible(false);
+            mainController.setLoginFrameController(new LoginFrameController(mainController));
+            mainController.getLoginFrameController().showMainFrameWindow();
+        }
+        });
 
     }
 }
