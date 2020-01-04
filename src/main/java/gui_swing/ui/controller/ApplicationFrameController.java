@@ -29,6 +29,7 @@ public class ApplicationFrameController {
     private JLabel loggedUserLabel;
     private JLabel logoutLabel;
     private JLabel exitLabel;
+    private boolean iconLabelFlag= true;
 
 
     public ApplicationFrameController(MainController mainController) {
@@ -50,8 +51,7 @@ public class ApplicationFrameController {
         bottomPropertiesBlankPanel = applicationFrame.getBottomPropertiesBlankPanel();
         bottomPropertiesIllustrationsPanel = applicationFrame.getBottomPropertiesIllustrationsPanel();
         bottomPropertiesSettingsPanel = applicationFrame.getBottomPropertiesSettingsPanel();
-        CardLayout cardLayout = (CardLayout) (bottomPropertiesPanel.getLayout());
-        cardLayout.show(bottomPropertiesPanel, bottomPropertiesBlankPanel.getName());
+        backToMainPanel();
         loggedUserLabel= applicationFrame.getLoggedUserLabel();
         iconLabel = applicationFrame.getIconLabel();
         exitLabel= applicationFrame.getExitLabel();
@@ -82,27 +82,30 @@ public class ApplicationFrameController {
             }
         });
         list1.addListSelectionListener(new ListSelectionListener() {
+
             @Override
             public void valueChanged(ListSelectionEvent e) {
 
                 CardLayout cardLayout = (CardLayout) (bottomPropertiesPanel.getLayout());
+                if(iconLabelFlag){
+                    switch (list1.getSelectedValue().toString()) {
+                        case "Hasła":
+                            cardLayout.show(bottomPropertiesPanel, bottomPropertiesTermsPanel.getName());
+                            break;
+                        case "Autorzy":
+                            cardLayout.show(bottomPropertiesPanel, bottomPropertiesAuthorsPanel.getName());
+                            break;
+                        case "Umowy":
+                            cardLayout.show(bottomPropertiesPanel, bottomPropertiesAgreementsPanel.getName());
+                            break;
+                        case "Ilustracje":
+                            cardLayout.show(bottomPropertiesPanel, bottomPropertiesIllustrationsPanel.getName());
+                            break;
+                        case "Ustawienia":
+                            cardLayout.show(bottomPropertiesPanel, bottomPropertiesSettingsPanel.getName());
+                            break;
+                    }
 
-                switch (list1.getSelectedValue().toString()) {
-                    case "Hasła":
-                        cardLayout.show(bottomPropertiesPanel, bottomPropertiesTermsPanel.getName());
-                        break;
-                    case "Autorzy":
-                        cardLayout.show(bottomPropertiesPanel, bottomPropertiesAuthorsPanel.getName());
-                        break;
-                    case "Umowy":
-                        cardLayout.show(bottomPropertiesPanel, bottomPropertiesAgreementsPanel.getName());
-                        break;
-                    case "Ilustracje":
-                        cardLayout.show(bottomPropertiesPanel, bottomPropertiesIllustrationsPanel.getName());
-                        break;
-                    case "Ustawienia":
-                        cardLayout.show(bottomPropertiesPanel, bottomPropertiesSettingsPanel.getName());
-                        break;
                 }
 
 
@@ -112,8 +115,7 @@ public class ApplicationFrameController {
             @Override
             public void mouseClicked(MouseEvent e) {
 
-                CardLayout cardLayout = (CardLayout) (bottomPropertiesPanel.getLayout());
-                cardLayout.show(bottomPropertiesPanel, bottomPropertiesBlankPanel.getName());
+                backToMainPanel();
 
             }
         });
@@ -129,7 +131,7 @@ public class ApplicationFrameController {
         logoutLabel.addMouseListener(new MouseAdapter(){
             @Override
             public void mouseClicked(MouseEvent e) {
-
+            backToMainPanel();
             ConfigManager.setLoggedUser("");
             ConfigManager.setJwtToken("");
             applicationFrame.setVisible(false);
@@ -138,6 +140,14 @@ public class ApplicationFrameController {
         }
         });
 
+    }
+
+    private void backToMainPanel() {
+        CardLayout cardLayout = (CardLayout) (bottomPropertiesPanel.getLayout());
+        cardLayout.show(bottomPropertiesPanel, bottomPropertiesBlankPanel.getName());
+        iconLabelFlag=false;
+        list1.clearSelection();
+        iconLabelFlag=true;
     }
 }
 
