@@ -32,6 +32,9 @@ public class ApplicationFrame extends JFrame{
     private JPanel leftTopPanel;
     private JLabel logoutLabel;
     private JLabel exitLabel;
+    private JList TermsList;
+    private JPanel TermsAllPanel;
+    private JTable table1;
     private JButton button1;
     private JRadioButton radioButton1;
     private JPanel card1;
