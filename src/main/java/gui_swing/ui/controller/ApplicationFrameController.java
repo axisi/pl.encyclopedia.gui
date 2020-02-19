@@ -1,14 +1,16 @@
 package gui_swing.ui.controller;
 
-import gui_swing.ui.model.ConfigManager;
+import gui_swing.ui.model.*;
 import gui_swing.ui.view.ApplicationFrame;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.event.MouseInputAdapter;
+import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ApplicationFrameController {
     //    private final static String termsPanel = "bottomPropertiesTermsPanel";
@@ -18,6 +20,7 @@ public class ApplicationFrameController {
     private MainController mainController;
     private JPanel topPanel;
     private JList list1;
+    private JList termsList;
     private JPanel bottomPropertiesPanel;
     private JPanel bottomPropertiesTermsPanel;
     private JPanel bottomPropertiesAuthorsPanel;
@@ -25,11 +28,36 @@ public class ApplicationFrameController {
     private JPanel bottomPropertiesAgreementsPanel;
     private JPanel bottomPropertiesIllustrationsPanel;
     private JPanel bottomPropertiesSettingsPanel;
+    private JPanel topDetailsPanel;
+    private JPanel topDetailsPanelBlank;
+    private JPanel topDetailsPanelFilters;
+
+    private JList categoryJList;
+    private  JList subcategoryJList;
+    private  JList tagsJList;
+    private  JList statusesJList;
+
+    private JButton searchButton;
     private JLabel iconLabel;
     private JLabel loggedUserLabel;
     private JLabel logoutLabel;
     private JLabel exitLabel;
+    private JPanel bottomDetailsTermsPanel;
+    private JTable termsTable;
+    private JPanel bottomDetailsBlankPanel;
+    private JPanel bottomDetailsPanel;
     private boolean iconLabelFlag= true;
+    private JPanel bottomDetailsTermPanel;
+    ApiConnector apiConnector = new ApiConnector();
+    private DefaultTableModel tm;
+    String[] headersStr =  {"Id", "Tytuł", "Ilość wersji", "Aktualna wersja", "Autorzy", "Podpis"};
+   // private TermTableModel  termTableModel = new TermTableModel(headersStr,null) ;
+    CardLayout cardLayout1;
+    CardLayout cardLayout;
+    CardLayout cardLayout2;
+    private ArrayList<String> tagsStrings ;
+    private RenderTermsFilters renderTermsFilters;
+
 
 
     public ApplicationFrameController(MainController mainController) {
@@ -51,11 +79,41 @@ public class ApplicationFrameController {
         bottomPropertiesBlankPanel = applicationFrame.getBottomPropertiesBlankPanel();
         bottomPropertiesIllustrationsPanel = applicationFrame.getBottomPropertiesIllustrationsPanel();
         bottomPropertiesSettingsPanel = applicationFrame.getBottomPropertiesSettingsPanel();
+        bottomDetailsBlankPanel = applicationFrame.getBottomDetailsBlankPanel();
+        bottomDetailsTermsPanel = applicationFrame.getBottomDetailsTermsPanel();
+        bottomDetailsPanel = applicationFrame.getBottomDetailsPanel();
+        topDetailsPanel = applicationFrame.getTopDetailsPanel();
+        topDetailsPanelBlank = applicationFrame.getTopDetailsPanelBlank();
+        topDetailsPanelFilters= applicationFrame.getTopDetailsPanelFilters();
+        categoryJList = applicationFrame.getCategoryJList();
+        subcategoryJList = applicationFrame.getSubcategoryJList();
+        tagsJList=applicationFrame.getTagsJList();
+        statusesJList = applicationFrame.getStatusesJList();
+
+        //termTableModel= applicationFrame.getTermTableModel();
+        bottomDetailsTermPanel = applicationFrame.getBottomDetailsTermPanel();
+        cardLayout1 = (CardLayout) (bottomDetailsPanel.getLayout());
+        cardLayout1.show(bottomDetailsPanel, bottomDetailsBlankPanel.getName());
+        cardLayout = (CardLayout) (bottomPropertiesPanel.getLayout());
+        cardLayout.show(bottomPropertiesPanel, bottomPropertiesBlankPanel.getName());
+        cardLayout2 = (CardLayout)(topDetailsPanel.getLayout());
+        cardLayout2.show(topDetailsPanel,topDetailsPanelBlank.getName());
+        termsTable = applicationFrame.getTermsTable();
+        tm= (DefaultTableModel) termsTable.getModel();
+        tagsStrings = applicationFrame.getTagsStrings();
+        searchButton = applicationFrame.getSearchButton();
+
+
+
+
+
         backToMainPanel();
         loggedUserLabel= applicationFrame.getLoggedUserLabel();
         iconLabel = applicationFrame.getIconLabel();
         exitLabel= applicationFrame.getExitLabel();
         logoutLabel = applicationFrame.getLogoutLabel();
+        termsList = applicationFrame.getTermsList();
+        renderTermsFilters = new RenderTermsFilters(new JList[]{applicationFrame.getCategoryJList(),applicationFrame.getSubcategoryJList(),applicationFrame.getStatusesJList()});
 
     }
 
@@ -85,32 +143,106 @@ public class ApplicationFrameController {
 
             @Override
             public void valueChanged(ListSelectionEvent e) {
+                if(e.getValueIsAdjusting()) {
+                    CardLayout cardLayout = (CardLayout) (bottomPropertiesPanel.getLayout());
+                    if (iconLabelFlag) {
+                        switch (list1.getSelectedValue().toString()) {
+                            case "Hasła":
+                                backToMainPanel();
+                                cardLayout.show(bottomPropertiesPanel, bottomPropertiesTermsPanel.getName());
+                                cardLayout1.show(bottomDetailsPanel, bottomDetailsBlankPanel.getName());
+                                break;
+                            case "Autorzy":
+                                backToMainPanel();
+                                cardLayout.show(bottomPropertiesPanel, bottomPropertiesAuthorsPanel.getName());
+                                cardLayout1.show(bottomDetailsPanel, bottomDetailsBlankPanel.getName());
+                                break;
+                            case "Umowy":
+                                backToMainPanel();
+                                cardLayout.show(bottomPropertiesPanel, bottomPropertiesAgreementsPanel.getName());
+                                cardLayout1.show(bottomDetailsPanel, bottomDetailsBlankPanel.getName());
+                                break;
+                            case "Ilustracje":
+                                backToMainPanel();
+                                cardLayout.show(bottomPropertiesPanel, bottomPropertiesIllustrationsPanel.getName());
+                                cardLayout1.show(bottomDetailsPanel, bottomDetailsBlankPanel.getName());
+                                break;
+                            case "Ustawienia":
+                                backToMainPanel();
+                                cardLayout.show(bottomPropertiesPanel, bottomPropertiesSettingsPanel.getName());
+                                cardLayout1.show(bottomDetailsPanel, bottomDetailsBlankPanel.getName());
+                                break;
+                        }
 
-                CardLayout cardLayout = (CardLayout) (bottomPropertiesPanel.getLayout());
-                if(iconLabelFlag){
-                    switch (list1.getSelectedValue().toString()) {
-                        case "Hasła":
-                            cardLayout.show(bottomPropertiesPanel, bottomPropertiesTermsPanel.getName());
-                            break;
-                        case "Autorzy":
-                            cardLayout.show(bottomPropertiesPanel, bottomPropertiesAuthorsPanel.getName());
-                            break;
-                        case "Umowy":
-                            cardLayout.show(bottomPropertiesPanel, bottomPropertiesAgreementsPanel.getName());
-                            break;
-                        case "Ilustracje":
-                            cardLayout.show(bottomPropertiesPanel, bottomPropertiesIllustrationsPanel.getName());
-                            break;
-                        case "Ustawienia":
-                            cardLayout.show(bottomPropertiesPanel, bottomPropertiesSettingsPanel.getName());
-                            break;
                     }
-
                 }
 
 
             }
         });
+
+        termsList.addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                if(e.getValueIsAdjusting()){
+                    if (iconLabelFlag) {
+                        switch (termsList.getSelectedValue().toString()) {
+                            case "Pokaż wszystkie":
+                                //System.out.println( bottomDetailsTermsPanel.getName());
+                                hideFiltersSearchPanels();
+                                apiConnector.getAllTerm();
+                                renderTermTable();
+                                break;
+                            case "Pokaż według filtrów":
+                               // System.out.println( bottomDetailsBlankPanel.getName());
+                                cardLayout1.show(bottomDetailsPanel, bottomDetailsBlankPanel.getName());
+                                searchButton.setVisible(true);
+                                JList[] jlist = new JList[3];
+                                jlist[0]=categoryJList;
+                                jlist[1]=subcategoryJList;
+                                jlist[2]=statusesJList;
+                                ArrayList <String> tagsName = apiConnector.getAllTags();
+                                renderTermsFilters.setTagsJList(tagsJList,tagsName);
+                                cardLayout2.show(topDetailsPanel,topDetailsPanelFilters.getName());
+                               //System.out.println(topDetailsPanel.getWidth());
+                                break;
+                            case "Pokaż według autorów":
+                                hideFiltersSearchPanels();
+                                break;
+                        }
+                    }
+                }
+            }
+        });
+       /* termsTable.getSelectionModel().addListSelectionListener(new ListSelectionListener(){
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                termsTable.setSelectionBackground(Color.RED);
+            }
+        });*/
+
+        searchButton.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+               // ArrayList<String>[] searchMatrix= new ArrayList<String>[4];
+                List<List<String>> searchMatrix = new ArrayList<List<String>>();
+                List<String> categoriesList = new ArrayList<String>();
+                List<String> subcategoriesList = new ArrayList<String>();
+                List<String> tagsList = new ArrayList<String>();
+                List<String> statusesList = new ArrayList<String>();
+
+
+                generateLists(categoriesList, subcategoriesList, categoryJList, subcategoryJList);
+                generateLists(tagsList, statusesList, tagsJList, statusesJList);
+
+
+                /*for (String s: categoriesList
+                     ) {
+                    System.out.println(s);
+                }*/
+            }
+        });
+
         iconLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -142,11 +274,120 @@ public class ApplicationFrameController {
 
     }
 
+    private void generateLists(List<String> tagsList, List<String> statusesList, JList tagsJList, JList statusesJList) {
+        for (int i = 0; i < tagsJList.getModel().getSize(); i++) {
+            CheckListItem checkListItem= (CheckListItem) tagsJList.getModel().getElementAt(i);
+            if(checkListItem.isSelected()){
+                tagsList.add(checkListItem.toString());
+            }
+        }
+        for (int i = 0; i < statusesJList.getModel().getSize(); i++) {
+            CheckListItem checkListItem= (CheckListItem) statusesJList.getModel().getElementAt(i);
+            if(checkListItem.isSelected()){
+                statusesList.add(checkListItem.toString());
+            }
+        }
+    }
+
+    private void hideFiltersSearchPanels() {
+        searchButton.setVisible(false);
+        cardLayout2.show(topDetailsPanel, topDetailsPanelBlank.getName());
+    }
+
+    private void renderTermTable() {
+        cardLayout1.show(bottomDetailsPanel, bottomDetailsTermsPanel.getName());
+
+        if(tm.getRowCount() !=0){
+           for(int i = tm.getRowCount() -1 ; i > -1 ; i--){
+              tm.removeRow(i);
+           }
+       }
+
+        int iteratorTollTip = 0;
+        for (Term t : apiConnector.getResponseList()) {
+
+            int counter = 0;
+            Object[] terms = {"Lp","Id", "Tytuł", "Ilość wersji", "Aktualna wersja", "Autorzy", "Podpis","Tagi"};
+            for (TermHistory t1: t.getTermHistories()) {
+                counter++;
+            }
+            tm.setColumnIdentifiers(terms);
+
+            /*ImageIcon icon = new ImageIcon("src/main/resources/img/tags/tag-black.png");
+            ImageIcon icon2 = new ImageIcon("src/main/resources/img/tags/tag-blue.png");*/
+
+
+
+            TableColumnModel tableModel= termsTable.getColumnModel();
+            tableModel.getColumn(0).setPreferredWidth(15);
+            tableModel.getColumn(1).setPreferredWidth(15);
+            tableModel.getColumn(2).setPreferredWidth(230);
+            tableModel.getColumn(3).setPreferredWidth(25);
+            tableModel.getColumn(4).setPreferredWidth(40);
+            tableModel.getColumn(5).setPreferredWidth(145);
+            tableModel.getColumn(6).setPreferredWidth(25);
+             tableModel.getColumn(7).setPreferredWidth(30);
+
+             List<Tag> tagList = t.getTags();
+           List<ImageIcon> imageIcons= new ArrayList<>();
+
+            String tagString = "";
+            if(!tagList.isEmpty()){
+                for (Tag tag: tagList) {
+
+                   imageIcons.add(new ImageIcon("src/main/resources/img/tags/"+tag.getIconName()));
+
+                }
+
+            }
+            // Wstawianie Authorów
+            List<Author> authorList = apiConnector.getAuthorsOfTerm(t.getId());
+            String authorsToTable ="";
+            for (Author a: authorList
+                 ) {
+                authorsToTable += a.getName()+" "+ a.getSurname();
+            }
+
+            //Koniec wstawiania
+
+            TagIcon tagIcon= new TagIcon(imageIcons);
+            tm.addRow(new Object[]{tm.getRowCount()+1,t.getId(),t.getTitle(),counter,t.getActualVersion(),authorsToTable,t.getIsSigned(),tagIcon});
+
+            if(!tagList.isEmpty()){
+                for (Tag tag: tagList) {
+
+
+                    tagString +=tag.getName() +", ";
+                }
+
+            }
+
+            tagsStrings.add(iteratorTollTip,tagString);
+            //System.out.println(tagsStrings.get(iteratorTollTip));
+            iteratorTollTip++;
+
+
+        }
+    }
+
+
     private void backToMainPanel() {
-        CardLayout cardLayout = (CardLayout) (bottomPropertiesPanel.getLayout());
+
+
         cardLayout.show(bottomPropertiesPanel, bottomPropertiesBlankPanel.getName());
+        hideFiltersSearchPanels();
+        cardLayout1.show(bottomDetailsPanel, bottomDetailsBlankPanel.getName());
         iconLabelFlag=false;
         list1.clearSelection();
+        /*if(termsList.getValueIsAdjusting()){
+
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    termsList.clearSelection();
+                }
+            });
+        }*/
         iconLabelFlag=true;
     }
 }

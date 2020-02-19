@@ -1,8 +1,17 @@
 package gui_swing.ui.view;
 
-import javax.swing.*;
 
-public class ApplicationFrame extends JFrame{
+
+import gui_swing.ui.model.TermTableModel;
+
+import javax.swing.*;
+import javax.swing.table.*;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.Vector;
+
+
+public class ApplicationFrame extends JFrame {
 
     private static final int WIDTH = 1280;
     private static final int HEIGHT = 800;
@@ -33,12 +42,260 @@ public class ApplicationFrame extends JFrame{
     private JLabel logoutLabel;
     private JLabel exitLabel;
     private JList TermsList;
-    private JPanel TermsAllPanel;
+    private JTable termsTable;
+
+    private JPanel bottomDetailsBlankPanel;
+    private JScrollPane termsTableScrollPane;
+    private JPanel bottomDetailsTermsPanel;
+    private JPanel bottomDetailsTermPanel;
+    private JPanel bottomDetailsTermTopPanel;
+    private JPanel bottomDetailsTermBottomPanel;
     private JTable table1;
-    private JButton button1;
+    private JTextArea textArea1;
+    private JPanel topDetailsPanelBlank;
+    private JPanel topDetailsPanelFilters;
+    private JPanel GroupJPanel;
+    private JList categoryJList;
+    private  JList subcategoryJList;
+    private  JList tagsJList;
+    private  JList statusesJList;
+
+    private JPanel SubgroupsJPanel;
+    private ArrayList<String> tagsStrings;
+    private JButton searchButton;
+    private JPanel TagsJPanel;
+    private JPanel StatusJPanel;
+    private JList subCategoriesJList;
+    private JPanel SubGroupJPanel;
+
     private JRadioButton radioButton1;
-    private JPanel card1;
-    private JPanel card2;
+
+    protected String[] columnToolTips = {null,
+            "Id hasła, pod tym numerem jest ono dostępne w bazie danych.",
+            "Tytuł hasła.",
+            "Ile dabe hasło ma różnych wersji.",
+            "Aktualna wersja hasła.",
+            "Autorzy danego hasła.",
+            "Czy dane hasło jest sygnowane",
+            "Tagi hasła (najedź aby wyświetlić nazwy)"
+    };
+
+    public JPanel getTagsJPanel() {
+        return TagsJPanel;
+    }
+
+    public void setTagsJPanel(JPanel tagsJPanel) {
+        TagsJPanel = tagsJPanel;
+    }
+
+    public JPanel getStatusJPanel() {
+        return StatusJPanel;
+    }
+
+    public void setStatusJPanel(JPanel statusJPanel) {
+        StatusJPanel = statusJPanel;
+    }
+
+    public JList getSubCategoriesJList() {
+        return subCategoriesJList;
+    }
+
+    public void setSubCategoriesJList(JList subCategoriesJList) {
+        this.subCategoriesJList = subCategoriesJList;
+    }
+
+    public JPanel getSubGroupJPanel() {
+        return SubGroupJPanel;
+    }
+
+    public void setSubGroupJPanel(JPanel subGroupJPanel) {
+        SubGroupJPanel = subGroupJPanel;
+    }
+
+    public JList getSubcategoryJList() {
+        return subcategoryJList;
+    }
+
+    public void setSubcategoryJList(JList subcategoryJList) {
+        this.subcategoryJList = subcategoryJList;
+    }
+
+    public JList getTagsJList() {
+        return tagsJList;
+    }
+
+    public void setTagsJList(JList tagsJList) {
+        this.tagsJList = tagsJList;
+    }
+
+    public JList getStatusesJList() {
+        return statusesJList;
+    }
+
+    public void setStatusesJList(JList statusesJList) {
+        this.statusesJList = statusesJList;
+    }
+
+    public JPanel getBottomDetailsTermTopPanel() {
+        return bottomDetailsTermTopPanel;
+    }
+
+    public void setBottomDetailsTermTopPanel(JPanel bottomDetailsTermTopPanel) {
+        this.bottomDetailsTermTopPanel = bottomDetailsTermTopPanel;
+    }
+
+    public JPanel getBottomDetailsTermBottomPanel() {
+        return bottomDetailsTermBottomPanel;
+    }
+
+    public void setBottomDetailsTermBottomPanel(JPanel bottomDetailsTermBottomPanel) {
+        this.bottomDetailsTermBottomPanel = bottomDetailsTermBottomPanel;
+    }
+
+    public JTable getTable1() {
+        return table1;
+    }
+
+    public void setTable1(JTable table1) {
+        this.table1 = table1;
+    }
+
+    public JTextArea getTextArea1() {
+        return textArea1;
+    }
+
+    public void setTextArea1(JTextArea textArea1) {
+        this.textArea1 = textArea1;
+    }
+
+    public JPanel getTopDetailsPanelBlank() {
+        return topDetailsPanelBlank;
+    }
+
+    public void setTopDetailsPanelBlank(JPanel topDetailsPanelBlank) {
+        this.topDetailsPanelBlank = topDetailsPanelBlank;
+    }
+
+    public JPanel getTopDetailsPanelFilters() {
+        return topDetailsPanelFilters;
+    }
+
+    public void setTopDetailsPanelFilters(JPanel topDetailsPanelFilters) {
+        this.topDetailsPanelFilters = topDetailsPanelFilters;
+    }
+
+    public JList getCategoryJList() {
+        return categoryJList;
+    }
+
+    public void setCategoryJList(JList categoryJList) {
+        this.categoryJList = categoryJList;
+    }
+
+    public JPanel getGroupJPanel() {
+        return GroupJPanel;
+    }
+
+    public void setGroupJPanel(JPanel groupJPanel) {
+        GroupJPanel = groupJPanel;
+    }
+
+
+
+    public JPanel getSubgroupsJPanel() {
+        return SubgroupsJPanel;
+    }
+
+    public void setSubgroupsJPanel(JPanel subgroupsJPanel) {
+        SubgroupsJPanel = subgroupsJPanel;
+    }
+
+    public String[] getColumnToolTips() {
+        return columnToolTips;
+    }
+
+    public void setColumnToolTips(String[] columnToolTips) {
+        this.columnToolTips = columnToolTips;
+    }
+
+    public String[] getHeadersStr() {
+        return headersStr;
+    }
+
+    public void setHeadersStr(String[] headersStr) {
+        this.headersStr = headersStr;
+    }
+
+    public ArrayList<String> getTagsStrings() {
+        return tagsStrings;
+    }
+
+    public void setTagsStrings(ArrayList<String> tagsStrings) {
+        this.tagsStrings = tagsStrings;
+    }
+
+    public JPanel getBottomDetailsTermPanel() {
+        return bottomDetailsTermPanel;
+    }
+
+    public void setBottomDetailsTermPanel(JPanel bottomDetailsTermPanel) {
+        this.bottomDetailsTermPanel = bottomDetailsTermPanel;
+    }
+
+    String[] headersStr =  {"Lp","Id", "Tytuł", "Ilość wersji", "Aktualna wersja", "Autorzy", "Podpis","Tagi"};
+
+
+    public JScrollPane getTermsTableScrollPane() {
+        return termsTableScrollPane;
+    }
+
+    public void setTermsTableScrollPane(JScrollPane termsTableScrollPane) {
+        this.termsTableScrollPane = termsTableScrollPane;
+    }
+
+
+
+
+    /*public TermTableModel getTermTableModel() {
+        return termTableModel;
+    }
+
+    public void setTermTableModel(TermTableModel termTableModel) {
+        this.termTableModel = termTableModel;
+    }*/
+
+    public JPanel getBottomDetailsTermsPanel() {
+        return bottomDetailsTermsPanel;
+    }
+
+    public void setBottomDetailsTermsPanel(JPanel bottomDetailsTermsPanel) {
+        this.bottomDetailsTermsPanel = bottomDetailsTermsPanel;
+    }
+
+    public JTable getTermsTable() {
+        return termsTable;
+    }
+
+    public void setTermsTable(JTable termsTable) {
+        this.termsTable = termsTable;
+    }
+
+    public JPanel getBottomDetailsBlankPanel() {
+        return bottomDetailsBlankPanel;
+    }
+
+    public void setBottomDetailsBlankPanel(JPanel bottomDetailsBlankPanel) {
+        this.bottomDetailsBlankPanel = bottomDetailsBlankPanel;
+    }
+
+    public JList getTermsList() {
+        return TermsList;
+    }
+
+    public void setTermsList(JList termsList) {
+        TermsList = termsList;
+    }
+
 
     public JPanel getLeftBottomPanel() {
         return leftBottomPanel;
@@ -129,21 +386,6 @@ public class ApplicationFrame extends JFrame{
     }
 
 
-    public JPanel getCard1() {
-        return card1;
-    }
-
-    public void setCard1(JPanel card1) {
-        this.card1 = card1;
-    }
-
-    public JPanel getCard2() {
-        return card2;
-    }
-
-    public void setCard2(JPanel card2) {
-        this.card2 = card2;
-    }
 
     public static int getWIDTH() {
         return WIDTH;
@@ -249,12 +491,12 @@ public class ApplicationFrame extends JFrame{
         this.bottomPropertiesAuthorsPanel = bottomPropertiesAuthorsPanel;
     }
 
-    public JButton getButton1() {
-        return button1;
+    public JButton getSearchButton() {
+        return searchButton;
     }
 
-    public void setButton1(JButton button1) {
-        this.button1 = button1;
+    public void setSearchButton(JButton searchButton) {
+        this.searchButton = searchButton;
     }
 
     public JRadioButton getRadioButton1() {
@@ -292,7 +534,6 @@ public class ApplicationFrame extends JFrame{
     }
 
 
-
     public ApplicationFrame() {
 
         setSize(WIDTH, HEIGHT);
@@ -307,14 +548,109 @@ public class ApplicationFrame extends JFrame{
 
 
     private void createUIComponents() {
- /*       bottomPropertiesPanel = new JPanel(new CardLayout());
-         card1 = new JPanel();
-         card2 = new JPanel();
-        card1.setBackground(Color.RED);
-        card2.setBackground(Color.GREEN);
-        bottomPropertiesPanel.add(card1,"test1");
-        bottomPropertiesPanel.add(card2,"test2");
-*/
+        tagsStrings= new ArrayList<String>(20000);
+        int rows = 0;
+        Vector headers = new Vector();
+        for (int i = 0; i < headersStr.length;i++) {
+            headers.addElement(headersStr[i]);
+
+        }
+
+
+
+        termsTable = new JTable(new TermTableModel(headers,0)){
+            public String getToolTipText(MouseEvent e) {
+                String tip = null;
+                java.awt.Point p = e.getPoint();
+                int rowIndex = rowAtPoint(p);
+                int colIndex = columnAtPoint(p);
+                int realColumnIndex = convertColumnIndexToModel(colIndex);
+
+                if (realColumnIndex == 7) {
+                    Long rowToCast = (Long) getValueAt(rowIndex,colIndex-6);
+                    int convertedValue = Math.toIntExact(rowToCast);
+                    tip = "Tagi dla hasła '" + getValueAt(rowIndex, colIndex -5 )
+                            + "' to : "
+                            + tagsStrings.get(convertedValue-1);
+
+                }
+
+                /*else if (realColumnIndex == 4) { //Veggie column
+                    TableModel model = getModel();
+                    String firstName = (String)model.getValueAt(rowIndex,0);
+                    String lastName = (String)model.getValueAt(rowIndex,1);
+                    Boolean veggie = (Boolean)model.getValueAt(rowIndex,4);
+                    if (Boolean.TRUE.equals(veggie)) {
+                        tip = firstName + " " + lastName
+                                + " is a vegetarian";
+                    } else {
+                        tip = firstName + " " + lastName
+                                + " is not a vegetarian";
+                    }
+                } else {
+                    //You can omit this part if you know you don't
+                    //have any renderers that supply their own tool
+                    //tips.
+                    tip = super.getToolTipText(e);
+                }*/
+                return tip;
+            }
+            protected JTableHeader createDefaultTableHeader() {
+                return new JTableHeader(columnModel) {
+                    public String getToolTipText(MouseEvent e) {
+                        String tip = null;
+                        java.awt.Point p = e.getPoint();
+                        int index = columnModel.getColumnIndexAtX(p.x);
+                        int realIndex = columnModel.getColumn(index).getModelIndex();
+                        return columnToolTips[realIndex];
+                    }
+                };
+            }
+        };
+        TermTableModel defaultTableModel = (TermTableModel) termsTable.getModel();
+        DefaultTableModel tm= (DefaultTableModel) termsTable.getModel();
+        tm.setColumnIdentifiers(headersStr);
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<DefaultTableModel>((DefaultTableModel) termsTable.getModel());
+        termsTable.setRowSorter(sorter);
+        TableColumnModel tableModel= termsTable.getColumnModel();
+
+        //Width of termsTable
+       /* long sum = 0;
+        for(int i =0 ; i<7 ; i ++){
+          sum+=  tableModel.getColumn(i).getWidth();
+        }
+        System.out.println( sum);*/
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment( JLabel.CENTER );
+        DefaultTableCellRenderer leftRenderer = new DefaultTableCellRenderer();
+        leftRenderer.setHorizontalAlignment( JLabel.LEFT );
+
+       /* tableModel.getColumn(0).setPreferredWidth(15);
+        tableModel.getColumn(1).setPreferredWidth(15);
+        tableModel.getColumn(2).setPreferredWidth(230);
+        tableModel.getColumn(3).setPreferredWidth(25);
+        tableModel.getColumn(4).setPreferredWidth(40);
+        tableModel.getColumn(5).setPreferredWidth(145);
+        tableModel.getColumn(6).setPreferredWidth(25);*/
+       // tableModel.getColumn(7).setPreferredWidth(30);
+        tableModel.getColumn(0).setCellRenderer(centerRenderer);
+        tableModel.getColumn(1).setCellRenderer(centerRenderer);
+        tableModel.getColumn(3).setCellRenderer(centerRenderer);
+        tableModel.getColumn(4).setCellRenderer(centerRenderer);
+        //tableModel.getColumn(7).setCellRenderer(leftRenderer);
+        /*List<RowSorter.SortKey> sortKeys = new ArrayList<>(25);
+        sortKeys.add(new RowSorter.SortKey(4, SortOrder.ASCENDING));
+        sortKeys.add(new RowSorter.SortKey(2, SortOrder.ASCENDING));
+        sorter.setSortKeys(sortKeys);*/
+
+         categoryJList = new JList();
+         subcategoryJList = new JList();
+         tagsJList = new JList();
+         statusesJList = new JList();
 
     }
+
+
 }
+
+
