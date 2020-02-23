@@ -43,7 +43,7 @@ public class RenderTermsFilters{
         jLists[1].setListData(new CheckListItem[]{
                 new CheckListItem("Hasło w całości przenoszone"),
                 new CheckListItem("Hasło wymagające poprawy"),
-                new CheckListItem("Hasło wymagające dużej poprawy 123 123 "),
+                new CheckListItem("Hasło wymagające dużej poprawy"),
                 new CheckListItem("Hasło nowe"),
                 new CheckListItem("Propozycja nowego hasła")
         });

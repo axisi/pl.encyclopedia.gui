@@ -67,6 +67,9 @@ public class ApplicationFrame extends JFrame {
     private JPanel StatusJPanel;
     private JList subCategoriesJList;
     private JPanel SubGroupJPanel;
+    private JLabel termsErrorLabel;
+    private JPanel TermErrorLabelPanel;
+
 
     private JRadioButton radioButton1;
 
@@ -80,8 +83,24 @@ public class ApplicationFrame extends JFrame {
             "Tagi hasła (najedź aby wyświetlić nazwy)"
     };
 
+    public JPanel getTermErrorLabelPanel() {
+        return TermErrorLabelPanel;
+    }
+
+    public void setTermErrorLabelPanel(JPanel termErrorLabelPanel) {
+        TermErrorLabelPanel = termErrorLabelPanel;
+    }
+
     public JPanel getTagsJPanel() {
         return TagsJPanel;
+    }
+
+    public JLabel getTermsErrorLabel() {
+        return termsErrorLabel;
+    }
+
+    public void setTermsErrorLabel(JLabel termsErrorLabel) {
+        this.termsErrorLabel = termsErrorLabel;
     }
 
     public void setTagsJPanel(JPanel tagsJPanel) {

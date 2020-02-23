@@ -99,7 +99,7 @@ public class LoginFrameController {
                                 loginFrame.getStatusLabel().setText("Wrong login");
                             } else {
                                 loginFrame.getStatusLabel().setForeground(Color.GREEN);
-                                loginFrame.getStatusLabel().setText("Loged-in");
+                                loginFrame.getStatusLabel().setText("Logged-in");
                                 ConfigManager.setJwtToken(output);
                                 ConfigManager.setLoggedUser(login);
                                 mainController.getApplicationFrameController().setValuesInLoggedUserLabel();

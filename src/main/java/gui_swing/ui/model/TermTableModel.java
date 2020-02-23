@@ -7,7 +7,7 @@ import javax.swing.table.TableRowSorter;
 import java.util.List;
 import java.util.Vector;
 
-import static java.awt.desktop.UserSessionEvent.Reason.LOCK;
+
 
 public class TermTableModel extends DefaultTableModel {
 

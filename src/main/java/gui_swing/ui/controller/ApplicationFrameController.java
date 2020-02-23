@@ -1,6 +1,8 @@
 package gui_swing.ui.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import gui_swing.ui.model.*;
+import gui_swing.ui.model.filters.*;
 import gui_swing.ui.view.ApplicationFrame;
 
 import javax.swing.*;
@@ -9,6 +11,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +34,7 @@ public class ApplicationFrameController {
     private JPanel topDetailsPanel;
     private JPanel topDetailsPanelBlank;
     private JPanel topDetailsPanelFilters;
+    private JLabel termsErrorLabel;
 
     private JList categoryJList;
     private  JList subcategoryJList;
@@ -57,6 +61,7 @@ public class ApplicationFrameController {
     CardLayout cardLayout2;
     private ArrayList<String> tagsStrings ;
     private RenderTermsFilters renderTermsFilters;
+    private JPanel termErrorLabelPanel;
 
 
 
@@ -102,7 +107,8 @@ public class ApplicationFrameController {
         tm= (DefaultTableModel) termsTable.getModel();
         tagsStrings = applicationFrame.getTagsStrings();
         searchButton = applicationFrame.getSearchButton();
-
+        termsErrorLabel = applicationFrame.getTermsErrorLabel();
+        termErrorLabelPanel = applicationFrame.getTermErrorLabelPanel();
 
 
 
@@ -190,7 +196,11 @@ public class ApplicationFrameController {
                             case "Pokaż wszystkie":
                                 //System.out.println( bottomDetailsTermsPanel.getName());
                                 hideFiltersSearchPanels();
-                                apiConnector.getAllTerm();
+                                try {
+                                    apiConnector.getAllTerm();
+                                }catch (Exception ex){
+                                    logoutBecauseOfError();
+                                }
                                 renderTermTable();
                                 break;
                             case "Pokaż według filtrów":
@@ -201,9 +211,16 @@ public class ApplicationFrameController {
                                 jlist[0]=categoryJList;
                                 jlist[1]=subcategoryJList;
                                 jlist[2]=statusesJList;
-                                ArrayList <String> tagsName = apiConnector.getAllTags();
-                                renderTermsFilters.setTagsJList(tagsJList,tagsName);
-                                cardLayout2.show(topDetailsPanel,topDetailsPanelFilters.getName());
+                                try {
+                                    ArrayList<String> tagsName = apiConnector.getAllTags();
+
+                                    renderTermsFilters.setTagsJList(tagsJList, tagsName);
+                                    cardLayout2.show(topDetailsPanel, topDetailsPanelFilters.getName());
+                                }catch (Exception ex){
+
+                                    System.out.println( ex.getMessage());
+                                    logoutBecauseOfError();
+                                }
                                //System.out.println(topDetailsPanel.getWidth());
                                 break;
                             case "Pokaż według autorów":
@@ -224,22 +241,62 @@ public class ApplicationFrameController {
         searchButton.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
+
                // ArrayList<String>[] searchMatrix= new ArrayList<String>[4];
-                List<List<String>> searchMatrix = new ArrayList<List<String>>();
-                List<String> categoriesList = new ArrayList<String>();
-                List<String> subcategoriesList = new ArrayList<String>();
-                List<String> tagsList = new ArrayList<String>();
-                List<String> statusesList = new ArrayList<String>();
+                ListsF searchMatrix = new ListsF();
+                CategoryF<String> categoriesList =  new CategoryF<String>();
+                SubcategoryF <String> subcategoriesList =  new SubcategoryF<String>();
+                TagF<String> tagsList =  new TagF<String>();
+                StatusesF<String> statusesList =  new StatusesF<>();
 
 
-                generateLists(categoriesList, subcategoriesList, categoryJList, subcategoryJList);
-                generateLists(tagsList, statusesList, tagsJList, statusesJList);
+                generateLists(categoriesList,  categoryJList );
+                generateLists(subcategoriesList,subcategoryJList);
+                generateLists(tagsList, tagsJList);
+                generateLists( statusesList,  statusesJList);
+                if(!(categoriesList.isEmpty() && subcategoriesList.isEmpty()&&tagsList.isEmpty()&&statusesList.isEmpty())) {
+                    searchMatrix.setCategoryF(categoriesList);
+                    searchMatrix.setSubcategoryF(subcategoriesList);
+                    searchMatrix.setTagF(tagsList);
+                    searchMatrix.setStatusesF(statusesList);
 
+                    try {
+                        apiConnector.getTermsByFilter(searchMatrix);
+                    } catch (JsonProcessingException ex) {
+                        ex.printStackTrace();
+                    }
+                    if(!apiConnector.getEmpty())
+                        renderTermTable();
+                    else {
+                        termsErrorLabel.setText("Żadne z haseł nie spełnia zadanych kryteriów.");
+                        cardLayout1.show(bottomDetailsPanel, bottomDetailsTermsPanel.getName());
 
-                /*for (String s: categoriesList
+                        if (tm.getRowCount() != 0) {
+                            for (int i = tm.getRowCount() - 1; i > -1; i--) {
+                                tm.removeRow(i);
+                            }
+                        }
+                    }
+                }
+
+               /* for (Object s: categoriesList
                      ) {
                     System.out.println(s);
-                }*/
+                }System.out.println();
+                for (Object s: subcategoriesList
+                     ) {
+                    System.out.println(s);
+                }System.out.println();
+                for (Object s: tagsList
+                     ) {
+                    System.out.println(s);
+                }
+                System.out.println();
+                for (Object s: statusesList
+                     ) {
+                    System.out.println(s);
+                }System.out.println();*/
+
             }
         });
 
@@ -263,30 +320,29 @@ public class ApplicationFrameController {
         logoutLabel.addMouseListener(new MouseAdapter(){
             @Override
             public void mouseClicked(MouseEvent e) {
-            backToMainPanel();
-            ConfigManager.setLoggedUser("");
-            ConfigManager.setJwtToken("");
-            applicationFrame.setVisible(false);
-            mainController.setLoginFrameController(new LoginFrameController(mainController));
-            mainController.getLoginFrameController().showMainFrameWindow();
-        }
+                logoutBecauseOfError();
+            }
         });
 
     }
 
-    private void generateLists(List<String> tagsList, List<String> statusesList, JList tagsJList, JList statusesJList) {
-        for (int i = 0; i < tagsJList.getModel().getSize(); i++) {
-            CheckListItem checkListItem= (CheckListItem) tagsJList.getModel().getElementAt(i);
+    private void logoutBecauseOfError() {
+        backToMainPanel();
+        ConfigManager.setLoggedUser("");
+        ConfigManager.setJwtToken("");
+        applicationFrame.setVisible(false);
+        mainController.setLoginFrameController(new LoginFrameController(mainController));
+        mainController.getLoginFrameController().showMainFrameWindow();
+    }
+
+    private void generateLists(List<String> myList,  JList myJList) {
+        for (int i = 0; i < myJList.getModel().getSize(); i++) {
+            CheckListItem checkListItem= (CheckListItem) myJList.getModel().getElementAt(i);
             if(checkListItem.isSelected()){
-                tagsList.add(checkListItem.toString());
+                myList.add(checkListItem.toString());
             }
         }
-        for (int i = 0; i < statusesJList.getModel().getSize(); i++) {
-            CheckListItem checkListItem= (CheckListItem) statusesJList.getModel().getElementAt(i);
-            if(checkListItem.isSelected()){
-                statusesList.add(checkListItem.toString());
-            }
-        }
+
     }
 
     private void hideFiltersSearchPanels() {
@@ -295,6 +351,7 @@ public class ApplicationFrameController {
     }
 
     private void renderTermTable() {
+        termsErrorLabel.setText("");
         cardLayout1.show(bottomDetailsPanel, bottomDetailsTermsPanel.getName());
 
         if(tm.getRowCount() !=0){
@@ -368,6 +425,7 @@ public class ApplicationFrameController {
 
 
         }
+        termsErrorLabel.setText("Znaleziono " + apiConnector.getResponseList().size() + " haseł.");
     }
 
 
