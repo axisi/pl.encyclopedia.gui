@@ -6,12 +6,11 @@ import gui_swing.ui.model.filters.*;
 import gui_swing.ui.view.ApplicationFrame;
 
 import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
+import javax.swing.event.*;
 import javax.swing.table.*;
+import javax.swing.text.Document;
 import java.awt.*;
 import java.awt.event.*;
-import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +33,13 @@ public class ApplicationFrameController {
     private JPanel topDetailsPanel;
     private JPanel topDetailsPanelBlank;
     private JPanel topDetailsPanelFilters;
+    private JPanel topTermDetailsPanel;
     private JLabel termsErrorLabel;
+    boolean tags1 = true;
+    boolean tags2 = true;
+    String newTermSuccessesAdded;
+
+    private Integer lettersOnVerse = 55;
 
     private JList categoryJList;
     private  JList subcategoryJList;
@@ -62,7 +67,25 @@ public class ApplicationFrameController {
     private ArrayList<String> tagsStrings ;
     private RenderTermsFilters renderTermsFilters;
     private JPanel termErrorLabelPanel;
+    private JButton addTermButton;
+    Boolean statusesWereSet = false;
+    private JLabel versesTermLabel;
 
+    private JEditorPane editorPane1;
+
+
+    private JTable authorsTable;
+    private JList tagsTermJList;
+    private JList statusesTermJList;
+
+
+    private JComboBox categoryComboBox;
+    private JComboBox subcategoryComboBox;
+    private DefaultTableModel tm1;
+    private JTextField textField1;
+    private JCheckBox isSignedCheckBox;
+
+    private JButton getStatusesForSubcategoryButton;
 
 
     public ApplicationFrameController(MainController mainController) {
@@ -109,6 +132,28 @@ public class ApplicationFrameController {
         searchButton = applicationFrame.getSearchButton();
         termsErrorLabel = applicationFrame.getTermsErrorLabel();
         termErrorLabelPanel = applicationFrame.getTermErrorLabelPanel();
+        topTermDetailsPanel =applicationFrame.getTopTermDetailsPanel();
+        addTermButton = applicationFrame.getAddTermButton();
+
+
+          authorsTable = applicationFrame.getAuthorsTable();
+          tagsTermJList = applicationFrame.getTagsTermJList();
+         statusesTermJList = applicationFrame.getStatusesTermJList();
+         categoryComboBox = applicationFrame.getCategoryComboBox();
+         subcategoryComboBox = applicationFrame.getSubcategoryComboBox();
+         getStatusesForSubcategoryButton = applicationFrame.getGetStatusesForSubcategoryButton();
+         versesTermLabel = applicationFrame.getVersesTermLabel();
+        editorPane1 = applicationFrame.getEditorPane1();
+        tm1 = (DefaultTableModel) authorsTable.getModel();
+        authorsTable.putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);
+        textField1 = applicationFrame.getTextField1();
+        isSignedCheckBox = applicationFrame.getIsSignedCheckBox();
+
+
+
+
+
+
 
 
 
@@ -119,8 +164,19 @@ public class ApplicationFrameController {
         exitLabel= applicationFrame.getExitLabel();
         logoutLabel = applicationFrame.getLogoutLabel();
         termsList = applicationFrame.getTermsList();
-        renderTermsFilters = new RenderTermsFilters(new JList[]{applicationFrame.getCategoryJList(),applicationFrame.getSubcategoryJList(),applicationFrame.getStatusesJList()});
+        renderTermsFilters = new RenderTermsFilters(new JList[]{applicationFrame.getCategoryJList(),applicationFrame.getSubcategoryJList(),applicationFrame.getStatusesJList()},1);
+        termsTable.getTableHeader().setReorderingAllowed(false);
 
+    }
+
+    private void comboboxFill(JComboBox comboBox, ArrayList<String> stringValuesToInsert) {
+    DefaultComboBoxModel defaultComboBoxModel =      (DefaultComboBoxModel)comboBox.getModel();
+    defaultComboBoxModel.removeAllElements();
+    comboBox.addItem("");
+        for (String s: stringValuesToInsert
+             ) {
+            comboBox.addItem(s);
+        }
     }
 
     public void showMainFrameWindow() {
@@ -204,6 +260,7 @@ public class ApplicationFrameController {
                                 renderTermTable();
                                 break;
                             case "Pokaż według filtrów":
+                                hideFiltersSearchPanels();
                                // System.out.println( bottomDetailsBlankPanel.getName());
                                 cardLayout1.show(bottomDetailsPanel, bottomDetailsBlankPanel.getName());
                                 searchButton.setVisible(true);
@@ -215,6 +272,11 @@ public class ApplicationFrameController {
                                     ArrayList<String> tagsName = apiConnector.getAllTags();
 
                                     renderTermsFilters.setTagsJList(tagsJList, tagsName);
+                                    if(tags2) {
+                                        renderTermsFilters.setJListCheckBoxFeatures(tagsJList, 1);
+                                        tags2 = false;
+                                    }
+
                                     cardLayout2.show(topDetailsPanel, topDetailsPanelFilters.getName());
                                 }catch (Exception ex){
 
@@ -225,9 +287,140 @@ public class ApplicationFrameController {
                                 break;
                             case "Pokaż według autorów":
                                 hideFiltersSearchPanels();
+                                cardLayout1.show(bottomDetailsPanel, bottomDetailsBlankPanel.getName());
+                                break;
+
+                            case "Nowe hasło":
+                                hideFiltersSearchPanels();
+                                cardLayout1.show(bottomDetailsPanel,bottomDetailsTermPanel.getName());
+
+                                addTermButton.setVisible(true);
+
+                                try {
+                                    ArrayList<String> tagsName = apiConnector.getAllTags();
+
+                                    renderTermsFilters.setTagsJList(tagsTermJList, tagsName);
+
+                                    if(tags1) {
+                                        renderTermsFilters.setJListCheckBoxFeatures(tagsTermJList, 1);
+                                        tags1 = false;
+                                    }
+
+                                    // Wczytanie wszystkich statusów
+                                    ArrayList<String> allStatuses = apiConnector.getAllStatusesString();
+                                    String subcategoryString = "Propozycja nowego hasła";
+                                    //Wczytanie statusów dla podkategorii
+                                    ArrayList<String> statusesOfSubcategory = apiConnector.getStatusesOfSubcategory(subcategoryString);
+
+
+
+                                    renderTermsFilters.setTagsJList(statusesTermJList, statusesOfSubcategory);
+                                    if(!statusesWereSet) {
+                                        statusesWereSet = true;
+                                        renderTermsFilters.setJListCheckBoxFeatures(statusesTermJList, 0);
+                                        statusesTermJList.addMouseListener(new MouseAdapter() {
+                                            @Override
+                                            public void mouseClicked(MouseEvent event) {
+                                                JList list = (JList) event.getSource();
+                                                int index = list.locationToIndex(event.getPoint());// Get index of item
+                                                // clicked
+                                                for (int i = 0; i < list.getModel().getSize(); i++) {
+                                                    CheckListItem item = (CheckListItem) list.getModel()
+                                                            .getElementAt(i);
+                                                    item.setSelected(false);
+                                                    list.repaint(list.getCellBounds(i, i));
+                                                    //System.out.println(item.isSelected());
+
+                                                }
+                                                CheckListItem item = (CheckListItem) list.getModel()
+                                                        .getElementAt(index);
+                                                item.setSelected(true); // Toggle selected state
+                                                list.repaint(list.getCellBounds(index, index));// Repaint cell
+                                            }
+                                        });
+
+                                    }
+
+
+                                }catch (Exception ex){
+
+                                    System.out.println( ex.getMessage());
+                                    logoutBecauseOfError();
+                                }
+
+                                ArrayList<String> authors = apiConnector.getAllAuthors();
+                                TableColumnModel tableColumnModel = authorsTable.getColumnModel();
+
+
+
+                                if(tm1.getRowCount() !=0){
+                                    for(int i = tm1.getRowCount() -1 ; i > -1 ; i--){
+                                        tm1.removeRow(i);
+                                    }
+                                }
+
+
+                                for (String s: authors
+                                     ) {
+                                    tm1.addRow(new Object[]{false,s,null});
+                                }
+                                tableColumnModel.getColumn(0).setPreferredWidth(10);
+                                tableColumnModel.getColumn(2).setPreferredWidth(30);
+                                comboboxFill(categoryComboBox,apiConnector.getAllCategoriesString());
+                                comboboxFill(subcategoryComboBox,apiConnector.getAllSubcategoriesString());
+                                subcategoryComboBox.setSelectedIndex(5);
+                                cardLayout2.show(topDetailsPanel,topTermDetailsPanel.getName());
+
                                 break;
                         }
                     }
+                }
+            }
+        });
+
+        getStatusesForSubcategoryButton.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(subcategoryComboBox.getSelectedIndex()!=0)
+                    renderTermsFilters.setTagsJList(statusesTermJList, apiConnector.getStatusesOfSubcategory(subcategoryComboBox.getSelectedItem().toString()));
+            }
+        });
+
+        termsTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                ListSelectionModel lsm = (ListSelectionModel)e.getSource();
+                StringBuilder output = new StringBuilder();
+
+                if (lsm.isSelectionEmpty()) {
+                    output.append(" <none>");
+                } else {
+                    // Find out which indexes are selected.
+                    int minIndex = lsm.getMinSelectionIndex();
+                    int maxIndex = lsm.getMaxSelectionIndex();
+                    for (int i = minIndex; i <= maxIndex; i++) {
+                        if (lsm.isSelectedIndex(i)) {
+                            output.append(" " + termsTable.getValueAt(i,1));
+                        }
+                    }
+                }
+
+               if( e.getValueIsAdjusting())
+                   if( termsTable.getSelectedRow()>=0){
+                      // System.out.println(termsTable.getValueAt(termsTable.getSelectedRow(),1));
+                       //System.out.println(output);
+                   }
+
+
+            }
+        });
+        termsTable.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent mouseEvent) {
+                JTable table =(JTable) mouseEvent.getSource();
+                Point point = mouseEvent.getPoint();
+                int row = table.rowAtPoint(point);
+                if (mouseEvent.getClickCount() == 2 && table.getSelectedRow() != -1) {
+                    System.out.println(termsTable.getValueAt(termsTable.getSelectedRow(),1));
                 }
             }
         });
@@ -300,6 +493,66 @@ public class ApplicationFrameController {
             }
         });
 
+        addTermButton.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                if (String.valueOf(categoryComboBox.getSelectedItem()) == "") {
+                    versesTermLabel.setText("Hasło musi mieć ustawioną kategorie.");
+                } else {
+
+
+                    Term term = new Term();
+                    TermHistory termHistory = new TermHistory();
+                    termHistory.setVersion(1L);
+                    term.setActualVersion(termHistory.getVersion());
+                    term.setTitle(textField1.getText());
+                    term.setSigned(isSignedCheckBox.isSelected());
+                    termHistory.setContent(editorPane1.getText());
+                    term.setCategory(String.valueOf(categoryComboBox.getSelectedItem()));
+                    term.setSubcategory(String.valueOf(subcategoryComboBox.getSelectedItem()));
+                    //System.out.println("a");
+                    ArrayList<String> statuses = new ArrayList<>();
+                    ArrayList<String> tags = new ArrayList<>();
+                    ArrayList<String> authors = new ArrayList<>();
+                    termHistory.setStatus(statusesTermJList.getModel().getElementAt(0).toString());
+                    for (int i = 0; i < statusesTermJList.getModel().getSize(); i++) {
+                        statuses.add(statusesTermJList.getModel().getElementAt(i).toString());
+                        CheckListItem checkListItem = (CheckListItem) statusesTermJList.getModel().getElementAt(i);
+                        if (checkListItem.isSelected())
+                            termHistory.setStatus(checkListItem.toString());
+                    }
+                    for (int i = 0; i < tagsTermJList.getModel().getSize(); i++) {
+                        CheckListItem checkListItem = (CheckListItem) tagsTermJList.getModel().getElementAt(i);
+                        if (checkListItem.isSelected())
+                            tags.add(checkListItem.toString());
+                    }
+                    for (int i = 0; i < tm1.getRowCount(); i++) {
+                        if ((boolean) tm1.getValueAt(i, 0))
+                            authors.add(tm1.getValueAt(i, 1) + "|" + tm1.getValueAt(i, 2));
+                    }
+                    ArrayList<TermHistory> termHistories = new ArrayList<>();
+                    termHistories.add(termHistory);
+
+                    term.setTermHistories(termHistories);
+                    term.setAuthors(authors);
+                    term.setTagsString(tags);
+                    term.setStatuses(statuses);
+
+                    try {
+
+                        versesTermLabel.setText(apiConnector.addNewTerm(term));
+                        tagsStrings.clear();
+                    } catch (JsonProcessingException ex) {
+                        ex.printStackTrace();
+                        logoutBecauseOfError();
+                    }
+
+                }
+            }
+        });
+
+
         iconLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -324,6 +577,54 @@ public class ApplicationFrameController {
             }
         });
 
+        authorsTable.getModel().addTableModelListener(new TableModelListener() {
+            @Override
+            public void tableChanged(TableModelEvent e) {
+
+            }
+        });
+
+        editorPane1.getDocument().addDocumentListener(new DocumentListener(){
+            String newline = "\n";
+
+            public void insertUpdate(DocumentEvent e) {
+                updateLog(e, "inserted into");
+            }
+            public void removeUpdate(DocumentEvent e) {
+                updateLog(e, "removed from");
+            }
+            public void changedUpdate(DocumentEvent e) {
+                //Plain text components do not fire these events
+            }
+
+            public void updateLog(DocumentEvent e, String action) {
+                Document doc = (Document)e.getDocument();
+                int changeLength = e.getLength();
+                Long sum =0L;
+                for (int i = 0; i < tm1.getRowCount() ; i++) {
+                    if( (boolean)tm1.getValueAt(i,0) && tm1.getValueAt(i,2)!=null){
+
+                        sum+=(Long)tm1.getValueAt(i,2);
+                    }
+                }
+                versesTermLabel.setText("Hasło ma aktualnie "+doc.getLength()+" znaków. Odpowiada to "+ getAnInt(doc,lettersOnVerse) +" pełnym wersetom.");
+                if (getAnInt(doc, lettersOnVerse) >= sum) {
+                    versesTermLabel.setText(versesTermLabel.getText() + " Długość hasłą przekroczyła zakontraktowaną ilość wersetów (" + sum + ")");
+                } else {
+                    versesTermLabel.setText(versesTermLabel.getText() + " Zakontraktowana ilość wersetów dla tego hasła to: (" + sum + ")");
+                }
+
+                /*System.out.println(
+                        changeLength + " character" +
+                                ((changeLength == 1) ? " " : "s ") +
+                                action + doc.getProperty("name") + "." + newline +
+                                "  Text length = " + doc.getLength() + newline);*/
+            }
+
+            private int getAnInt(Document doc , Integer lettersOnVerse) {
+                return doc.getLength()/lettersOnVerse;
+            }
+        });
     }
 
     private void logoutBecauseOfError() {
@@ -346,6 +647,7 @@ public class ApplicationFrameController {
     }
 
     private void hideFiltersSearchPanels() {
+        addTermButton.setVisible(false);
         searchButton.setVisible(false);
         cardLayout2.show(topDetailsPanel, topDetailsPanelBlank.getName());
     }
@@ -408,7 +710,7 @@ public class ApplicationFrameController {
             //Koniec wstawiania
 
             TagIcon tagIcon= new TagIcon(imageIcons);
-            tm.addRow(new Object[]{tm.getRowCount()+1,t.getId(),t.getTitle(),counter,t.getActualVersion(),authorsToTable,t.getIsSigned(),tagIcon});
+            tm.addRow(new Object[]{tm.getRowCount()+1,t.getId(),t.getTitle(),counter,t.getActualVersion(),authorsToTable,t.getSigned(),tagIcon});
 
             if(!tagList.isEmpty()){
                 for (Tag tag: tagList) {
@@ -448,6 +750,7 @@ public class ApplicationFrameController {
         }*/
         iconLabelFlag=true;
     }
+
 }
 
 

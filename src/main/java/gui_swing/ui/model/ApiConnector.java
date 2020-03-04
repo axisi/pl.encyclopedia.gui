@@ -83,9 +83,7 @@ public  class ApiConnector {
 
     public void getTermsByFilter(ListsF listsF) throws JsonProcessingException {
         webTarget = client.target(apiURI).path("term/filtered");
-        invocationBuilder = webTarget
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
         //JSONObject obj = new JSONObject(listsF.getCategoryF());
         ObjectMapper objectMapper = new ObjectMapper();
         String json = objectMapper.writeValueAsString(listsF);
@@ -102,5 +100,55 @@ public  class ApiConnector {
 
         //System.out.println(webTarget.getConfiguration());
 
+    }
+
+    public ArrayList<String> getAllCategoriesString() {
+
+        webTarget = client.target(apiURI).path("categories");
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return  invocationBuilder.get(new GenericType<ArrayList<String>>(){});
+    }
+
+    public ArrayList<String> getAllSubcategoriesString() {
+        webTarget = client.target(apiURI).path("subcategories");
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return  invocationBuilder.get(new GenericType<ArrayList<String>>(){});
+    }
+
+    public ArrayList<String> getAllStatusesString() {
+        webTarget = client.target(apiURI).path("statuses");
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return  invocationBuilder.get(new GenericType<ArrayList<String>>(){});
+    }
+
+    public ArrayList<String> getStatusesOfSubcategory(String subcategory) {
+
+        webTarget = client.target(apiURI).path("subcategory/"+subcategory);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        Long subcategoryId  = invocationBuilder.get(new GenericType<Long>(){});
+
+        webTarget = client.target(apiURI).path("statuses/subcategory/"+subcategoryId);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return  invocationBuilder.get(new GenericType<ArrayList<String>>(){});
+    }
+
+    public ArrayList<String> getAllAuthors() {
+        webTarget = client.target(apiURI).path("authors");
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return  invocationBuilder.get(new GenericType<ArrayList<String>>(){});
+    }
+
+    public String addNewTerm(Term term) throws JsonProcessingException {
+        webTarget = client.target(apiURI).path("term");
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        ObjectMapper objectMapper = new ObjectMapper();
+        String json = objectMapper.writeValueAsString(term);
+        System.out.println(json);
+
+        //System.out.println(obj.toString());
+        Response response =  invocationBuilder.post(Entity.json(json));
+        Term response1=response.readEntity(new GenericType<Term>(){});
+       //System.out.println(response1.getTags().get(0).getName());
+        return  "Pomyślnie założono hasło o id: "+response1.getId() +" oraz tytule: " + response1.getTitle();
     }
 }

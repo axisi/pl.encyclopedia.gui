@@ -2,10 +2,12 @@ package gui_swing.ui.view;
 
 
 
+import gui_swing.ui.model.AuthorTermTableModel;
 import gui_swing.ui.model.TermTableModel;
 
 import javax.swing.*;
 import javax.swing.table.*;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Vector;
@@ -50,7 +52,7 @@ public class ApplicationFrame extends JFrame {
     private JPanel bottomDetailsTermPanel;
     private JPanel bottomDetailsTermTopPanel;
     private JPanel bottomDetailsTermBottomPanel;
-    private JTable table1;
+    private JTable authorsTable;
     private JTextArea textArea1;
     private JPanel topDetailsPanelBlank;
     private JPanel topDetailsPanelFilters;
@@ -68,6 +70,29 @@ public class ApplicationFrame extends JFrame {
     private JList subCategoriesJList;
     private JPanel SubGroupJPanel;
     private JLabel termsErrorLabel;
+    private JTextField textField1;
+    private JCheckBox isSignedCheckBox;
+    private JButton boldButton;
+    private JButton italicsButton;
+    private JButton underlineButton;
+    private JButton markReferenceButton;
+    private JComboBox categoryComboBox;
+    private JComboBox subcategoryComboBox;
+    private JButton setAsActualVersionButton;
+    private JLabel termIdLabel;
+    private JLabel actualTermHostoryVersionLabel;
+    private JEditorPane editorPane1;
+    private JPanel topTermDetailsPanel;
+    private JList authorsTermJList;
+    private JList tagsTermJList;
+    private JList statusesTermJList;
+    private JCheckBox editCheckBox;
+    private JButton addTermButton;
+    private JButton getStatusesForSubcategoryButton;
+    private JLabel versesTermLabel;
+    private JScrollPane scrollPane1;
+    private JScrollPane scrollPane2;
+    private JScrollPane editorPane;
     private JPanel TermErrorLabelPanel;
 
 
@@ -82,6 +107,166 @@ public class ApplicationFrame extends JFrame {
             "Czy dane hasło jest sygnowane",
             "Tagi hasła (najedź aby wyświetlić nazwy)"
     };
+
+    public JList getTagsTermJList() {
+        return tagsTermJList;
+    }
+
+    public void setTagsTermJList(JList tagsTermJList) {
+        this.tagsTermJList = tagsTermJList;
+    }
+
+    public JList getStatusesTermJList() {
+        return statusesTermJList;
+    }
+
+    public JLabel getVersesTermLabel() {
+        return versesTermLabel;
+    }
+
+    public void setVersesTermLabel(JLabel versesTermLabel) {
+        this.versesTermLabel = versesTermLabel;
+    }
+
+    public void setStatusesTermJList(JList statusesTermJList) {
+        this.statusesTermJList = statusesTermJList;
+    }
+
+    public JCheckBox getEditCheckBox() {
+        return editCheckBox;
+    }
+
+    public void setEditCheckBox(JCheckBox editCheckBox) {
+        this.editCheckBox = editCheckBox;
+    }
+
+    public JButton getAddTermButton() {
+        return addTermButton;
+    }
+
+    public void setAddTermButton(JButton addTermButton) {
+        this.addTermButton = addTermButton;
+    }
+
+    public JTextField getTextField1() {
+        return textField1;
+    }
+
+    public void setTextField1(JTextField textField1) {
+        this.textField1 = textField1;
+    }
+
+    public JCheckBox getIsSignedCheckBox() {
+        return isSignedCheckBox;
+    }
+
+    public void setIsSignedCheckBox(JCheckBox isSignedCheckBox) {
+        this.isSignedCheckBox = isSignedCheckBox;
+    }
+
+    public JButton getGetStatusesForSubcategoryButton() {
+        return getStatusesForSubcategoryButton;
+    }
+
+    public void setGetStatusesForSubcategoryButton(JButton getStatusesForSubcategoryButton) {
+        this.getStatusesForSubcategoryButton = getStatusesForSubcategoryButton;
+    }
+
+    public JButton getBoldButton() {
+        return boldButton;
+    }
+
+    public void setBoldButton(JButton boldButton) {
+        this.boldButton = boldButton;
+    }
+
+    public JButton getItalicsButton() {
+        return italicsButton;
+    }
+
+    public void setItalicsButton(JButton italicsButton) {
+        this.italicsButton = italicsButton;
+    }
+
+    public JButton getUnderlineButton() {
+        return underlineButton;
+    }
+
+    public void setUnderlineButton(JButton underlineButton) {
+        this.underlineButton = underlineButton;
+    }
+
+    public JButton getMarkReferenceButton() {
+        return markReferenceButton;
+    }
+
+    public void setMarkReferenceButton(JButton markReferenceButton) {
+        this.markReferenceButton = markReferenceButton;
+    }
+
+    public JComboBox getCategoryComboBox() {
+        return categoryComboBox;
+    }
+
+    public void setCategoryComboBox(JComboBox categoryComboBox) {
+        this.categoryComboBox = categoryComboBox;
+    }
+
+    public JComboBox getSubcategoryComboBox() {
+        return subcategoryComboBox;
+    }
+
+    public void setSubcategoryComboBox(JComboBox subcategoryComboBox) {
+        this.subcategoryComboBox = subcategoryComboBox;
+    }
+
+    public JButton getSetAsActualVersionButton() {
+        return setAsActualVersionButton;
+    }
+
+    public void setSetAsActualVersionButton(JButton setAsActualVersionButton) {
+        this.setAsActualVersionButton = setAsActualVersionButton;
+    }
+
+    public JLabel getTermIdLabel() {
+        return termIdLabel;
+    }
+
+    public void setTermIdLabel(JLabel termIdLabel) {
+        this.termIdLabel = termIdLabel;
+    }
+
+    public JLabel getActualTermHostoryVersionLabel() {
+        return actualTermHostoryVersionLabel;
+    }
+
+    public void setActualTermHostoryVersionLabel(JLabel actualTermHostoryVersionLabel) {
+        this.actualTermHostoryVersionLabel = actualTermHostoryVersionLabel;
+    }
+
+    public JEditorPane getEditorPane1() {
+        return editorPane1;
+    }
+
+    public void setEditorPane1(JEditorPane editorPane1) {
+        this.editorPane1 = editorPane1;
+    }
+
+    public JPanel getTopTermDetailsPanel() {
+        return topTermDetailsPanel;
+    }
+
+    public void setTopTermDetailsPanel(JPanel topTermDetailsPanel) {
+        this.topTermDetailsPanel = topTermDetailsPanel;
+    }
+
+    public JList getAuthorsTermJList() {
+        return authorsTermJList;
+    }
+
+    public void setAuthorsTermJList(JList authorsTermJList) {
+        this.authorsTermJList = authorsTermJList;
+    }
 
     public JPanel getTermErrorLabelPanel() {
         return TermErrorLabelPanel;
@@ -171,12 +356,12 @@ public class ApplicationFrame extends JFrame {
         this.bottomDetailsTermBottomPanel = bottomDetailsTermBottomPanel;
     }
 
-    public JTable getTable1() {
-        return table1;
+    public JTable getAuthorsTable() {
+        return authorsTable;
     }
 
-    public void setTable1(JTable table1) {
-        this.table1 = table1;
+    public void setAuthorsTable(JTable authorsTable) {
+        this.authorsTable = authorsTable;
     }
 
     public JTextArea getTextArea1() {
@@ -574,10 +759,32 @@ public class ApplicationFrame extends JFrame {
             headers.addElement(headersStr[i]);
 
         }
+        Vector authorHeaders = new Vector();
 
+        authorHeaders.addElement("Wybierz");
+        authorHeaders.addElement("Imię i nazwisko");
+        authorHeaders.addElement("Ilość wersetów");
 
+        authorsTable = new JTable(new AuthorTermTableModel(authorHeaders,0)){};
 
         termsTable = new JTable(new TermTableModel(headers,0)){
+
+
+            public Component prepareRenderer(
+                    TableCellRenderer renderer, int row, int column)
+            {
+                Component c = super.prepareRenderer(renderer, row, column);
+                JComponent jc = (JComponent)c;
+
+                //  Alternate row color
+
+                if (isRowSelected(row))
+                    c.setBackground(Color.LIGHT_GRAY);
+                else c.setBackground(this.getBackground());
+
+                return c;
+            }
+
             public String getToolTipText(MouseEvent e) {
                 String tip = null;
                 java.awt.Point p = e.getPoint();
@@ -594,24 +801,7 @@ public class ApplicationFrame extends JFrame {
 
                 }
 
-                /*else if (realColumnIndex == 4) { //Veggie column
-                    TableModel model = getModel();
-                    String firstName = (String)model.getValueAt(rowIndex,0);
-                    String lastName = (String)model.getValueAt(rowIndex,1);
-                    Boolean veggie = (Boolean)model.getValueAt(rowIndex,4);
-                    if (Boolean.TRUE.equals(veggie)) {
-                        tip = firstName + " " + lastName
-                                + " is a vegetarian";
-                    } else {
-                        tip = firstName + " " + lastName
-                                + " is not a vegetarian";
-                    }
-                } else {
-                    //You can omit this part if you know you don't
-                    //have any renderers that supply their own tool
-                    //tips.
-                    tip = super.getToolTipText(e);
-                }*/
+
                 return tip;
             }
             protected JTableHeader createDefaultTableHeader() {
@@ -666,6 +856,19 @@ public class ApplicationFrame extends JFrame {
          subcategoryJList = new JList();
          tagsJList = new JList();
          statusesJList = new JList();
+
+          authorsTermJList= new JList();
+          tagsTermJList= new JList();
+          statusesTermJList= new JList();
+
+          editorPane1 = new JEditorPane();
+          scrollPane1 = new JScrollPane(editorPane1);
+          scrollPane2 = new JScrollPane(statusesTermJList);
+          scrollPane2.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+
+
+
+
 
     }
 
