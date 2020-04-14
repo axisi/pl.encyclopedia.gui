@@ -8,6 +8,10 @@ public class CheckListItem {
     public CheckListItem(String label) {
         this.label = label;
     }
+    public CheckListItem(String label,Boolean isSelected) {
+        this.label = label;
+        this.setSelected(isSelected);
+    }
 
     public boolean isSelected() {
         return isSelected;

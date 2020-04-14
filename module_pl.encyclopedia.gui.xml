@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module_pl.encyclopedia.gui" default="compile.module.pl.encyclopedia.gui">
+  <dirname property="module.pl.encyclopedia.gui.basedir" file="${ant.file.module_pl.encyclopedia.gui}"/>
+  
+  <property name="module.jdk.home.pl.encyclopedia.gui" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.pl.encyclopedia.gui" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.pl.encyclopedia.gui" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.pl.encyclopedia.gui" value="-encoding UTF-8 -source 8 -target 1.8 ${compiler.args}"/>
+  
+  <property name="pl.encyclopedia.gui.output.dir" value="${module.pl.encyclopedia.gui.basedir}/target/classes"/>
+  <property name="pl.encyclopedia.gui.testoutput.dir" value="${module.pl.encyclopedia.gui.basedir}/target/test-classes"/>
+  
+  <path id="pl.encyclopedia.gui.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="pl.encyclopedia.gui.module.production.classpath">
+    <path refid="${module.jdk.classpath.pl.encyclopedia.gui}"/>
+    <pathelement location="${basedir}/../../../Downloads/SHEF-bin-2009-05-12/dist/SHEF.jar"/>
+    <path refid="library.lib.classpath"/>
+    <path refid="library.maven:_org.json:json:20190722.classpath"/>
+    <path refid="library.maven:_javax.ws.rs:javax.ws.rs-api:2.1.1.classpath"/>
+    <path refid="library.maven:_org.glassfish.jersey.media:jersey-media-json-jackson:2.30.classpath"/>
+    <path refid="library.maven:_org.glassfish.jersey.core:jersey-common:2.30.classpath"/>
+    <path refid="library.maven:_jakarta.annotation:jakarta.annotation-api:1.3.5.classpath"/>
+    <path refid="library.maven:_org.glassfish.hk2:osgi-resource-locator:1.0.3.classpath"/>
+    <path refid="library.maven:_com.sun.activation:jakarta.activation:1.2.1.classpath"/>
+    <path refid="library.maven:_org.glassfish.jersey.ext:jersey-entity-filtering:2.30.classpath"/>
+    <path refid="library.maven:_com.fasterxml.jackson.core:jackson-annotations:2.9.9.classpath"/>
+    <path refid="library.maven:_com.fasterxml.jackson.core:jackson-databind:2.9.9.classpath"/>
+    <path refid="library.maven:_com.fasterxml.jackson.core:jackson-core:2.9.9.classpath"/>
+    <path refid="library.maven:_com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.9.9.classpath"/>
+    <path refid="library.maven:_org.glassfish.jersey.inject:jersey-hk2:2.30.classpath"/>
+    <path refid="library.maven:_org.glassfish.hk2:hk2-locator:2.6.1.classpath"/>
+    <path refid="library.maven:_org.glassfish.hk2.external:aopalliance-repackaged:2.6.1.classpath"/>
+    <path refid="library.maven:_org.glassfish.hk2:hk2-api:2.6.1.classpath"/>
+    <path refid="library.maven:_org.glassfish.hk2:hk2-utils:2.6.1.classpath"/>
+    <path refid="library.maven:_org.javassist:javassist:3.25.0-ga.classpath"/>
+    <path refid="library.maven:_org.apache.httpcomponents:httpclient:4.1.1.classpath"/>
+    <path refid="library.maven:_org.apache.httpcomponents:httpcore:4.1.classpath"/>
+    <path refid="library.maven:_commons-logging:commons-logging:1.1.1.classpath"/>
+    <path refid="library.maven:_commons-codec:commons-codec:1.4.classpath"/>
+    <path refid="library.maven:_org.glassfish.jersey.core:jersey-client:2.30.classpath"/>
+    <path refid="library.maven:_jakarta.ws.rs:jakarta.ws.rs-api:2.1.6.classpath"/>
+    <path refid="library.maven:_org.glassfish.hk2.external:jakarta.inject:2.6.1.classpath"/>
+    <path refid="library.maven:_org.glassfish.jersey.connectors:jersey-grizzly-connector:2.30.classpath"/>
+    <path refid="library.maven:_org.glassfish.grizzly:grizzly-http-client:1.16.classpath"/>
+    <path refid="library.maven:_org.slf4j:slf4j-api:1.7.12.classpath"/>
+    <path refid="library.maven:_org.glassfish.grizzly:grizzly-websockets:2.4.4.classpath"/>
+    <path refid="library.maven:_org.glassfish.grizzly:grizzly-framework:2.4.4.classpath"/>
+    <path refid="library.maven:_org.glassfish.grizzly:grizzly-http:2.4.4.classpath"/>
+    <path refid="library.maven:_org.glassfish.grizzly:connection-pool:2.4.4.classpath"/>
+    <path refid="library.maven:_jakarta.xml.bind:jakarta.xml.bind-api:2.3.2.classpath"/>
+    <path refid="library.maven:_jakarta.activation:jakarta.activation-api:1.2.1.classpath"/>
+    <path refid="library.maven:_org.glassfish.jaxb:jaxb-runtime:2.3.2.classpath"/>
+    <path refid="library.maven:_org.glassfish.jaxb:txw2:2.3.2.classpath"/>
+    <path refid="library.maven:_com.sun.istack:istack-commons-runtime:3.0.8.classpath"/>
+    <path refid="library.maven:_org.jvnet.staxex:stax-ex:1.8.1.classpath"/>
+    <path refid="library.maven:_com.sun.xml.fastinfoset:fastinfoset:1.2.16.classpath"/>
+    <pathelement location="${basedir}/src/main/lib/SHEF.jar"/>
+    <pathelement location="${basedir}/src/main/lib/lib/jtidy-8.0.jar"/>
+    <pathelement location="${basedir}/src/main/lib/lib/sam.jar"/>
+    <pathelement location="${basedir}/src/main/lib/lib/novaworx-syntax-0.0.7.jar"/>
+  </path>
+  
+  <path id="pl.encyclopedia.gui.runtime.production.module.classpath">
+    <pathelement location="${pl.encyclopedia.gui.output.dir}"/>
+    <pathelement location="${basedir}/../../../Downloads/SHEF-bin-2009-05-12/dist/SHEF.jar"/>
+    <path refid="library.lib.classpath"/>
+    <path refid="library.maven:_org.json:json:20190722.classpath"/>
+    <path refid="library.maven:_javax.ws.rs:javax.ws.rs-api:2.1.1.classpath"/>
+    <path refid="library.maven:_org.glassfish.jersey.media:jersey-media-json-jackson:2.30.classpath"/>
+    <path refid="library.maven:_org.glassfish.jersey.core:jersey-common:2.30.classpath"/>
+    <path refid="library.maven:_jakarta.annotation:jakarta.annotation-api:1.3.5.classpath"/>
+    <path refid="library.maven:_org.glassfish.hk2:osgi-resource-locator:1.0.3.classpath"/>
+    <path refid="library.maven:_com.sun.activation:jakarta.activation:1.2.1.classpath"/>
+    <path refid="library.maven:_org.glassfish.jersey.ext:jersey-entity-filtering:2.30.classpath"/>
+    <path refid="library.maven:_com.fasterxml.jackson.core:jackson-annotations:2.9.9.classpath"/>
+    <path refid="library.maven:_com.fasterxml.jackson.core:jackson-databind:2.9.9.classpath"/>
+    <path refid="library.maven:_com.fasterxml.jackson.core:jackson-core:2.9.9.classpath"/>
+    <path refid="library.maven:_com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.9.9.classpath"/>
+    <path refid="library.maven:_org.glassfish.jersey.inject:jersey-hk2:2.30.classpath"/>
+    <path refid="library.maven:_org.glassfish.hk2:hk2-locator:2.6.1.classpath"/>
+    <path refid="library.maven:_org.glassfish.hk2.external:aopalliance-repackaged:2.6.1.classpath"/>
+    <path refid="library.maven:_org.glassfish.hk2:hk2-api:2.6.1.classpath"/>
+    <path refid="library.maven:_org.glassfish.hk2:hk2-utils:2.6.1.classpath"/>
+    <path refid="library.maven:_org.javassist:javassist:3.25.0-ga.classpath"/>
+    <path refid="library.maven:_org.apache.httpcomponents:httpclient:4.1.1.classpath"/>
+    <path refid="library.maven:_org.apache.httpcomponents:httpcore:4.1.classpath"/>
+    <path refid="library.maven:_commons-logging:commons-logging:1.1.1.classpath"/>
+    <path refid="library.maven:_commons-codec:commons-codec:1.4.classpath"/>
+    <path refid="library.maven:_org.glassfish.jersey.core:jersey-client:2.30.classpath"/>
+    <path refid="library.maven:_jakarta.ws.rs:jakarta.ws.rs-api:2.1.6.classpath"/>
+    <path refid="library.maven:_org.glassfish.hk2.external:jakarta.inject:2.6.1.classpath"/>
+    <path refid="library.maven:_org.glassfish.jersey.connectors:jersey-grizzly-connector:2.30.classpath"/>
+    <path refid="library.maven:_org.glassfish.grizzly:grizzly-http-client:1.16.classpath"/>
+    <path refid="library.maven:_org.slf4j:slf4j-api:1.7.12.classpath"/>
+    <path refid="library.maven:_org.glassfish.grizzly:grizzly-websockets:2.4.4.classpath"/>
+    <path refid="library.maven:_org.glassfish.grizzly:grizzly-framework:2.4.4.classpath"/>
+    <path refid="library.maven:_org.glassfish.grizzly:grizzly-http:2.4.4.classpath"/>
+    <path refid="library.maven:_org.glassfish.grizzly:connection-pool:2.4.4.classpath"/>
+    <path refid="library.maven:_jakarta.xml.bind:jakarta.xml.bind-api:2.3.2.classpath"/>
+    <path refid="library.maven:_jakarta.activation:jakarta.activation-api:1.2.1.classpath"/>
+    <path refid="library.maven:_org.glassfish.jaxb:jaxb-runtime:2.3.2.classpath"/>
+    <path refid="library.maven:_org.glassfish.jaxb:txw2:2.3.2.classpath"/>
+    <path refid="library.maven:_com.sun.istack:istack-commons-runtime:3.0.8.classpath"/>
+    <path refid="library.maven:_org.jvnet.staxex:stax-ex:1.8.1.classpath"/>
+    <path refid="library.maven:_com.sun.xml.fastinfoset:fastinfoset:1.2.16.classpath"/>
+    <pathelement location="${basedir}/src/main/lib/SHEF.jar"/>
+    <pathelement location="${basedir}/src/main/lib/lib/jtidy-8.0.jar"/>
+    <pathelement location="${basedir}/src/main/lib/lib/sam.jar"/>
+    <pathelement location="${basedir}/src/main/lib/lib/novaworx-syntax-0.0.7.jar"/>
+  </path>
+  
+  <path id="pl.encyclopedia.gui.module.classpath">
+    <path refid="${module.jdk.classpath.pl.encyclopedia.gui}"/>
+    <pathelement location="${pl.encyclopedia.gui.output.dir}"/>
+    <pathelement location="${basedir}/../../../Downloads/SHEF-bin-2009-05-12/dist/SHEF.jar"/>
+    <path refid="library.lib.classpath"/>
+    <path refid="library.maven:_org.json:json:20190722.classpath"/>
+    <path refid="library.maven:_javax.ws.rs:javax.ws.rs-api:2.1.1.classpath"/>
+    <path refid="library.maven:_org.glassfish.jersey.media:jersey-media-json-jackson:2.30.classpath"/>
+    <path refid="library.maven:_org.glassfish.jersey.core:jersey-common:2.30.classpath"/>
+    <path refid="library.maven:_jakarta.annotation:jakarta.annotation-api:1.3.5.classpath"/>
+    <path refid="library.maven:_org.glassfish.hk2:osgi-resource-locator:1.0.3.classpath"/>
+    <path refid="library.maven:_com.sun.activation:jakarta.activation:1.2.1.classpath"/>
+    <path refid="library.maven:_org.glassfish.jersey.ext:jersey-entity-filtering:2.30.classpath"/>
+    <path refid="library.maven:_com.fasterxml.jackson.core:jackson-annotations:2.9.9.classpath"/>
+    <path refid="library.maven:_com.fasterxml.jackson.core:jackson-databind:2.9.9.classpath"/>
+    <path refid="library.maven:_com.fasterxml.jackson.core:jackson-core:2.9.9.classpath"/>
+    <path refid="library.maven:_com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.9.9.classpath"/>
+    <path refid="library.maven:_org.glassfish.jersey.inject:jersey-hk2:2.30.classpath"/>
+    <path refid="library.maven:_org.glassfish.hk2:hk2-locator:2.6.1.classpath"/>
+    <path refid="library.maven:_org.glassfish.hk2.external:aopalliance-repackaged:2.6.1.classpath"/>
+    <path refid="library.maven:_org.glassfish.hk2:hk2-api:2.6.1.classpath"/>
+    <path refid="library.maven:_org.glassfish.hk2:hk2-utils:2.6.1.classpath"/>
+    <path refid="library.maven:_org.javassist:javassist:3.25.0-ga.classpath"/>
+    <path refid="library.maven:_org.apache.httpcomponents:httpclient:4.1.1.classpath"/>
+    <path refid="library.maven:_org.apache.httpcomponents:httpcore:4.1.classpath"/>
+    <path refid="library.maven:_commons-logging:commons-logging:1.1.1.classpath"/>
+    <path refid="library.maven:_commons-codec:commons-codec:1.4.classpath"/>
+    <path refid="library.maven:_org.glassfish.jersey.core:jersey-client:2.30.classpath"/>
+    <path refid="library.maven:_jakarta.ws.rs:jakarta.ws.rs-api:2.1.6.classpath"/>
+    <path refid="library.maven:_org.glassfish.hk2.external:jakarta.inject:2.6.1.classpath"/>
+    <path refid="library.maven:_org.glassfish.jersey.connectors:jersey-grizzly-connector:2.30.classpath"/>
+    <path refid="library.maven:_org.glassfish.grizzly:grizzly-http-client:1.16.classpath"/>
+    <path refid="library.maven:_org.slf4j:slf4j-api:1.7.12.classpath"/>
+    <path refid="library.maven:_org.glassfish.grizzly:grizzly-websockets:2.4.4.classpath"/>
+    <path refid="library.maven:_org.glassfish.grizzly:grizzly-framework:2.4.4.classpath"/>
+    <path refid="library.maven:_org.glassfish.grizzly:grizzly-http:2.4.4.classpath"/>
+    <path refid="library.maven:_org.glassfish.grizzly:connection-pool:2.4.4.classpath"/>
+    <path refid="library.maven:_jakarta.xml.bind:jakarta.xml.bind-api:2.3.2.classpath"/>
+    <path refid="library.maven:_jakarta.activation:jakarta.activation-api:1.2.1.classpath"/>
+    <path refid="library.maven:_org.glassfish.jaxb:jaxb-runtime:2.3.2.classpath"/>
+    <path refid="library.maven:_org.glassfish.jaxb:txw2:2.3.2.classpath"/>
+    <path refid="library.maven:_com.sun.istack:istack-commons-runtime:3.0.8.classpath"/>
+    <path refid="library.maven:_org.jvnet.staxex:stax-ex:1.8.1.classpath"/>
+    <path refid="library.maven:_com.sun.xml.fastinfoset:fastinfoset:1.2.16.classpath"/>
+    <pathelement location="${basedir}/src/main/lib/SHEF.jar"/>
+    <pathelement location="${basedir}/src/main/lib/lib/jtidy-8.0.jar"/>
+    <pathelement location="${basedir}/src/main/lib/lib/sam.jar"/>
+    <pathelement location="${basedir}/src/main/lib/lib/novaworx-syntax-0.0.7.jar"/>
+  </path>
+  
+  <path id="pl.encyclopedia.gui.runtime.module.classpath">
+    <pathelement location="${pl.encyclopedia.gui.testoutput.dir}"/>
+    <pathelement location="${pl.encyclopedia.gui.output.dir}"/>
+    <pathelement location="${basedir}/../../../Downloads/SHEF-bin-2009-05-12/dist/SHEF.jar"/>
+    <path refid="library.lib.classpath"/>
+    <path refid="library.maven:_org.json:json:20190722.classpath"/>
+    <path refid="library.maven:_javax.ws.rs:javax.ws.rs-api:2.1.1.classpath"/>
+    <path refid="library.maven:_org.glassfish.jersey.media:jersey-media-json-jackson:2.30.classpath"/>
+    <path refid="library.maven:_org.glassfish.jersey.core:jersey-common:2.30.classpath"/>
+    <path refid="library.maven:_jakarta.annotation:jakarta.annotation-api:1.3.5.classpath"/>
+    <path refid="library.maven:_org.glassfish.hk2:osgi-resource-locator:1.0.3.classpath"/>
+    <path refid="library.maven:_com.sun.activation:jakarta.activation:1.2.1.classpath"/>
+    <path refid="library.maven:_org.glassfish.jersey.ext:jersey-entity-filtering:2.30.classpath"/>
+    <path refid="library.maven:_com.fasterxml.jackson.core:jackson-annotations:2.9.9.classpath"/>
+    <path refid="library.maven:_com.fasterxml.jackson.core:jackson-databind:2.9.9.classpath"/>
+    <path refid="library.maven:_com.fasterxml.jackson.core:jackson-core:2.9.9.classpath"/>
+    <path refid="library.maven:_com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.9.9.classpath"/>
+    <path refid="library.maven:_org.glassfish.jersey.inject:jersey-hk2:2.30.classpath"/>
+    <path refid="library.maven:_org.glassfish.hk2:hk2-locator:2.6.1.classpath"/>
+    <path refid="library.maven:_org.glassfish.hk2.external:aopalliance-repackaged:2.6.1.classpath"/>
+    <path refid="library.maven:_org.glassfish.hk2:hk2-api:2.6.1.classpath"/>
+    <path refid="library.maven:_org.glassfish.hk2:hk2-utils:2.6.1.classpath"/>
+    <path refid="library.maven:_org.javassist:javassist:3.25.0-ga.classpath"/>
+    <path refid="library.maven:_org.apache.httpcomponents:httpclient:4.1.1.classpath"/>
+    <path refid="library.maven:_org.apache.httpcomponents:httpcore:4.1.classpath"/>
+    <path refid="library.maven:_commons-logging:commons-logging:1.1.1.classpath"/>
+    <path refid="library.maven:_commons-codec:commons-codec:1.4.classpath"/>
+    <path refid="library.maven:_org.glassfish.jersey.core:jersey-client:2.30.classpath"/>
+    <path refid="library.maven:_jakarta.ws.rs:jakarta.ws.rs-api:2.1.6.classpath"/>
+    <path refid="library.maven:_org.glassfish.hk2.external:jakarta.inject:2.6.1.classpath"/>
+    <path refid="library.maven:_org.glassfish.jersey.connectors:jersey-grizzly-connector:2.30.classpath"/>
+    <path refid="library.maven:_org.glassfish.grizzly:grizzly-http-client:1.16.classpath"/>
+    <path refid="library.maven:_org.slf4j:slf4j-api:1.7.12.classpath"/>
+    <path refid="library.maven:_org.glassfish.grizzly:grizzly-websockets:2.4.4.classpath"/>
+    <path refid="library.maven:_org.glassfish.grizzly:grizzly-framework:2.4.4.classpath"/>
+    <path refid="library.maven:_org.glassfish.grizzly:grizzly-http:2.4.4.classpath"/>
+    <path refid="library.maven:_org.glassfish.grizzly:connection-pool:2.4.4.classpath"/>
+    <path refid="library.maven:_jakarta.xml.bind:jakarta.xml.bind-api:2.3.2.classpath"/>
+    <path refid="library.maven:_jakarta.activation:jakarta.activation-api:1.2.1.classpath"/>
+    <path refid="library.maven:_org.glassfish.jaxb:jaxb-runtime:2.3.2.classpath"/>
+    <path refid="library.maven:_org.glassfish.jaxb:txw2:2.3.2.classpath"/>
+    <path refid="library.maven:_com.sun.istack:istack-commons-runtime:3.0.8.classpath"/>
+    <path refid="library.maven:_org.jvnet.staxex:stax-ex:1.8.1.classpath"/>
+    <path refid="library.maven:_com.sun.xml.fastinfoset:fastinfoset:1.2.16.classpath"/>
+    <pathelement location="${basedir}/src/main/lib/SHEF.jar"/>
+    <pathelement location="${basedir}/src/main/lib/lib/jtidy-8.0.jar"/>
+    <pathelement location="${basedir}/src/main/lib/lib/sam.jar"/>
+    <pathelement location="${basedir}/src/main/lib/lib/novaworx-syntax-0.0.7.jar"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.pl.encyclopedia.gui">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.pl.encyclopedia.gui">
+    <patternset refid="excluded.from.module.pl.encyclopedia.gui"/>
+  </patternset>
+  
+  <path id="pl.encyclopedia.gui.module.sourcepath">
+    <dirset dir="${module.pl.encyclopedia.gui.basedir}">
+      <include name="src/main/java"/>
+      <include name="src/main/resources"/>
+    </dirset>
+  </path>
+  
+  <path id="pl.encyclopedia.gui.module.test.sourcepath">
+    <dirset dir="${module.pl.encyclopedia.gui.basedir}">
+      <include name="src/test/java"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.pl.encyclopedia.gui" depends="compile.module.pl.encyclopedia.gui.production,compile.module.pl.encyclopedia.gui.tests" description="Compile module pl.encyclopedia.gui"/>
+  
+  <target name="compile.module.pl.encyclopedia.gui.production" depends="register.custom.compilers" description="Compile module pl.encyclopedia.gui; production classes">
+    <mkdir dir="${pl.encyclopedia.gui.output.dir}"/>
+    <javac2 destdir="${pl.encyclopedia.gui.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.pl.encyclopedia.gui}/javac">
+      <compilerarg line="${compiler.args.pl.encyclopedia.gui}"/>
+      <bootclasspath refid="pl.encyclopedia.gui.module.bootclasspath"/>
+      <classpath refid="pl.encyclopedia.gui.module.production.classpath"/>
+      <src refid="pl.encyclopedia.gui.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.pl.encyclopedia.gui"/>
+    </javac2>
+    
+    <copy todir="${pl.encyclopedia.gui.output.dir}">
+      <fileset dir="${module.pl.encyclopedia.gui.basedir}/src/main/java">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+      <fileset dir="${module.pl.encyclopedia.gui.basedir}/src/main/resources">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.pl.encyclopedia.gui.tests" depends="register.custom.compilers,compile.module.pl.encyclopedia.gui.production" description="compile module pl.encyclopedia.gui; test classes" unless="skip.tests">
+    <mkdir dir="${pl.encyclopedia.gui.testoutput.dir}"/>
+    <javac2 destdir="${pl.encyclopedia.gui.testoutput.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.pl.encyclopedia.gui}/javac">
+      <compilerarg line="${compiler.args.pl.encyclopedia.gui}"/>
+      <bootclasspath refid="pl.encyclopedia.gui.module.bootclasspath"/>
+      <classpath refid="pl.encyclopedia.gui.module.classpath"/>
+      <src refid="pl.encyclopedia.gui.module.test.sourcepath"/>
+      <patternset refid="excluded.from.compilation.pl.encyclopedia.gui"/>
+    </javac2>
+    
+    <copy todir="${pl.encyclopedia.gui.testoutput.dir}">
+      <fileset dir="${module.pl.encyclopedia.gui.basedir}/src/test/java">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="clean.module.pl.encyclopedia.gui" description="cleanup module">
+    <delete dir="${pl.encyclopedia.gui.output.dir}"/>
+    <delete dir="${pl.encyclopedia.gui.testoutput.dir}"/>
+  </target>
+</project>

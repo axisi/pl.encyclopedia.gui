@@ -69,7 +69,7 @@ public class LoginFrameController {
             password = new String(loginFrame.getLoginPasswordField().getPassword());
             try {
                 DefaultHttpClient httpClient = new DefaultHttpClient();
-                HttpPost postRequest = new HttpPost("http://localhost:8080/login");
+                HttpPost postRequest = new HttpPost(ConfigManager.getApiURI()+"/login");
                 StringEntity input = new StringEntity("{\"login\":\"" + login + "\",\"password\":\"" + password + "\"}");
                 input.setContentType("application/json");
                 postRequest.setEntity(input);

@@ -3,6 +3,8 @@
 package gui_swing.ui.model;
 
 
+import gui_swing.ui.model.Listeners.MouseListeners;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -43,13 +45,13 @@ public class RenderTermsFilters{
                     new CheckListItem("Architektura i urbanizacja")
 
             });
-            jLists[1].setListData(new CheckListItem[]{
+           /* jLists[1].setListData(new CheckListItem[]{
                     new CheckListItem("Hasło w całości przenoszone"),
                     new CheckListItem("Hasło wymagające poprawy"),
                     new CheckListItem("Hasło wymagające dużej poprawy"),
                     new CheckListItem("Hasło nowe"),
                     new CheckListItem("Propozycja nowego hasła")
-            });
+            });*/
 
             jLists[2].setListData(new CheckListItem[]{
                     new CheckListItem("Nowy"),
@@ -81,7 +83,11 @@ public class RenderTermsFilters{
         myList.setCellRenderer(new CheckListRenderer());
         myList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
         if(option==1) {
-            myList.addMouseListener(new MouseAdapter() {
+            myList.addMouseListener(new MouseListeners.CheckListItemMouseListener());
+
+
+
+                    /*new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent event) {
                     JList list = (JList) event.getSource();
@@ -92,7 +98,7 @@ public class RenderTermsFilters{
                     item.setSelected(!item.isSelected()); // Toggle selected state
                     list.repaint(list.getCellBounds(index, index));// Repaint cell
                 }
-            });
+            });*/
         }
     }
 

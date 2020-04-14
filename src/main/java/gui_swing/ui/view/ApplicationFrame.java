@@ -2,8 +2,11 @@ package gui_swing.ui.view;
 
 
 
-import gui_swing.ui.model.AuthorTermTableModel;
-import gui_swing.ui.model.TermTableModel;
+import gui_swing.ui.model.tableModels.AuthorTableModel;
+import gui_swing.ui.model.tableModels.AuthorTermTableModel;
+import gui_swing.ui.model.tableModels.TagTermTableModel;
+import gui_swing.ui.model.tableModels.TermTableModel;
+import net.atlanticbb.tantlinger.shef.HTMLEditorPane;
 
 import javax.swing.*;
 import javax.swing.table.*;
@@ -80,7 +83,7 @@ public class ApplicationFrame extends JFrame {
     private JComboBox subcategoryComboBox;
     private JButton setAsActualVersionButton;
     private JLabel termIdLabel;
-    private JLabel actualTermHostoryVersionLabel;
+    private JLabel actualTermHistoryVersionLabel;
     private JEditorPane editorPane1;
     private JPanel topTermDetailsPanel;
     private JList authorsTermJList;
@@ -92,6 +95,61 @@ public class ApplicationFrame extends JFrame {
     private JLabel versesTermLabel;
     private JScrollPane scrollPane1;
     private JScrollPane scrollPane2;
+    private JList authorsList;
+    private JPanel bottomDetailsAuthorsPanel;
+    private JTable authorsMenageTable;
+    private JTextField nameTextField;
+    private JTextField surnameTextField;
+    private JTextField signTextField;
+    private JTextField emailTextField;
+    private JButton addAuthorButton;
+    private JButton updateAuthorButton;
+    private JButton deleteAuthorButton;
+    private JLabel authorsIdLabel;
+    private JLabel authorPanelErrorLabel;
+    private JLabel termDetailsIdLabel;
+    private JList settingsList;
+    private JPanel bottomDetailsSettingsPanel;
+    private JPanel left;
+    private JButton addSubcategoryButton;
+    private JTextField SubcategoryTextField;
+    private JButton deleteSubcategoryButton;
+    private JPanel leftCenter;
+    private JPanel rightCenter;
+    private JPanel right;
+    private JList list2;
+    private JList list3;
+    private JList list4;
+    private JButton upButton;
+    private JButton downButton;
+    private JButton leftButton;
+    private JButton rightButton;
+    private JLabel settingsErrorLabel;
+    private JButton saveSubcategoryStatuses;
+    private JPanel bottomDetailsTagsPanel;
+    private JPanel topDetailsTagsPanel;
+    private JTextField tagsNameField;
+    private JButton addTagButton;
+    private JButton deleteTagButton;
+    private JList list5;
+    private JTable termsTagsTable;
+    private JButton choseTagColorButton;
+    private JLabel tagIconLabel;
+    private JLabel tagsSettingsErrorLabel;
+    private JButton saveTermsToTagButton;
+    private JButton updateTagButton;
+    private JLabel termHistoryVersionLabel;
+    private JScrollPane scrollAuthors;
+    private JScrollPane tagTermScroll;
+    private JPanel shefPanel;
+    private JButton updateTermButton;
+    private JButton sendTermToNextStepButton;
+    private JButton manageTermStatusesButton;
+    private JButton manageTermVersionsButton;
+    private JButton redirectTermToIndicatedAuthorButton;
+    private JButton manageTermReferenceButton;
+    private JLabel editedTermHistoryVersionLabel;
+    private JScrollPane scrollFK;
     private JScrollPane editorPane;
     private JPanel TermErrorLabelPanel;
 
@@ -112,12 +170,300 @@ public class ApplicationFrame extends JFrame {
         return tagsTermJList;
     }
 
+    public JButton getUpdateTermButton() {
+        return updateTermButton;
+    }
+
+    public JButton getManageTermReferenceButton() {
+        return manageTermReferenceButton;
+    }
+
+    public void setManageTermReferenceButton(JButton manageTermReferenceButton) {
+        this.manageTermReferenceButton = manageTermReferenceButton;
+    }
+
+    public JLabel getEditedTermHistoryVersionLabel() {
+        return editedTermHistoryVersionLabel;
+    }
+
+    public void setEditedTermHistoryVersionLabel(JLabel editedTermHistoryVersionLabel) {
+        this.editedTermHistoryVersionLabel = editedTermHistoryVersionLabel;
+    }
+
+    public void setUpdateTermButton(JButton updateTermButton) {
+        this.updateTermButton = updateTermButton;
+    }
+
+    public JButton getSendTermToNextStepButton() {
+        return sendTermToNextStepButton;
+    }
+
+    public void setSendTermToNextStepButton(JButton sendTermToNextStepButton) {
+        this.sendTermToNextStepButton = sendTermToNextStepButton;
+    }
+
+    public JButton getManageTermStatusesButton() {
+        return manageTermStatusesButton;
+    }
+
+    public void setManageTermStatusesButton(JButton manageTermStatusesButton) {
+        this.manageTermStatusesButton = manageTermStatusesButton;
+    }
+
+    public JButton getManageTermVersionsButton() {
+        return manageTermVersionsButton;
+    }
+
+    public void setManageTermVersionsButton(JButton manageTermVersionsButton) {
+        this.manageTermVersionsButton = manageTermVersionsButton;
+    }
+
+    public JButton getRedirectTermToIndicatedAuthorButton() {
+        return redirectTermToIndicatedAuthorButton;
+    }
+
+    public void setRedirectTermToIndicatedAuthorButton(JButton redirectTermToIndicatedAuthorButton) {
+        this.redirectTermToIndicatedAuthorButton = redirectTermToIndicatedAuthorButton;
+    }
+
     public void setTagsTermJList(JList tagsTermJList) {
         this.tagsTermJList = tagsTermJList;
     }
 
+    public JLabel getTermDetailsIdLabel() {
+        return termDetailsIdLabel;
+    }
+
+    public void setTermDetailsIdLabel(JLabel termDetailsIdLabel) {
+        this.termDetailsIdLabel = termDetailsIdLabel;
+    }
+
+    public JScrollPane getScrollFK() {
+        return scrollFK;
+    }
+
+    public void setScrollFK(JScrollPane scrollFK) {
+        this.scrollFK = scrollFK;
+    }
+
+    public JList getSettingsList() {
+        return settingsList;
+    }
+
+    public JButton getSaveSubcategoryStatuses() {
+        return saveSubcategoryStatuses;
+    }
+
+    public void setSaveSubcategoryStatuses(JButton saveSubcategoryStatuses) {
+        this.saveSubcategoryStatuses = saveSubcategoryStatuses;
+    }
+
+    public void setSettingsList(JList settingsList) {
+        this.settingsList = settingsList;
+    }
+
+    public JPanel getBottomDetailsTagsPanel() {
+        return bottomDetailsTagsPanel;
+    }
+
+    public void setBottomDetailsTagsPanel(JPanel bottomDetailsTagsPanel) {
+        this.bottomDetailsTagsPanel = bottomDetailsTagsPanel;
+    }
+
     public JList getStatusesTermJList() {
         return statusesTermJList;
+    }
+
+    public JPanel getBottomDetailsSettingsPanel() {
+        return bottomDetailsSettingsPanel;
+    }
+
+    public void setBottomDetailsSettingsPanel(JPanel bottomDetailsSettingsPanel) {
+        this.bottomDetailsSettingsPanel = bottomDetailsSettingsPanel;
+    }
+
+    public JPanel getLeft() {
+        return left;
+    }
+
+    public void setLeft(JPanel left) {
+        this.left = left;
+    }
+
+    public JPanel getTopDetailsTagsPanel() {
+        return topDetailsTagsPanel;
+    }
+
+    public void setTopDetailsTagsPanel(JPanel topDetailsTagsPanel) {
+        this.topDetailsTagsPanel = topDetailsTagsPanel;
+    }
+
+    public JTextField getTagsNameField() {
+        return tagsNameField;
+    }
+
+    public void setTagsNameField(JTextField tagsNameField) {
+        this.tagsNameField = tagsNameField;
+    }
+
+    public JButton getAddTagButton() {
+        return addTagButton;
+    }
+
+    public void setAddTagButton(JButton addTagButton) {
+        this.addTagButton = addTagButton;
+    }
+
+    public JButton getDeleteTagButton() {
+        return deleteTagButton;
+    }
+
+    public void setDeleteTagButton(JButton deleteTagButton) {
+        this.deleteTagButton = deleteTagButton;
+    }
+
+    public JList getList5() {
+        return list5;
+    }
+
+    public void setList5(JList list5) {
+        this.list5 = list5;
+    }
+
+    public JTable getTermsTagsTable() {
+        return termsTagsTable;
+    }
+
+    public void setTermsTagsTable(JTable termsTagsTable) {
+        this.termsTagsTable = termsTagsTable;
+    }
+
+    public JButton getChoseTagColorButton() {
+        return choseTagColorButton;
+    }
+
+    public void setChoseTagColorButton(JButton choseTagColorButton) {
+        this.choseTagColorButton = choseTagColorButton;
+    }
+
+    public JLabel getTagIconLabel() {
+        return tagIconLabel;
+    }
+
+    public void setTagIconLabel(JLabel tagIconLabel) {
+        this.tagIconLabel = tagIconLabel;
+    }
+
+    public JButton getAddSubcategoryButton() {
+        return addSubcategoryButton;
+    }
+
+    public void setAddSubcategoryButton(JButton addSubcategoryButton) {
+        this.addSubcategoryButton = addSubcategoryButton;
+    }
+
+    public JTextField getSubcategoryTextField() {
+        return SubcategoryTextField;
+    }
+
+    public void setSubcategoryTextField(JTextField subcategoryTextField) {
+        SubcategoryTextField = subcategoryTextField;
+    }
+
+    public JLabel getSettingsErrorLabel() {
+        return settingsErrorLabel;
+    }
+
+    public void setSettingsErrorLabel(JLabel settingsErrorLabel) {
+        this.settingsErrorLabel = settingsErrorLabel;
+    }
+
+    public JButton getDeleteSubcategoryButton() {
+        return deleteSubcategoryButton;
+    }
+
+    public void setDeleteSubcategoryButton(JButton deleteSubcategoryButton) {
+        this.deleteSubcategoryButton = deleteSubcategoryButton;
+    }
+
+    public JPanel getLeftCenter() {
+        return leftCenter;
+    }
+
+    public void setLeftCenter(JPanel leftCenter) {
+        this.leftCenter = leftCenter;
+    }
+
+    public JPanel getRightCenter() {
+        return rightCenter;
+    }
+
+    public void setRightCenter(JPanel rightCenter) {
+        this.rightCenter = rightCenter;
+    }
+
+    public JPanel getRight() {
+        return right;
+    }
+
+    public void setRight(JPanel right) {
+        this.right = right;
+    }
+
+    public JList getList2() {
+        return list2;
+    }
+
+    public void setList2(JList list2) {
+        this.list2 = list2;
+    }
+
+    public JList getList3() {
+        return list3;
+    }
+
+    public void setList3(JList list3) {
+        this.list3 = list3;
+    }
+
+    public JList getList4() {
+        return list4;
+    }
+
+    public void setList4(JList list4) {
+        this.list4 = list4;
+    }
+
+    public JButton getUpButton() {
+        return upButton;
+    }
+
+    public void setUpButton(JButton upButton) {
+        this.upButton = upButton;
+    }
+
+    public JButton getDownButton() {
+        return downButton;
+    }
+
+    public void setDownButton(JButton downButton) {
+        this.downButton = downButton;
+    }
+
+    public JButton getLeftButton() {
+        return leftButton;
+    }
+
+    public void setLeftButton(JButton leftButton) {
+        this.leftButton = leftButton;
+    }
+
+    public JButton getRightButton() {
+        return rightButton;
+    }
+
+    public void setRightButton(JButton rightButton) {
+        this.rightButton = rightButton;
     }
 
     public JLabel getVersesTermLabel() {
@@ -134,6 +480,142 @@ public class ApplicationFrame extends JFrame {
 
     public JCheckBox getEditCheckBox() {
         return editCheckBox;
+    }
+
+    public JScrollPane getScrollPane1() {
+        return scrollPane1;
+    }
+
+    public void setScrollPane1(JScrollPane scrollPane1) {
+        this.scrollPane1 = scrollPane1;
+    }
+
+    public JLabel getAuthorsIdLabel() {
+        return authorsIdLabel;
+    }
+
+    public JLabel getAuthorPanelErrorLabel() {
+        return authorPanelErrorLabel;
+    }
+
+    public void setAuthorPanelErrorLabel(JLabel authorPanelErrorLabel) {
+        this.authorPanelErrorLabel = authorPanelErrorLabel;
+    }
+
+    public void setAuthorsIdLabel(JLabel authorsIdLabel) {
+        this.authorsIdLabel = authorsIdLabel;
+    }
+
+    public JScrollPane getScrollPane2() {
+        return scrollPane2;
+    }
+
+    public void setScrollPane2(JScrollPane scrollPane2) {
+        this.scrollPane2 = scrollPane2;
+    }
+
+    public JList getAuthorsList() {
+        return authorsList;
+    }
+
+    public void setAuthorsList(JList authorsList) {
+        this.authorsList = authorsList;
+    }
+
+    public JPanel getBottomDetailsAuthorsPanel() {
+        return bottomDetailsAuthorsPanel;
+    }
+
+    public void setBottomDetailsAuthorsPanel(JPanel bottomDetailsAuthorsPanel) {
+        this.bottomDetailsAuthorsPanel = bottomDetailsAuthorsPanel;
+    }
+
+    public JTable getAuthorsMenageTable() {
+        return authorsMenageTable;
+    }
+
+    public void setAuthorsMenageTable(JTable authorsMenageTable) {
+        this.authorsMenageTable = authorsMenageTable;
+    }
+
+    public JTextField getNameTextField() {
+        return nameTextField;
+    }
+
+    public void setNameTextField(JTextField nameTextField) {
+        this.nameTextField = nameTextField;
+    }
+
+    public JTextField getSurnameTextField() {
+        return surnameTextField;
+    }
+
+    public void setSurnameTextField(JTextField surnameTextField) {
+        this.surnameTextField = surnameTextField;
+    }
+
+    public JTextField getSignTextField() {
+        return signTextField;
+    }
+
+    public void setSignTextField(JTextField signTextField) {
+        this.signTextField = signTextField;
+    }
+
+    public JTextField getEmailTextField() {
+        return emailTextField;
+    }
+
+    public void setEmailTextField(JTextField emailTextField) {
+        this.emailTextField = emailTextField;
+    }
+
+    public JButton getAddAuthorButton() {
+        return addAuthorButton;
+    }
+
+    public void setAddAuthorButton(JButton addAuthorButton) {
+        this.addAuthorButton = addAuthorButton;
+    }
+
+    public JButton getUpdateAuthorButton() {
+        return updateAuthorButton;
+    }
+
+    public void setUpdateAuthorButton(JButton updateAuthorButton) {
+        this.updateAuthorButton = updateAuthorButton;
+    }
+
+    public JButton getDeleteAuthorButton() {
+        return deleteAuthorButton;
+    }
+
+    public JButton getSaveTermsToTagButton() {
+        return saveTermsToTagButton;
+    }
+
+    public void setSaveTermsToTagButton(JButton saveTermsToTagButton) {
+        this.saveTermsToTagButton = saveTermsToTagButton;
+    }
+
+    public JButton getUpdateTagButton() {
+        return updateTagButton;
+    }
+
+    public void setUpdateTagButton(JButton updateTagButton) {
+        this.updateTagButton = updateTagButton;
+    }
+
+    public void setDeleteAuthorButton(JButton deleteAuthorButton) {
+        this.deleteAuthorButton = deleteAuthorButton;
+    }
+
+    public JScrollPane getEditorPane() {
+        return editorPane;
+    }
+
+    public void setEditorPane(JScrollPane editorPane) {
+        this.editorPane = editorPane;
     }
 
     public void setEditCheckBox(JCheckBox editCheckBox) {
@@ -174,6 +656,14 @@ public class ApplicationFrame extends JFrame {
 
     public JButton getBoldButton() {
         return boldButton;
+    }
+
+    public JPanel getShefPanel() {
+        return shefPanel;
+    }
+
+    public void setShefPanel(JPanel shefPanel) {
+        this.shefPanel = shefPanel;
     }
 
     public void setBoldButton(JButton boldButton) {
@@ -236,12 +726,12 @@ public class ApplicationFrame extends JFrame {
         this.termIdLabel = termIdLabel;
     }
 
-    public JLabel getActualTermHostoryVersionLabel() {
-        return actualTermHostoryVersionLabel;
+    public JLabel getActualTermHistoryVersionLabel() {
+        return actualTermHistoryVersionLabel;
     }
 
-    public void setActualTermHostoryVersionLabel(JLabel actualTermHostoryVersionLabel) {
-        this.actualTermHostoryVersionLabel = actualTermHostoryVersionLabel;
+    public void setActualTermHistoryVersionLabel(JLabel actualTermHistoryVersionLabel) {
+        this.actualTermHistoryVersionLabel = actualTermHistoryVersionLabel;
     }
 
     public JEditorPane getEditorPane1() {
@@ -250,6 +740,22 @@ public class ApplicationFrame extends JFrame {
 
     public void setEditorPane1(JEditorPane editorPane1) {
         this.editorPane1 = editorPane1;
+    }
+
+    public JScrollPane getScrollAuthors() {
+        return scrollAuthors;
+    }
+
+    public void setScrollAuthors(JScrollPane scrollAuthors) {
+        this.scrollAuthors = scrollAuthors;
+    }
+
+    public JScrollPane getTagTermScroll() {
+        return tagTermScroll;
+    }
+
+    public void setTagTermScroll(JScrollPane tagTermScroll) {
+        this.tagTermScroll = tagTermScroll;
     }
 
     public JPanel getTopTermDetailsPanel() {
@@ -436,6 +942,14 @@ public class ApplicationFrame extends JFrame {
 
     public void setTagsStrings(ArrayList<String> tagsStrings) {
         this.tagsStrings = tagsStrings;
+    }
+
+    public JLabel getTermHistoryVersionLabel() {
+        return termHistoryVersionLabel;
+    }
+
+    public void setTermHistoryVersionLabel(JLabel termHistoryVersionLabel) {
+        this.termHistoryVersionLabel = termHistoryVersionLabel;
     }
 
     public JPanel getBottomDetailsTermPanel() {
@@ -639,6 +1153,14 @@ public class ApplicationFrame extends JFrame {
         this.leftContainerPropertiesPanel = leftContainerPropertiesPanel;
     }
 
+    public JLabel getTagsSettingsErrorLabel() {
+        return tagsSettingsErrorLabel;
+    }
+
+    public void setTagsSettingsErrorLabel(JLabel tagsSettingsErrorLabel) {
+        this.tagsSettingsErrorLabel = tagsSettingsErrorLabel;
+    }
+
     public JPanel getTopPropertiesPanel() {
         return topPropertiesPanel;
     }
@@ -740,6 +1262,7 @@ public class ApplicationFrame extends JFrame {
 
     public ApplicationFrame() {
 
+
         setSize(WIDTH, HEIGHT);
         setContentPane(mainPanel);
         setLocationRelativeTo(null);
@@ -752,6 +1275,7 @@ public class ApplicationFrame extends JFrame {
 
 
     private void createUIComponents() {
+
         tagsStrings= new ArrayList<String>(20000);
         int rows = 0;
         Vector headers = new Vector();
@@ -761,12 +1285,32 @@ public class ApplicationFrame extends JFrame {
         }
         Vector authorHeaders = new Vector();
 
+        authorHeaders.addElement("Id");
         authorHeaders.addElement("Wybierz");
         authorHeaders.addElement("Imię i nazwisko");
         authorHeaders.addElement("Ilość wersetów");
 
         authorsTable = new JTable(new AuthorTermTableModel(authorHeaders,0)){};
+        Vector authorHeaders1 = new Vector();
+        authorHeaders1.addElement("Id");
+        authorHeaders1.addElement("Imię");
+        authorHeaders1.addElement("Nazwisko");
+        authorHeaders1.addElement("Podpis");
+        authorHeaders1.addElement("Email");
+        authorHeaders1.addElement("Ilość przypisanych haseł");
 
+
+        Vector tagsTableHeaders = new Vector();
+        tagsTableHeaders.addElement("Wybierz");
+        tagsTableHeaders.addElement("Id");
+        tagsTableHeaders.addElement("Tytuł hasła");
+        termsTagsTable = new JTable(new TagTermTableModel(tagsTableHeaders,0)){};
+        TableColumnModel tableColumnModelTags = termsTagsTable.getColumnModel();
+        tableColumnModelTags.getColumn(0).setPreferredWidth(70);
+        tableColumnModelTags.getColumn(1).setPreferredWidth(70);
+        tableColumnModelTags.getColumn(2).setPreferredWidth(250);
+
+        authorsMenageTable = new JTable(new AuthorTableModel(authorHeaders1,0)){};
         termsTable = new JTable(new TermTableModel(headers,0)){
 
 
@@ -787,20 +1331,21 @@ public class ApplicationFrame extends JFrame {
 
             public String getToolTipText(MouseEvent e) {
                 String tip = null;
-                java.awt.Point p = e.getPoint();
+                Point p = e.getPoint();
                 int rowIndex = rowAtPoint(p);
                 int colIndex = columnAtPoint(p);
                 int realColumnIndex = convertColumnIndexToModel(colIndex);
 
                 if (realColumnIndex == 7) {
-                    Long rowToCast = (Long) getValueAt(rowIndex,colIndex-6);
-                    int convertedValue = Math.toIntExact(rowToCast);
+                    int rowToCast =  (int)getValueAt(rowIndex,0);
+
+
+                   //int convertedValue = Math.toIntExact(rowToCast);
                     tip = "Tagi dla hasła '" + getValueAt(rowIndex, colIndex -5 )
                             + "' to : "
-                            + tagsStrings.get(convertedValue-1);
+                            + tagsStrings.get(rowToCast-1);
 
                 }
-
 
                 return tip;
             }
@@ -808,7 +1353,7 @@ public class ApplicationFrame extends JFrame {
                 return new JTableHeader(columnModel) {
                     public String getToolTipText(MouseEvent e) {
                         String tip = null;
-                        java.awt.Point p = e.getPoint();
+                        Point p = e.getPoint();
                         int index = columnModel.getColumnIndexAtX(p.x);
                         int realIndex = columnModel.getColumn(index).getModelIndex();
                         return columnToolTips[realIndex];
@@ -853,7 +1398,7 @@ public class ApplicationFrame extends JFrame {
         sorter.setSortKeys(sortKeys);*/
 
          categoryJList = new JList();
-         subcategoryJList = new JList();
+         subcategoryJList = new JList(new DefaultListModel());
          tagsJList = new JList();
          statusesJList = new JList();
 
@@ -861,14 +1406,26 @@ public class ApplicationFrame extends JFrame {
           tagsTermJList= new JList();
           statusesTermJList= new JList();
 
-          editorPane1 = new JEditorPane();
+          //HTMLEditorPane htmlEditorPane = new HTMLEditorPane();
+
+       /* editorPane1.setLineWrap(true); //Makes the text wrap to the next line
+        editorPane1.setWrapStyleWord(true); //Makes the text wrap full words, not just letters*/
+
           scrollPane1 = new JScrollPane(editorPane1);
           scrollPane2 = new JScrollPane(statusesTermJList);
           scrollPane2.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+           list2 = new JList(new DefaultListModel());
+           list3 = new JList(new DefaultListModel());
+           list4 = new JList(new DefaultListModel());
+           list5 = new JList(new DefaultListModel());
 
 
 
-
+           scrollFK = new JScrollPane(list2);
+           scrollAuthors = new JScrollPane(authorsTable);
+           tagTermScroll = new JScrollPane(tagsTermJList);
+           //shefPanel.add(htmlEditorPane);
+        //mainPanel = new JPanel();
 
     }
 

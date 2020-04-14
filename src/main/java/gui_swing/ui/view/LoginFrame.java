@@ -1,8 +1,10 @@
 package gui_swing.ui.view;
 
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
+import java.awt.*;
 
-public class LoginFrame extends  JFrame {
+public class LoginFrame extends JFrame {
 
     public static final int HEIGHT = 500;
     public static final int WIDTH = 650;
@@ -19,6 +21,7 @@ public class LoginFrame extends  JFrame {
 
 
     }
+
     private JPanel mainPanel;
     private JPanel loginTopPanel;
     private JPanel loginStatusPanel;
@@ -41,12 +44,12 @@ public class LoginFrame extends  JFrame {
     }
 
     private JPanel buttonsPanel;
+    private JPanel deadPanel;
 
 
     public JLabel getStatusLabel() {
         return statusLabel;
     }
-
 
 
     public JPanel getMainPanel() {
@@ -94,5 +97,8 @@ public class LoginFrame extends  JFrame {
     }
 
 
+    private void createUIComponents() {
+
+    }
 
 }

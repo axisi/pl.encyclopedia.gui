@@ -2,17 +2,26 @@ package gui_swing.ui.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import gui_swing.ui.model.*;
+import gui_swing.ui.model.Listeners.MouseListeners;
 import gui_swing.ui.model.filters.*;
+import gui_swing.ui.model.tableModels.NoSelectionModel;
 import gui_swing.ui.view.ApplicationFrame;
+import net.atlanticbb.tantlinger.shef.HTMLEditorPane;
+//import sun.java2d.pipe.AlphaPaintPipe;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.table.*;
 import javax.swing.text.Document;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ApplicationFrameController {
     //    private final static String termsPanel = "bottomPropertiesTermsPanel";
@@ -38,13 +47,14 @@ public class ApplicationFrameController {
     boolean tags1 = true;
     boolean tags2 = true;
     String newTermSuccessesAdded;
-
-    private Integer lettersOnVerse = 55;
+    private JButton markReferenceButton;
+    private Integer lettersOnVerse = 52;
 
     private JList categoryJList;
     private  JList subcategoryJList;
     private  JList tagsJList;
     private  JList statusesJList;
+    private JPanel shefPanel;
 
     private JButton searchButton;
     private JLabel iconLabel;
@@ -70,20 +80,104 @@ public class ApplicationFrameController {
     private JButton addTermButton;
     Boolean statusesWereSet = false;
     private JLabel versesTermLabel;
-
+    private JLabel termHistoryVersionLabel;
     private JEditorPane editorPane1;
-
+    HTMLEditorPane htmlEditorPane = new HTMLEditorPane();
 
     private JTable authorsTable;
     private JList tagsTermJList;
     private JList statusesTermJList;
+    private MouseListeners.CheckListItemMouseListenerStatuses checkListItemMouseListenerStatuses = new MouseListeners.CheckListItemMouseListenerStatuses();
 
 
     private JComboBox categoryComboBox;
     private JComboBox subcategoryComboBox;
-    private DefaultTableModel tm1;
+    private DefaultTableModel authorsTableModelInTermDetails;
     private JTextField textField1;
     private JCheckBox isSignedCheckBox;
+
+    private JLabel actualTermHistoryVersionLabel;
+    private JLabel termDetailsIdLabel;
+    private String defaultSubcategoryForNewTerm = "Propozycja nowego hasła";
+
+
+    private JButton updateTermButton;
+    private JButton sendTermToNextStepButton;
+    private JButton manageTermStatusesButton;
+    private JButton manageTermVersionsButton;
+    private JButton redirectTermToIndicatedAuthorButton;
+    private JButton manageTermReferenceButton;
+    private JLabel editedTermHistoryVersionLabel;
+
+
+    //Authors begin------------------------------------------------------------------------------------------------------------------------------------------------
+
+    private JList authorsList;
+    private JPanel bottomDetailsAuthorsPanel;
+    private JTable authorsMenageTable;
+    private JTextField nameTextField;
+    private JTextField surnameTextField;
+    private JTextField signTextField;
+    private JTextField emailTextField;
+    private JButton addAuthorButton;
+    private JButton updateAuthorButton;
+    private JButton deleteAuthorButton;
+    private JScrollPane editorPane;
+    private JLabel authorsIdLabel;
+    private JLabel authorPanelErrorLabel;
+    private Long selectedAuthorId = -1L;
+    private DefaultTableModel am;
+
+
+    //Authors end----------------------------------------------------------------END-----------------------------------------------------------------------------
+
+
+    // settings tab----------------------------------------------------------START-------------------------------------------------------------------------------
+
+    private JList settingsList;
+
+    private JPanel bottomDetailsSettingsPanel;
+    private JPanel left;
+    private JButton addSubcategoryButton;
+    private JTextField subcategoryTextField;
+    private JButton deleteSubcategoryButton;
+    private JPanel leftCenter;
+    private JPanel rightCenter;
+    private JPanel right;
+    private JList subcategorySettingsList;
+    private JList allStatusesSettingsList;
+    private JList chosenStatusesSettingsList;
+    private JButton upButton;
+    private JButton downButton;
+    private JButton leftButton;
+    private JButton rightButton;
+    private JLabel subcategoryErrorLabel;
+    private JButton saveSubcategoryStatuses;
+
+    //------------------------------------------------tags
+    private JPanel bottomDetailsTagsPanel;
+    private JPanel topDetailsTagsPanel;
+    private JTextField tagsNameField;
+    private JButton addTagButton;
+    private JButton deleteTagButton;
+    private JList tagsSettingsList;
+    private JTable termsTagsTable;
+    private JButton choseTagColorButton;
+    private JLabel tagIconLabel;
+    private JLabel tagsSettingsErrorLabel;
+    private DefaultTableModel tagsModel;
+    private Color selectedTagColor;
+    private String selectedTagColorName;
+    private JButton saveTermsToTagButton;
+    private JButton updateTagButton;
+    //------------------------------------------------tags
+    // settings tab----------------------------------------------------------END---------------------------------------------------------------------------------
+
+
+    //--------------------------------------------------------------------------------------------
+
+    //----------------------------------------------------------------------------------------------
+
 
     private JButton getStatusesForSubcategoryButton;
 
@@ -117,6 +211,8 @@ public class ApplicationFrameController {
         subcategoryJList = applicationFrame.getSubcategoryJList();
         tagsJList=applicationFrame.getTagsJList();
         statusesJList = applicationFrame.getStatusesJList();
+        markReferenceButton = applicationFrame.getMarkReferenceButton();
+
 
         //termTableModel= applicationFrame.getTermTableModel();
         bottomDetailsTermPanel = applicationFrame.getBottomDetailsTermPanel();
@@ -135,7 +231,7 @@ public class ApplicationFrameController {
         topTermDetailsPanel =applicationFrame.getTopTermDetailsPanel();
         addTermButton = applicationFrame.getAddTermButton();
 
-
+        termHistoryVersionLabel = applicationFrame.getTermHistoryVersionLabel();
           authorsTable = applicationFrame.getAuthorsTable();
           tagsTermJList = applicationFrame.getTagsTermJList();
          statusesTermJList = applicationFrame.getStatusesTermJList();
@@ -143,29 +239,140 @@ public class ApplicationFrameController {
          subcategoryComboBox = applicationFrame.getSubcategoryComboBox();
          getStatusesForSubcategoryButton = applicationFrame.getGetStatusesForSubcategoryButton();
          versesTermLabel = applicationFrame.getVersesTermLabel();
-        editorPane1 = applicationFrame.getEditorPane1();
-        tm1 = (DefaultTableModel) authorsTable.getModel();
+        //editorPane1 = applicationFrame.getEditorPane1();
+        editorPane1 = new JEditorPane();
+        authorsTableModelInTermDetails = (DefaultTableModel) authorsTable.getModel();
         authorsTable.putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);
         textField1 = applicationFrame.getTextField1();
         isSignedCheckBox = applicationFrame.getIsSignedCheckBox();
+        actualTermHistoryVersionLabel = applicationFrame.getActualTermHistoryVersionLabel();
+        termDetailsIdLabel = applicationFrame.getTermDetailsIdLabel();
+
+        shefPanel = applicationFrame.getShefPanel();
+JMenuBar jMenuBar = new JMenuBar();
+                /*JFrame frame = new JFrame();
+                frame.getContentPane().add(htmlEditorPane);
+                frame.setVisible(true);*/
+        //editorPane1 =null;
+        jMenuBar.add(htmlEditorPane.getEditMenu());
+        jMenuBar.add(htmlEditorPane.getFormatMenu());
+        jMenuBar.add(htmlEditorPane.getInsertMenu());
+        shefPanel.add(jMenuBar,BorderLayout.PAGE_START);
+        shefPanel.add(htmlEditorPane,BorderLayout.CENTER);
+        htmlEditorPane.setAutoscrolls(true);
+        htmlEditorPane.setOpaque(false);
+
+
+         updateTermButton = applicationFrame.getUpdateTermButton();
+         sendTermToNextStepButton= applicationFrame.getSendTermToNextStepButton();
+         manageTermStatusesButton= applicationFrame.getManageTermStatusesButton();
+         manageTermVersionsButton = applicationFrame.getManageTermVersionsButton();
+         redirectTermToIndicatedAuthorButton = applicationFrame.getRedirectTermToIndicatedAuthorButton();
+        manageTermReferenceButton= applicationFrame.getManageTermReferenceButton();
+        editedTermHistoryVersionLabel = applicationFrame.getEditedTermHistoryVersionLabel();
 
 
 
 
+        //Authors--------------------------------------------------------------------START------------------------------------------------------------------------
+
+        authorsList = applicationFrame.getAuthorsList();
+        bottomDetailsAuthorsPanel = applicationFrame.getBottomDetailsAuthorsPanel();
+        addAuthorButton = applicationFrame.getAddAuthorButton();
+        deleteAuthorButton = applicationFrame.getDeleteAuthorButton();
+        updateAuthorButton = applicationFrame.getUpdateAuthorButton();
+        authorPanelErrorLabel = applicationFrame.getAuthorPanelErrorLabel();
+        nameTextField = applicationFrame.getNameTextField();
+        surnameTextField = applicationFrame.getSurnameTextField();
+        emailTextField = applicationFrame.getEmailTextField();
+        signTextField = applicationFrame.getSignTextField();
+        authorsIdLabel = applicationFrame.getAuthorsIdLabel();
+        authorsMenageTable = applicationFrame.getAuthorsMenageTable();
+        am = (DefaultTableModel)authorsMenageTable.getModel();
+        //Authors end-------------------------------------------------------------END--------------------------------------------------------------------------------
+
+
+        // settings tab----------------------------------------------------------START-------------------------------------------------------------------------------
+
+        settingsList = applicationFrame.getSettingsList();
+        bottomDetailsSettingsPanel = applicationFrame.getBottomDetailsSettingsPanel();
+        subcategoryErrorLabel = applicationFrame.getSettingsErrorLabel();
+        subcategorySettingsList =applicationFrame.getList2();
+         allStatusesSettingsList=applicationFrame.getList3();
+         chosenStatusesSettingsList=applicationFrame.getList4();
+        addSubcategoryButton = applicationFrame.getAddSubcategoryButton();
+        subcategoryTextField = applicationFrame.getSubcategoryTextField();
+        deleteSubcategoryButton = applicationFrame.getDeleteSubcategoryButton();
+        upButton = applicationFrame.getUpButton();
+        downButton = applicationFrame.getDownButton();
+        leftButton = applicationFrame.getLeftButton();
+        rightButton = applicationFrame.getRightButton();
+        saveSubcategoryStatuses = applicationFrame.getSaveSubcategoryStatuses();
+
+        //------------------------------------------------tags
+        bottomDetailsTagsPanel = applicationFrame.getBottomDetailsTagsPanel();
+
+        tagsSettingsList = applicationFrame.getList5();
+        tagsNameField = applicationFrame.getTagsNameField();
+        termsTagsTable = applicationFrame.getTermsTagsTable();
+        tagsModel = (DefaultTableModel)termsTagsTable.getModel();
+        termsTagsTable.getTableHeader().setReorderingAllowed(false);
+        addTagButton = applicationFrame.getAddTagButton();
+        choseTagColorButton = applicationFrame.getChoseTagColorButton();
+        tagIconLabel = applicationFrame.getTagIconLabel();
+        tagsSettingsErrorLabel = applicationFrame.getTagsSettingsErrorLabel();
+        deleteTagButton = applicationFrame.getDeleteTagButton();
+        updateTagButton = applicationFrame.getUpdateTagButton();
+        saveTermsToTagButton = applicationFrame.getSaveTermsToTagButton();
 
 
 
+        /*JColorChooser jColorChooser = new JColorChooser(Color.red);
+        jColorChooser.setOpaque(false);
+        jColorChooser.addChooserPanel(new AbstractColorChooserPanel() {
+            @Override
+            public void updateChooser() {
+
+            }
+
+            @Override
+            protected void buildChooser() {
+
+            }
+
+            @Override
+            public String getDisplayName() {
+                return null;
+            }
+
+            @Override
+            public Icon getSmallDisplayIcon() {
+                return null;
+            }
+
+            @Override
+            public Icon getLargeDisplayIcon() {
+                return null;
+            }
+        });
+        bottomDetailsTagsPanel.setLayout(new BorderLayout());
+        bottomDetailsTagsPanel.add(jColorChooser);*/
+        //------------------------------------------------tags
+        // settings tab----------------------------------------------------------END---------------------------------------------------------------------------------
 
 
+        termsList = applicationFrame.getTermsList();
 
         backToMainPanel();
         loggedUserLabel= applicationFrame.getLoggedUserLabel();
         iconLabel = applicationFrame.getIconLabel();
         exitLabel= applicationFrame.getExitLabel();
         logoutLabel = applicationFrame.getLogoutLabel();
-        termsList = applicationFrame.getTermsList();
+
         renderTermsFilters = new RenderTermsFilters(new JList[]{applicationFrame.getCategoryJList(),applicationFrame.getSubcategoryJList(),applicationFrame.getStatusesJList()},1);
         termsTable.getTableHeader().setReorderingAllowed(false);
+        authorsMenageTable.getTableHeader().setReorderingAllowed(false);
+        authorsTable.getTableHeader().setReorderingAllowed(false);
 
     }
 
@@ -276,6 +483,13 @@ public class ApplicationFrameController {
                                         renderTermsFilters.setJListCheckBoxFeatures(tagsJList, 1);
                                         tags2 = false;
                                     }
+                                    DefaultListModel defaultListModel = (DefaultListModel) subcategoryJList.getModel();
+                                    defaultListModel.removeAllElements();
+                                    ArrayList<String> subcategoriesList = apiConnector.getAllSubcategoriesString();
+                                    for (String s: subcategoriesList
+                                         ) {
+                                        defaultListModel.addElement(new CheckListItem(s));
+                                    }
 
                                     cardLayout2.show(topDetailsPanel, topDetailsPanelFilters.getName());
                                 }catch (Exception ex){
@@ -296,97 +510,161 @@ public class ApplicationFrameController {
 
                                 addTermButton.setVisible(true);
 
-                                try {
-                                    ArrayList<String> tagsName = apiConnector.getAllTags();
-
-                                    renderTermsFilters.setTagsJList(tagsTermJList, tagsName);
-
-                                    if(tags1) {
-                                        renderTermsFilters.setJListCheckBoxFeatures(tagsTermJList, 1);
-                                        tags1 = false;
-                                    }
-
-                                    // Wczytanie wszystkich statusów
-                                    ArrayList<String> allStatuses = apiConnector.getAllStatusesString();
-                                    String subcategoryString = "Propozycja nowego hasła";
-                                    //Wczytanie statusów dla podkategorii
-                                    ArrayList<String> statusesOfSubcategory = apiConnector.getStatusesOfSubcategory(subcategoryString);
+                                prepareTermForm(true);
 
 
-
-                                    renderTermsFilters.setTagsJList(statusesTermJList, statusesOfSubcategory);
-                                    if(!statusesWereSet) {
-                                        statusesWereSet = true;
-                                        renderTermsFilters.setJListCheckBoxFeatures(statusesTermJList, 0);
-                                        statusesTermJList.addMouseListener(new MouseAdapter() {
-                                            @Override
-                                            public void mouseClicked(MouseEvent event) {
-                                                JList list = (JList) event.getSource();
-                                                int index = list.locationToIndex(event.getPoint());// Get index of item
-                                                // clicked
-                                                for (int i = 0; i < list.getModel().getSize(); i++) {
-                                                    CheckListItem item = (CheckListItem) list.getModel()
-                                                            .getElementAt(i);
-                                                    item.setSelected(false);
-                                                    list.repaint(list.getCellBounds(i, i));
-                                                    //System.out.println(item.isSelected());
-
-                                                }
-                                                CheckListItem item = (CheckListItem) list.getModel()
-                                                        .getElementAt(index);
-                                                item.setSelected(true); // Toggle selected state
-                                                list.repaint(list.getCellBounds(index, index));// Repaint cell
-                                            }
-                                        });
-
-                                    }
-
-
-                                }catch (Exception ex){
-
-                                    System.out.println( ex.getMessage());
-                                    logoutBecauseOfError();
-                                }
-
-                                ArrayList<String> authors = apiConnector.getAllAuthors();
-                                TableColumnModel tableColumnModel = authorsTable.getColumnModel();
-
-
-
-                                if(tm1.getRowCount() !=0){
-                                    for(int i = tm1.getRowCount() -1 ; i > -1 ; i--){
-                                        tm1.removeRow(i);
-                                    }
-                                }
-
-
-                                for (String s: authors
-                                     ) {
-                                    tm1.addRow(new Object[]{false,s,null});
-                                }
-                                tableColumnModel.getColumn(0).setPreferredWidth(10);
-                                tableColumnModel.getColumn(2).setPreferredWidth(30);
                                 comboboxFill(categoryComboBox,apiConnector.getAllCategoriesString());
                                 comboboxFill(subcategoryComboBox,apiConnector.getAllSubcategoriesString());
-                                subcategoryComboBox.setSelectedIndex(5);
-                                cardLayout2.show(topDetailsPanel,topTermDetailsPanel.getName());
 
+                                subcategoryComboBox.setSelectedItem(defaultSubcategoryForNewTerm);
+                                cardLayout2.show(topDetailsPanel,topTermDetailsPanel.getName());
+                               CheckListItem checkListItem = (CheckListItem) statusesTermJList.getModel().getElementAt(0);
+                               checkListItem.setSelected(true);
                                 break;
                         }
                     }
                 }
             }
         });
+        // Authors begin---------------------------------------------------------------------------------------------------------
 
+        /*markReferenceButton.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                HTMLEditorPane htmlEditorPane = new HTMLEditorPane();
+                *//*JFrame frame = new JFrame();
+                frame.getContentPane().add(htmlEditorPane);
+                frame.setVisible(true);*//*
+                //editorPane1 =null;
+                shefPanel= htmlEditorPane;
+                shefPanel.setVisible(true);
+                //shefPanel.setMinimumSize(new Dimension(100,100));
+            }
+        });*/
+        authorsList.addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                if(e.getValueIsAdjusting()) {
+                    switch (authorsList.getSelectedValue().toString()){
+                        case "Zarządzanie autorami":
+                            selectedAuthorId = -1L;
+                            cardLayout1.show(bottomDetailsPanel, bottomDetailsAuthorsPanel.getName());
+                            addAuthorButton.setVisible(true);
+                            renderAuthorTable();
+                            break;
+
+
+                    }
+
+                }
+            }
+        });
+        addAuthorButton.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+
+                //System.out.println(nameTextField.getText());
+                if(nameTextField.equals("") || surnameTextField.getText().length()==0){
+                    authorPanelErrorLabel.setText("Pola imię oraz nazwisko muszą zostać wypełnione.");
+                }else
+                {
+                    if(!apiConnector.isAuthorExist(nameTextField.getText(),surnameTextField.getText())){
+
+                        Author author = new Author();
+                        author.setName(nameTextField.getText());
+                        author.setSurname(surnameTextField.getText());
+                        author.setEmail(emailTextField.getText());
+                        author.setSign(signTextField.getText());
+
+                        authorPanelErrorLabel.setText(apiConnector.addNewAuthor(author));
+
+                        //deleteAuthorButton.setVisible(true);
+                        //updateAuthorButton.setVisible(true);
+                        selectedAuthorId= apiConnector.getSelectedAuthorId();
+
+                        authorsIdLabel.setText("ID: "+ selectedAuthorId.intValue());
+                        clearAuthorPanel();
+                        renderAuthorTable();
+                    }else
+                        authorPanelErrorLabel.setText("Autor o takim imieniu i nazwisku istnieje już w bazie.");
+
+                }
+            }
+        });
+        authorsMenageTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent mouseEvent) {
+                JTable table =(JTable) mouseEvent.getSource();
+                Point point = mouseEvent.getPoint();
+                int row = table.rowAtPoint(point);
+                if (mouseEvent.getClickCount() == 2 && table.getSelectedRow() != -1) {
+                   Author author = apiConnector.getAuthor((Integer)authorsMenageTable.getValueAt(authorsMenageTable.getSelectedRow(),0));
+                  Float idAuthor= (author.getId());
+                  selectedAuthorId =
+                          (idAuthor.longValue());
+
+                   authorsIdLabel.setText("ID: "+ selectedAuthorId.intValue());
+                   nameTextField.setText(author.getName());
+                   surnameTextField.setText(author.getSurname());
+                   emailTextField.setText(author.getEmail());
+                   signTextField.setText(author.getSign());
+                   if(!updateAuthorButton.isVisible()){
+                       updateAuthorButton.setVisible(true);
+                   }
+                   if(!deleteAuthorButton.isVisible()){
+                       deleteAuthorButton.setVisible(true);
+                   }
+                }
+            }
+        });
+        deleteAuthorButton.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(apiConnector.isAuthorRemovable(selectedAuthorId)) {
+                    authorPanelErrorLabel.setText(apiConnector.deleteAuthor(selectedAuthorId.intValue()));
+                    hideButtonsAndRefreshViewAfterAuthorsAction();
+                }else
+                    authorPanelErrorLabel.setText("Autor o id: '"+selectedAuthorId+"' nie może zostać usunięty ponieważ są do niego przypisane hasła.");
+            }
+        });
+        updateAuthorButton.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int result = -2;
+                Author author = apiConnector.getAuthor(selectedAuthorId.intValue());
+                if (!(Objects.equals(author.getName(), (nameTextField.getText())) && Objects.equals(author.getSurname(),(surnameTextField.getText()))
+                        && Objects.equals(author.getEmail(),(emailTextField.getText())) && Objects.equals(author.getSign(),(emailTextField.getText())))){
+                    String message = "Czy chcesz zaktualizować autora o id: '"+ (int)author.getId()+ "' \nObecne imię : '"+
+                            author.getName()+"', nazwisko: '"+ author.getSurname()+ "', podpis: '"+author.getSign()+"', email: '" +
+                            author.getEmail()+"'.\n Nowe dane autora będą następujące - imię: '"+nameTextField.getText()+"', nazwisko: '"+
+                            surnameTextField.getText()+"', podpis: '"+signTextField.getText()+"', email: '"+emailTextField.getText()+"'?";
+                     result = JOptionPane.showOptionDialog(applicationFrame,message,"Aktualizacja autora",JOptionPane.YES_NO_OPTION,JOptionPane.QUESTION_MESSAGE,null,null,null);
+                }else
+                    authorPanelErrorLabel.setText("Dla autora o id "+(int)author.getId()+"  nie zostały zmienione żadne dane.");
+
+                if(result == 0){
+                    author.setName(nameTextField.getText());
+                    author.setSurname(surnameTextField.getText());
+                    author.setSign(signTextField.getText());
+                    author.setEmail(emailTextField.getText());
+                    authorPanelErrorLabel.setText(apiConnector.updateAuthor(author));
+                    hideButtonsAndRefreshViewAfterAuthorsAction();
+                }
+
+            }
+        });
+        // Authors end---------------------------------------------------------------------------------------------------------
         getStatusesForSubcategoryButton.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if(subcategoryComboBox.getSelectedIndex()!=0)
                     renderTermsFilters.setTagsJList(statusesTermJList, apiConnector.getStatusesOfSubcategory(subcategoryComboBox.getSelectedItem().toString()));
+
             }
         });
 
-        termsTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+        /*termsTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
                 ListSelectionModel lsm = (ListSelectionModel)e.getSource();
@@ -413,14 +691,22 @@ public class ApplicationFrameController {
 
 
             }
-        });
+        });*/
+
+        // Klilnięcie na rekord w tabeli haseł
+
         termsTable.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent mouseEvent) {
+                hideFiltersSearchPanels();
                 JTable table =(JTable) mouseEvent.getSource();
                 Point point = mouseEvent.getPoint();
                 int row = table.rowAtPoint(point);
                 if (mouseEvent.getClickCount() == 2 && table.getSelectedRow() != -1) {
-                    System.out.println(termsTable.getValueAt(termsTable.getSelectedRow(),1));
+                    Integer integerId = Integer.valueOf(termsTable.getValueAt(termsTable.getSelectedRow(),1).toString()) ;
+
+
+                    fillTermFormWithFreshData(integerId);
+
                 }
             }
         });
@@ -430,7 +716,49 @@ public class ApplicationFrameController {
                 termsTable.setSelectionBackground(Color.RED);
             }
         });*/
+        settingsList.addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                if(e.getValueIsAdjusting()) {
+                    if (iconLabelFlag) {
+                        switch (settingsList.getSelectedValue().toString()) {
+                            case "Podkategorie":
 
+                                settingsCardClear();
+                                cardLayout1.show(bottomDetailsPanel,bottomDetailsSettingsPanel.getName());
+                                renderSubcategoriesJList();
+                                break;
+
+                            case   "Tagi":
+                                settingsCardClear();
+                                cardLayout1.show(bottomDetailsPanel,bottomDetailsTagsPanel.getName());
+                                //
+
+                                renderTagsJList();
+
+                                //tagsModel.addRow(new Object[]{true,1,"szikakaka"});
+
+
+
+                                break;
+
+                            case "Użytkownicy":
+                                settingsCardClear();
+
+                                break;
+
+                            case "Kategorie":
+                                settingsCardClear();
+
+                                break;
+
+
+                        }
+                    }
+                }
+            }
+        });
+//-----------------------------------------------------------------------------------------------TermBUTTONS-----START-------------------------------------------------------------------------------
         searchButton.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -458,8 +786,10 @@ public class ApplicationFrameController {
                     } catch (JsonProcessingException ex) {
                         ex.printStackTrace();
                     }
-                    if(!apiConnector.getEmpty())
+                    if(!apiConnector.getEmpty()){
                         renderTermTable();
+
+                    }
                     else {
                         termsErrorLabel.setText("Żadne z haseł nie spełnia zadanych kryteriów.");
                         cardLayout1.show(bottomDetailsPanel, bottomDetailsTermsPanel.getName());
@@ -471,25 +801,6 @@ public class ApplicationFrameController {
                         }
                     }
                 }
-
-               /* for (Object s: categoriesList
-                     ) {
-                    System.out.println(s);
-                }System.out.println();
-                for (Object s: subcategoriesList
-                     ) {
-                    System.out.println(s);
-                }System.out.println();
-                for (Object s: tagsList
-                     ) {
-                    System.out.println(s);
-                }
-                System.out.println();
-                for (Object s: statusesList
-                     ) {
-                    System.out.println(s);
-                }System.out.println();*/
-
             }
         });
 
@@ -498,7 +809,7 @@ public class ApplicationFrameController {
             public void actionPerformed(ActionEvent e) {
 
                 if (String.valueOf(categoryComboBox.getSelectedItem()) == "") {
-                    versesTermLabel.setText("Hasło musi mieć ustawioną kategorie.");
+                    versesTermLabel.setText("Hasło musi mieć ustawioną kategorię.");
                 } else {
 
 
@@ -508,50 +819,343 @@ public class ApplicationFrameController {
                     term.setActualVersion(termHistory.getVersion());
                     term.setTitle(textField1.getText());
                     term.setSigned(isSignedCheckBox.isSelected());
-                    termHistory.setContent(editorPane1.getText());
+                    termHistory.setContent(htmlEditorPane.getText());
                     term.setCategory(String.valueOf(categoryComboBox.getSelectedItem()));
                     term.setSubcategory(String.valueOf(subcategoryComboBox.getSelectedItem()));
                     //System.out.println("a");
-                    ArrayList<String> statuses = new ArrayList<>();
-                    ArrayList<String> tags = new ArrayList<>();
-                    ArrayList<String> authors = new ArrayList<>();
-                    termHistory.setStatus(statusesTermJList.getModel().getElementAt(0).toString());
-                    for (int i = 0; i < statusesTermJList.getModel().getSize(); i++) {
-                        statuses.add(statusesTermJList.getModel().getElementAt(i).toString());
-                        CheckListItem checkListItem = (CheckListItem) statusesTermJList.getModel().getElementAt(i);
-                        if (checkListItem.isSelected())
-                            termHistory.setStatus(checkListItem.toString());
-                    }
-                    for (int i = 0; i < tagsTermJList.getModel().getSize(); i++) {
-                        CheckListItem checkListItem = (CheckListItem) tagsTermJList.getModel().getElementAt(i);
-                        if (checkListItem.isSelected())
-                            tags.add(checkListItem.toString());
-                    }
-                    for (int i = 0; i < tm1.getRowCount(); i++) {
-                        if ((boolean) tm1.getValueAt(i, 0))
-                            authors.add(tm1.getValueAt(i, 1) + "|" + tm1.getValueAt(i, 2));
-                    }
-                    ArrayList<TermHistory> termHistories = new ArrayList<>();
-                    termHistories.add(termHistory);
 
-                    term.setTermHistories(termHistories);
-                    term.setAuthors(authors);
-                    term.setTagsString(tags);
-                    term.setStatuses(statuses);
+                    packFormDataToEntity(termHistory,term);
 
+                    prepareTermForm(true);
                     try {
 
                         versesTermLabel.setText(apiConnector.addNewTerm(term));
                         tagsStrings.clear();
+                        categoryComboBox.setSelectedIndex(0);
+                        subcategoryComboBox.setSelectedIndex(0);
                     } catch (JsonProcessingException ex) {
                         ex.printStackTrace();
                         logoutBecauseOfError();
+                    }
+
+
+
+                }
+            }
+        });
+
+        updateTermButton.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String category =categoryComboBox.getModel().getSelectedItem().toString();
+                String subcategory =subcategoryComboBox.getModel().getSelectedItem().toString();
+
+                Long termId= Long.valueOf(termDetailsIdLabel.getText().substring(4));
+                Long termHistoryId;
+                Term oldTerm = apiConnector.getTerm(termId.intValue());
+                Term newTerm = new Term(termId,isSignedCheckBox.isSelected(),textField1.getText(),category,subcategory);
+                TermHistory termHistory=new TermHistory();
+                Long actualTermHistoryVersion= Long.valueOf(actualTermHistoryVersionLabel.getText());
+                for (TermHistory t: oldTerm.getTermHistories()
+                     ) {
+                    if(t.getVersion()==actualTermHistoryVersion){
+                        termHistoryId=t.getId();
+                        termHistory = apiConnector.getTermHistory(termHistoryId);
+                    }
+                }
+                termHistory.setContent(htmlEditorPane.getText());
+
+                packFormDataToEntity(termHistory,newTerm);
+                try {
+                    Integer termId1 =apiConnector.updateTerm(newTerm);
+                    fillTermFormWithFreshData(termId1);
+                    versesTermLabel.setText("Pomyślnie zaktualizowano hasło o id '"+termId1+"'.");
+                } catch (JsonProcessingException ex) {
+                    ex.printStackTrace();
+                    logoutBecauseOfError();
+                }
+
+
+            }
+        });
+//-----------------------------------------------------------------------------------------------TermBUTTONS-----STOP-------------------------------------------------------------------------------
+//---------------------------------------------------------------------Settings subcategory START ----------------------------------------------------------------------------
+        addSubcategoryButton.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                if(subcategoryTextField.getText().length()!=0 ){
+                    if (apiConnector.isSubcategoryExist(subcategoryTextField.getText())){
+                        subcategoryErrorLabel.setText("Podkategoria: '"+subcategoryTextField.getText()+"' już istnieje. Wybierz inną nazwę.");
+                    }else{
+                       subcategoryErrorLabel.setText(apiConnector.createSubcategory(subcategoryTextField.getText()));
+                       renderSubcategoriesJList();
+                       subcategoryTextField.setText("");
+                    }
+                }else{
+                    subcategoryErrorLabel.setText("Nazwa podkategorii nie może być pusta.");
+                }
+
+            }
+        });
+
+        deleteSubcategoryButton.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //System.out.println(bottomDetailsSettingsPanel.getHeight());
+                if(subcategorySettingsList.getSelectedValue()!=null){
+                    Boolean isRemovable = apiConnector.isSubcategoryRemovable(subcategorySettingsList.getSelectedValue().toString());
+
+                    if(Objects.equals(subcategorySettingsList.getSelectedValue().toString(),("Propozycja nowego hasła"))){
+
+                        isRemovable=false;
+                    }
+
+                    if(isRemovable){
+                        subcategoryErrorLabel.setText( subcategorySettingsList.getSelectedValue()+"' o ID: '"+ apiConnector.deleteSubcategory(apiConnector.getSubcategoryId(subcategorySettingsList.getSelectedValue().toString())));
+                        renderSubcategoriesJList();
+                    }else{
+                        subcategoryErrorLabel.setText("Nie można usunąć podkategorii, ponieważ istnieją hasła które są do niej przypisane.");
+                    }
+                }else{
+                    subcategoryErrorLabel.setText("Nie została zanaznaczona żadna podkategoria, do usunięcia");
+                }
+
+            }
+        });
+
+        subcategorySettingsList.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                JList list = (JList) e.getSource();
+                if(e.getClickCount()==1){
+                    String chosenSubcategory = list.getModel().getElementAt(list.locationToIndex(e.getPoint())).toString();
+                    DefaultListModel defaultListModelAll = (DefaultListModel) allStatusesSettingsList.getModel();
+                    DefaultListModel defaultListModelChosen = (DefaultListModel) chosenStatusesSettingsList.getModel();
+                    defaultListModelAll.removeAllElements();
+                    defaultListModelChosen.removeAllElements();
+                    ArrayList<String> allStatuses = apiConnector.getAllStatusesString();
+
+                    ArrayList<String> chosenStatuses = apiConnector.getStatusesOfSubcategory(chosenSubcategory);
+                    for (String s : chosenStatuses
+                         ) {
+                        for (int i = 0; i <allStatuses.size() ; i++) {
+                            if(Objects.equals(s,allStatuses.get(i))){
+                                allStatuses.remove(i);
+                                break;
+                            }
+                        }
+
+                        defaultListModelChosen.addElement(s);
+                    }
+
+                    for (String s: allStatuses
+                    ) {
+                        defaultListModelAll.addElement(s);
                     }
 
                 }
             }
         });
 
+        upButton.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                DefaultListModel defaultListModelChosen = (DefaultListModel) chosenStatusesSettingsList.getModel();
+                if(!chosenStatusesSettingsList.isSelectionEmpty()){
+                    int index = chosenStatusesSettingsList.getSelectedIndex();
+                    String temp="";
+                    if (index > 0) {
+
+                            temp=defaultListModelChosen.getElementAt(index-1).toString();
+                            defaultListModelChosen.set(index-1,defaultListModelChosen.get(index));
+                            defaultListModelChosen.set(index,temp);
+                            chosenStatusesSettingsList.setSelectedIndex(index-1);
+
+                    }
+                }
+            }
+        });
+        downButton.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                DefaultListModel defaultListModelChosen = (DefaultListModel) chosenStatusesSettingsList.getModel();
+                if(!chosenStatusesSettingsList.isSelectionEmpty()){
+                    int index = chosenStatusesSettingsList.getSelectedIndex();
+                    String temp="";
+                    if (index <defaultListModelChosen.getSize()-1) {
+
+                        temp=defaultListModelChosen.getElementAt(index+1).toString();
+                        defaultListModelChosen.set(index+1,defaultListModelChosen.get(index));
+                        defaultListModelChosen.set(index,temp);
+                        chosenStatusesSettingsList.setSelectedIndex(index+1);
+
+                    }
+                }
+            }
+        });
+        rightButton.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                DefaultListModel defaultListModelChosen = (DefaultListModel) chosenStatusesSettingsList.getModel();
+                DefaultListModel defaultListModelAll = (DefaultListModel) allStatusesSettingsList.getModel();
+                int index = allStatusesSettingsList.getSelectedIndex();
+                if(!allStatusesSettingsList.isSelectionEmpty()){
+
+                    defaultListModelChosen.addElement(defaultListModelAll.get(index));
+                    defaultListModelAll.remove(index);
+
+                }
+                if(defaultListModelAll.getSize()>=index ){
+                    allStatusesSettingsList.setSelectedIndex(index);
+                }
+                else
+                {
+                    allStatusesSettingsList.setSelectedIndex(defaultListModelAll.getSize()-2);
+                }
+            }
+        });
+        leftButton.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                DefaultListModel defaultListModelChosen = (DefaultListModel) chosenStatusesSettingsList.getModel();
+                DefaultListModel defaultListModelAll = (DefaultListModel) allStatusesSettingsList.getModel();
+                int index = chosenStatusesSettingsList.getSelectedIndex();
+                if(!chosenStatusesSettingsList.isSelectionEmpty()){
+
+                    defaultListModelAll.addElement(defaultListModelChosen.get(index));
+                    defaultListModelChosen.remove(index);
+
+                }
+                if(defaultListModelChosen.getSize()>=index ){
+                    chosenStatusesSettingsList.setSelectedIndex(index);
+                }else
+                {
+                    chosenStatusesSettingsList.setSelectedIndex(defaultListModelChosen.getSize()-2);
+                }
+            }
+        });
+
+        saveSubcategoryStatuses.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(!subcategorySettingsList.isSelectionEmpty()){
+                    ArrayList<String> statuses =new ArrayList<>();
+                    for (int i = 0; i < chosenStatusesSettingsList.getModel().getSize() ; i++) {
+                        statuses.add(chosenStatusesSettingsList.getModel().getElementAt(i).toString());
+                    }
+                    subcategoryErrorLabel.setText(apiConnector.updateSubcategoryStatuses(subcategorySettingsList.getSelectedValue().toString(),statuses));
+                }
+            }
+        });
+
+        //---------------------------------------------------------------Tags START---------------------------------------------------------------------------------------------
+        addTagButton.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(tagsNameField.getText()==""||selectedTagColor==null){
+                    tagsSettingsErrorLabel.setText("Tag musi mieć nazwę, oraz musi mieć wybrany kolor.");
+                }else{
+                    if(apiConnector.isTagExist(tagsNameField.getText())){
+                        tagsSettingsErrorLabel.setText("Tag o wpisanej nazwie już istnieje");
+                    }else{
+                        Tag tag = new Tag();
+                        tag.setName(tagsNameField.getText());
+                        tag.setIconName(selectedTagColorName+".png");
+                        tagsSettingsErrorLabel.setText("Pomyślnie udało się założyć tag o id: '"+apiConnector.addNewTag(tag)+"'.");
+                        renderTagsJList();
+
+                    }
+
+                }
+               // IndexColorModel indexColorModel = new IndexColorModel();
+                //BufferedImage bufferedImage = new BufferedImage(10,10,BufferedImage.TYPE_INT_RGB);
+                //Graphics2D cg = bufferedImage.createGraphics();
+
+            }
+        });
+
+        choseTagColorButton.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                 selectedTagColor = JColorChooser.showDialog(
+                        bottomDetailsTagsPanel,
+                        "Wybierz kolor",
+                        Color.WHITE);
+                 if(selectedTagColor!=null) {
+                     selectedTagColorName = selectedTagColor.getRed() + "-" + selectedTagColor.getGreen() + "-" + selectedTagColor.getBlue();
+                     String tagIconPath = getColorTagIcon(selectedTagColor, selectedTagColorName);
+                     tagIconLabel.setIcon(new ImageIcon(tagIconPath));
+                 }
+
+            }
+        });
+        deleteTagButton.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(tagsSettingsList.isSelectionEmpty()){
+                    tagsSettingsErrorLabel.setText("Wybierz tag do usunięcia.");
+                }else{
+                    if(apiConnector.isTagRemovable(tagsSettingsList.getSelectedValue().toString())){
+                       // System.out.println("usunąć "+tagsSettingsList.getSelectedValue().toString());
+                        tagsSettingsErrorLabel.setText("Pomyślnie usunięto tago id: '"+apiConnector.deleteTag(tagsSettingsList.getSelectedValue().toString())+"'.");
+                        renderTagsJList();
+                    }else{
+                        tagsSettingsErrorLabel.setText("Nie można usunąć tagu, ponieważ są do niego przypsane hasła.");
+                    }
+                }
+            }
+        });
+        updateTagButton.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(tagsSettingsList.isSelectionEmpty()){
+                    tagsSettingsErrorLabel.setText("Wybierz tag do aktualizacji.");
+                }else{
+                    if(selectedTagColor==null && tagsNameField.getText().isEmpty()){
+                        tagsSettingsErrorLabel.setText("Aby tag został zaktualizowany wybierz nową nazwę lub zmień kolor.");
+                    }else{
+                        Long id = apiConnector.getTagId(tagsSettingsList.getSelectedValue().toString());
+                        Tag tag = new Tag(id.floatValue(),tagsNameField.getText(),selectedTagColorName+".png");
+                        tagsSettingsErrorLabel.setText("Pomyślnie zaktualizowano tago o id '"+apiConnector.updateTag(tag)+"'.");
+                        renderTagsJList();
+
+                    }
+                }
+            }
+        });
+        tagsSettingsList.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+
+                clickOnTagTable();
+            }
+
+            /*@Override
+            public void mouseClicked(MouseEvent e) {
+
+                clickOnTagTable();
+            }*/
+        });
+
+        saveTermsToTagButton.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Long tagId = apiConnector.getTagId(tagsSettingsList.getSelectedValue().toString());
+                for (int i = 0; i < tagsModel.getRowCount(); i++) {
+                    Long termId = Long.valueOf(tagsModel.getValueAt(i,1).toString());
+                    Boolean result = Boolean.valueOf(tagsModel.getValueAt(i,0).toString());
+                    apiConnector.updateTagMarksTerm(tagId,termId,result);
+                }
+            }
+        });
+
+
+        //---------------------------------------------------------------Tags END---------------------------------------------------------------------------------------------
+
+//---------------------------------------------------------------------Settings subcategory END ----------------------------------------------------------------------------
 
         iconLabel.addMouseListener(new MouseAdapter() {
             @Override
@@ -584,6 +1188,8 @@ public class ApplicationFrameController {
             }
         });
 
+
+
         editorPane1.getDocument().addDocumentListener(new DocumentListener(){
             String newline = "\n";
 
@@ -600,11 +1206,11 @@ public class ApplicationFrameController {
             public void updateLog(DocumentEvent e, String action) {
                 Document doc = (Document)e.getDocument();
                 int changeLength = e.getLength();
-                Long sum =0L;
-                for (int i = 0; i < tm1.getRowCount() ; i++) {
-                    if( (boolean)tm1.getValueAt(i,0) && tm1.getValueAt(i,2)!=null){
-
-                        sum+=(Long)tm1.getValueAt(i,2);
+                Integer sum =0;
+                for (int i = 0; i < authorsTableModelInTermDetails.getRowCount() ; i++) {
+                    if( (boolean) authorsTableModelInTermDetails.getValueAt(i,1) && authorsTableModelInTermDetails.getValueAt(i,3)!=null){
+                            String verseString = authorsTableModelInTermDetails.getValueAt(i,3).toString();
+                        sum+=Integer.valueOf(verseString);
                     }
                 }
                 versesTermLabel.setText("Hasło ma aktualnie "+doc.getLength()+" znaków. Odpowiada to "+ getAnInt(doc,lettersOnVerse) +" pełnym wersetom.");
@@ -614,17 +1220,392 @@ public class ApplicationFrameController {
                     versesTermLabel.setText(versesTermLabel.getText() + " Zakontraktowana ilość wersetów dla tego hasła to: (" + sum + ")");
                 }
 
-                /*System.out.println(
+                System.out.println(
                         changeLength + " character" +
                                 ((changeLength == 1) ? " " : "s ") +
                                 action + doc.getProperty("name") + "." + newline +
-                                "  Text length = " + doc.getLength() + newline);*/
+                                "  Text length = " + doc.getLength() + newline);
             }
 
             private int getAnInt(Document doc , Integer lettersOnVerse) {
                 return doc.getLength()/lettersOnVerse;
             }
         });
+    }
+
+    private void fillTermFormWithFreshData(Integer integerId) {
+        termsList.clearSelection();
+        prepareTermForm(false);
+
+        //System.out.println(termsTable.getValueAt(termsTable.getSelectedRow(),1));
+        cardLayout1.show(bottomDetailsPanel,bottomDetailsTermPanel.getName());
+        cardLayout2.show(topDetailsPanel,topTermDetailsPanel.getName());
+
+        Term term= apiConnector.getTerm(integerId);
+        term.setCategory(apiConnector.getTermCategory(integerId));
+        term.setSubcategory(apiConnector.getTermSubcategory(integerId));
+        term.setSigned(apiConnector.isSigned(integerId));
+
+        //----------------------------------
+
+
+        TableColumnModel tableColumnModel = authorsTable.getColumnModel();
+
+
+        if(authorsTableModelInTermDetails.getRowCount() !=0){
+            for(int i = authorsTableModelInTermDetails.getRowCount() -1; i > -1 ; i--){
+                authorsTableModelInTermDetails.removeRow(i);
+            }
+        }
+
+
+        tableColumnModel.getColumn(0).setMaxWidth(40);
+        tableColumnModel.getColumn(1).setMaxWidth(40);
+        tableColumnModel.getColumn(3).setPreferredWidth(30);
+        comboboxFill(categoryComboBox,apiConnector.getAllCategoriesString());
+        comboboxFill(subcategoryComboBox,apiConnector.getAllSubcategoriesString());
+
+
+        //----------------------------------
+
+        fillDataToTermForm(term, false,integerId);
+    }
+
+    private void packFormDataToEntity(TermHistory termHistory, Term term) {
+        ArrayList<String> statuses = new ArrayList<>();
+        ArrayList<String> tags = new ArrayList<>();
+        ArrayList<String> authors = new ArrayList<>();
+        if(statusesTermJList.getModel().getSize()>0)
+            termHistory.setStatus(statusesTermJList.getModel().getElementAt(0).toString());
+        for (int i = 0; i < statusesTermJList.getModel().getSize(); i++) {
+            statuses.add(statusesTermJList.getModel().getElementAt(i).toString());
+            CheckListItem checkListItem = (CheckListItem) statusesTermJList.getModel().getElementAt(i);
+            if (checkListItem.isSelected())
+                termHistory.setStatus(checkListItem.toString());
+        }
+        for (int i = 0; i < tagsTermJList.getModel().getSize(); i++) {
+            CheckListItem checkListItem = (CheckListItem) tagsTermJList.getModel().getElementAt(i);
+            if (checkListItem.isSelected())
+                tags.add(checkListItem.toString());
+        }
+        for (int i = 0; i < authorsTableModelInTermDetails.getRowCount(); i++) {
+            if ((boolean) authorsTableModelInTermDetails.getValueAt(i, 1)){
+
+                Integer numberOfVerses =0;
+                if(!(authorsTableModelInTermDetails.getValueAt(i, 3)==null)){
+                    Object numbersOfVersesLong = authorsTableModelInTermDetails.getValueAt(i, 3);
+                    numberOfVerses=  Integer.valueOf(numbersOfVersesLong.toString());
+                }
+                authors.add(authorsTableModelInTermDetails.getValueAt(i, 0) + "|" + numberOfVerses);
+            }
+        }
+        ArrayList<TermHistory> termHistories = new ArrayList<>();
+        termHistories.add(termHistory);
+
+        term.setTermHistories(termHistories);
+        term.setAuthors(authors);
+        term.setTagsString(tags);
+        term.setStatuses(statuses);
+    }
+
+    private void clearAuthorPanel() {
+        nameTextField.setText("");
+        surnameTextField.setText("");
+        emailTextField.setText("");
+        signTextField.setText("");
+
+        authorsIdLabel.setText("");
+    }
+
+    private void clearTermPanel() {
+        termHistoryVersionLabel.setText("");
+        //editorPane1.setText("");
+        htmlEditorPane.getGraphics();
+        htmlEditorPane.setText("");
+        textField1.setText("");
+        actualTermHistoryVersionLabel.setText("");
+        isSignedCheckBox.setSelected(false);
+        //versesTermLabel.setText("");
+        termDetailsIdLabel.setText("");
+
+
+    }
+
+    private void clickOnTagTable() {
+        if (tagsModel.getRowCount() != 0) {
+            for (int i = tagsModel.getRowCount() - 1; i > -1; i--) {
+                tagsModel.removeRow(i);
+            }
+        }
+        //tagsSettingsList.setEnabled(false);
+        tagsNameField.setText(tagsSettingsList.getSelectedValue().toString());
+        Long tagId = apiConnector.getTagId(tagsSettingsList.getSelectedValue().toString());
+        Tag tag = apiConnector.getTag(apiConnector.getTagId(tagsSettingsList.getSelectedValue().toString()));
+        String [] rgbFromDatabase= tag.getIconName().split("-");
+        rgbFromDatabase[2]=rgbFromDatabase[2].substring(0,rgbFromDatabase[2].indexOf("."));
+        String tagColorName = tag.getIconName().substring(0,tag.getIconName().indexOf("."));
+        Color color = new Color(Integer.valueOf(rgbFromDatabase[0]),Integer.valueOf(rgbFromDatabase[1]),Integer.valueOf(rgbFromDatabase[2]));
+        selectedTagColor= color;
+        selectedTagColorName = selectedTagColor.getRed() + "-" + selectedTagColor.getGreen() + "-" + selectedTagColor.getBlue();
+        String tagIconPath= getColorTagIcon(color,tagColorName);
+        tagIconLabel.setIcon(new ImageIcon(tagIconPath));
+
+
+        List<Term> terms  = apiConnector.getAllTerm();
+        for (Term t: terms
+             ) {
+            Boolean isTagMarksTerm = apiConnector.isTagMarksTerm(tagId,t.getId());
+            tagsModel.addRow(new Object[]{isTagMarksTerm,t.getId().intValue(),t.getTitle()});
+        }
+        TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(termsTagsTable.getModel());
+        termsTagsTable.setRowSorter(sorter);
+        ArrayList<RowSorter.SortKey> sortKeys = new ArrayList<RowSorter.SortKey>();
+
+        int columnIndexToSort = 0;
+        sortKeys.add(new RowSorter.SortKey(columnIndexToSort, SortOrder.DESCENDING));
+        sortKeys.add(new RowSorter.SortKey(1, SortOrder.ASCENDING));
+
+        sorter.setSortKeys(sortKeys);
+        sorter.sort();
+
+        try{
+            Thread.currentThread().sleep(1);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        //tagsSettingsList.setEnabled(true);
+    }
+
+    private String getColorTagIcon(Color selectedTagColor, String selectedTagColorName) {
+        BufferedImage bufferedImage = new BufferedImage(12,12,BufferedImage.TYPE_INT_RGB);
+        //imageIcons.add(new ImageIcon("src/main/resources/img/tags/"+tag.getIconName()));
+        File iconFile = new File("src/main/resources/img/tags/"+selectedTagColorName+".png");
+        if(!iconFile.exists()){
+
+            Graphics2D g2d = bufferedImage.createGraphics();
+            g2d.setColor(selectedTagColor);
+            g2d.fillRect(0, 0, bufferedImage.getWidth(), bufferedImage.getHeight());
+            //tagIconLabel.setIcon();
+            try {
+                if (ImageIO.write(bufferedImage, "png", new File("src/main/resources/img/tags/"+selectedTagColorName+".png")))
+                {
+                    //System.out.println("-- saved");
+                    return "src/main/resources/img/tags/"+selectedTagColorName+".png";
+                }
+            } catch (IOException exception) {
+                // TODO Auto-generated catch block
+                exception.printStackTrace();
+            }
+
+        }
+        return "src/main/resources/img/tags/"+selectedTagColorName+".png";
+    }
+
+
+    private void renderTagsJList() {
+
+        ArrayList<String> tagsStrings = apiConnector.getAllTags();
+        DefaultListModel listModel = (DefaultListModel) tagsSettingsList.getModel();
+
+        listModel.removeAllElements();
+        for (String s: tagsStrings
+        ) {
+            listModel.addElement(s);
+        }
+
+    }
+
+    private void settingsCardClear() {
+        subcategoryErrorLabel.setText("");
+        subcategoryTextField.setText("");
+        tagsNameField.setText("");
+       DefaultListModel defaultListModel = (DefaultListModel) allStatusesSettingsList.getModel();
+       DefaultListModel defaultListModel1 = (DefaultListModel) chosenStatusesSettingsList.getModel();
+       defaultListModel.removeAllElements();
+       defaultListModel1.removeAllElements();
+       subcategorySettingsList.clearSelection();
+        selectedTagColorName= null;
+        tagIconLabel.setIcon(null);
+
+
+    }
+
+    private void renderSubcategoriesJList() {
+        DefaultListModel listModel = (DefaultListModel) subcategorySettingsList.getModel();
+        listModel.removeAllElements();
+        ArrayList<String> strings = apiConnector.getAllSubcategoriesString();
+        for (String s: strings
+             ) {
+            listModel.addElement(s);
+        }
+
+    }
+
+    private void prepareTermForm(Boolean isNewTerm) {
+        try {
+            clearTermPanel();
+            ArrayList<String> tagsName = apiConnector.getAllTags();
+
+            renderTermsFilters.setTagsJList(tagsTermJList, tagsName);
+
+            if(tags1) {
+                renderTermsFilters.setJListCheckBoxFeatures(tagsTermJList, 1);
+                tags1 = false;
+            }
+
+            // Wczytanie wszystkich statusów
+
+            String subcategoryString = "Propozycja nowego hasła";
+            //Wczytanie statusów dla podkategorii
+            ArrayList<String> statusesOfSubcategory = apiConnector.getStatusesOfSubcategory(subcategoryString);
+
+
+            if(isNewTerm)
+                renderTermsFilters.setTagsJList(statusesTermJList, statusesOfSubcategory);
+
+            if(!statusesWereSet) {
+                statusesWereSet = true;
+                renderTermsFilters.setJListCheckBoxFeatures(statusesTermJList, 0);
+                statusesTermJList.addMouseListener(checkListItemMouseListenerStatuses) ;
+            }
+
+
+        }catch (Exception ex){
+
+            System.out.println( ex.getMessage());
+            logoutBecauseOfError();
+        }
+        ArrayList<Author> authors = apiConnector.getAllAuthorsObject();
+       // ArrayList<String> authors = apiConnector.getAllAuthors();
+        TableColumnModel tableColumnModel = authorsTable.getColumnModel();
+
+
+
+        if(authorsTableModelInTermDetails.getRowCount() !=0){
+            for(int i = authorsTableModelInTermDetails.getRowCount() -1; i > -1 ; i--){
+                authorsTableModelInTermDetails.removeRow(i);
+            }
+        }
+
+
+        for (Author s: authors
+        ) {
+            Float idAuthor = s.getId();
+            authorsTableModelInTermDetails.addRow(new Object[]{idAuthor.intValue(),false,s.getName()+" "+ s.getSurname() ,null});
+        }
+        tableColumnModel.getColumn(0).setMaxWidth(40);
+        tableColumnModel.getColumn(1).setMaxWidth(40);
+        tableColumnModel.getColumn(3).setPreferredWidth(30);
+    }
+
+    private void fillDataToTermForm(Term term, boolean isEditable,Integer termId) {
+        //System.out.println(term.toString());
+        textField1.setText(term.getTitle());
+       isSignedCheckBox.setSelected(term.getSigned());
+        actualTermHistoryVersionLabel.setText(""+term.getActualVersion().intValue());
+        termDetailsIdLabel.setText("ID: "+term.getId().intValue());
+        fillTermAuthorTable(termId);
+        fillTermTagTable(termId);
+        fillActualTermHistoryStatusAndContent(termId);
+
+        categoryComboBox.setSelectedItem(term.getCategory());
+        subcategoryComboBox.setSelectedItem(term.getSubcategory());
+        getStatusesForSubcategoryButton.setVisible(true);
+        updateTermButton.setVisible(true);
+        /*if(subcategoryComboBox.getSelectedIndex()!=0)
+            renderTermsFilters.setTagsJList(statusesTermJList, apiConnector.getStatusesOfSubcategory(subcategoryComboBox.getSelectedItem().toString()));*/
+    }
+
+    private void fillActualTermHistoryStatusAndContent(Integer termId) {
+        Term term = apiConnector.getTerm(termId);
+        TermHistory termHistory = apiConnector.getActualTermHistoryOfTerm(termId);
+        ArrayList<String> statuses = apiConnector.getStatusesOfTerm(termId);
+        String actualStatus = apiConnector.getStatusOfTermHistory(termHistory.getId());
+        editedTermHistoryVersionLabel.setText(""+termHistory.getVersion().intValue());
+        if(statuses.size()>0){
+            CheckListItem[] checkListItems = new CheckListItem[statuses.size()];
+            for (int i = 0; i < statuses.size() ; i++) {
+                if(statuses.get(i).equals(actualStatus))
+                    checkListItems[i]= new CheckListItem(statuses.get(i),true);
+                else
+                    checkListItems[i]= new CheckListItem(statuses.get(i),false);
+
+            }
+            //statusesTermJList.setSelectionModel(new NoSelectionModel());
+            statusesTermJList.setListData(checkListItems);
+            //statusesTermJList.removeMouseListener(checkListItemMouseListenerStatuses);
+
+            //renderTermsFilters.setTagsJList(statusesTermJList,statuses);
+
+        }
+        termHistoryVersionLabel.setText("Numer widocznej wersji: '"+ termHistory.getVersion().intValue()+"'");
+        htmlEditorPane.setText(termHistory.getContent());
+    }
+
+    private void fillTermTagTable(Integer termId) {
+
+        for (int i = 0; i <tagsTermJList.getModel().getSize() ; i++) {
+            CheckListItem checkListItem = (CheckListItem) tagsTermJList.getModel().getElementAt(i);
+           checkListItem.setSelected(apiConnector.isTagMarksTerm(apiConnector.getTagId(checkListItem.toString()),termId.longValue()));
+        }
+    }
+
+    private void fillTermAuthorTable(Integer integerId) {
+        ArrayList<Float> authors = apiConnector.getAllAuthorsIdsFloat();
+        for (Float f: authors
+        ) {
+            Author author = apiConnector.getAuthor(f.intValue());
+            String authorFullName = author.getName()+ " "+ author.getSurname();
+            Float authorId = author.getId();
+            Long isAuthorAssignToTerm = apiConnector.isAuthorAssignToTerm(f,integerId);
+
+            if(isAuthorAssignToTerm>=-0L)
+
+                authorsTableModelInTermDetails.addRow(new Object[]{authorId.intValue(),true,authorFullName,isAuthorAssignToTerm});
+            else
+                authorsTableModelInTermDetails.addRow(new Object[]{authorId.intValue(),false,authorFullName,null});
+
+        }
+    }
+
+    private void hideButtonsAndRefreshViewAfterAuthorsAction() {
+        renderAuthorTable();
+        deleteAuthorButton.setVisible(false);
+        updateAuthorButton.setVisible(false);
+        authorsIdLabel.setText("ID:" );
+        nameTextField.setText("");
+        surnameTextField.setText("");
+        emailTextField.setText("");
+        signTextField.setText("");
+    }
+
+    private void renderAuthorTable() {
+        if(am.getRowCount() !=0){
+            for(int i = am.getRowCount() -1 ; i > -1 ; i--){
+                am.removeRow(i);
+            }
+        }
+        TableColumnModel tableColumnModel = authorsMenageTable.getColumnModel();
+        tableColumnModel.getColumn(0).setPreferredWidth(30);
+        tableColumnModel.getColumn(1).setPreferredWidth(150);
+        tableColumnModel.getColumn(2).setPreferredWidth(150);
+        tableColumnModel.getColumn(3).setPreferredWidth(200);
+        tableColumnModel.getColumn(4).setPreferredWidth(200);
+        tableColumnModel.getColumn(5).setPreferredWidth(150);
+        try{
+          ArrayList<Author> authors= apiConnector.getAllAuthorsObject();
+            for (Author a: authors
+            ) {
+                Float id = a.getId();
+                Integer howManyTerms = apiConnector.howManyTerms(id.intValue());
+                am.addRow(new Object[]{id.intValue(),a.getName(),a.getSurname(),a.getSign(),a.getEmail(),howManyTerms});
+            }
+        }catch (Exception ex){
+            logoutBecauseOfError();
+            ex.printStackTrace();
+        }
+
+
     }
 
     private void logoutBecauseOfError() {
@@ -649,10 +1630,13 @@ public class ApplicationFrameController {
     private void hideFiltersSearchPanels() {
         addTermButton.setVisible(false);
         searchButton.setVisible(false);
+        getStatusesForSubcategoryButton.setVisible(false);
+        updateTermButton.setVisible(false);
         cardLayout2.show(topDetailsPanel, topDetailsPanelBlank.getName());
     }
 
     private void renderTermTable() {
+        tagsStrings.clear();
         termsErrorLabel.setText("");
         cardLayout1.show(bottomDetailsPanel, bottomDetailsTermsPanel.getName());
 
@@ -678,14 +1662,19 @@ public class ApplicationFrameController {
 
 
             TableColumnModel tableModel= termsTable.getColumnModel();
-            tableModel.getColumn(0).setPreferredWidth(15);
-            tableModel.getColumn(1).setPreferredWidth(15);
-            tableModel.getColumn(2).setPreferredWidth(230);
-            tableModel.getColumn(3).setPreferredWidth(25);
-            tableModel.getColumn(4).setPreferredWidth(40);
+            tableModel.getColumn(0).setPreferredWidth(30);
+            tableModel.getColumn(0).setMaxWidth(30);
+            tableModel.getColumn(1).setPreferredWidth(30);
+            tableModel.getColumn(1).setMaxWidth(30);
+            tableModel.getColumn(2).setPreferredWidth(220);
+            tableModel.getColumn(3).setPreferredWidth(30);
+            tableModel.getColumn(3).setMaxWidth(30);
+            tableModel.getColumn(4).setPreferredWidth(30);
+            tableModel.getColumn(4).setMaxWidth(30);
             tableModel.getColumn(5).setPreferredWidth(145);
             tableModel.getColumn(6).setPreferredWidth(25);
-             tableModel.getColumn(7).setPreferredWidth(30);
+            tableModel.getColumn(6).setMaxWidth(25);
+             tableModel.getColumn(7).setPreferredWidth(54);
 
              List<Tag> tagList = t.getTags();
            List<ImageIcon> imageIcons= new ArrayList<>();
@@ -694,7 +1683,13 @@ public class ApplicationFrameController {
             if(!tagList.isEmpty()){
                 for (Tag tag: tagList) {
 
-                   imageIcons.add(new ImageIcon("src/main/resources/img/tags/"+tag.getIconName()));
+                    String [] rgbFromDatabase= tag.getIconName().split("-");
+                    rgbFromDatabase[2]=rgbFromDatabase[2].substring(0,rgbFromDatabase[2].indexOf("."));
+                    Color color = new Color(Integer.valueOf(rgbFromDatabase[0]),Integer.valueOf(rgbFromDatabase[1]),Integer.valueOf(rgbFromDatabase[2]));
+                    String tagColorName = tag.getIconName().substring(0,tag.getIconName().indexOf("."));
+                   //imageIcons.add(new ImageIcon("src/main/resources/img/tags/"+tag.getIconName()));
+                    String iconPath= getColorTagIcon(color,tagColorName);
+                   imageIcons.add(new ImageIcon(iconPath));
 
                 }
 
@@ -702,15 +1697,20 @@ public class ApplicationFrameController {
             // Wstawianie Authorów
             List<Author> authorList = apiConnector.getAuthorsOfTerm(t.getId());
             String authorsToTable ="";
+            Boolean isFirst=true;
             for (Author a: authorList
                  ) {
-                authorsToTable += a.getName()+" "+ a.getSurname();
+                if(isFirst) {
+                    authorsToTable += a.getName() + " " + a.getSurname();
+                    isFirst=false;
+                }else
+                    authorsToTable += ", "+a.getName() + " " + a.getSurname();
             }
 
             //Koniec wstawiania
 
             TagIcon tagIcon= new TagIcon(imageIcons);
-            tm.addRow(new Object[]{tm.getRowCount()+1,t.getId(),t.getTitle(),counter,t.getActualVersion(),authorsToTable,t.getSigned(),tagIcon});
+            tm.addRow(new Object[]{tm.getRowCount()+1,t.getId(),t.getTitle(),counter,t.getActualVersion(),authorsToTable,apiConnector.isSigned(t.getId().intValue()),tagIcon});
 
             if(!tagList.isEmpty()){
                 for (Tag tag: tagList) {
@@ -739,6 +1739,13 @@ public class ApplicationFrameController {
         cardLayout1.show(bottomDetailsPanel, bottomDetailsBlankPanel.getName());
         iconLabelFlag=false;
         list1.clearSelection();
+        addAuthorButton.setVisible(false);
+        updateAuthorButton.setVisible(false);
+        deleteAuthorButton.setVisible(false);
+        termsList.clearSelection();
+        authorsList.clearSelection();
+        settingsList.clearSelection();
+
         /*if(termsList.getValueIsAdjusting()){
 
             SwingUtilities.invokeLater(new Runnable() {

@@ -24,6 +24,16 @@ public class Term {
     private ArrayList<String> statuses = new ArrayList<String>();
     private ArrayList<String> tagsString = new ArrayList<String>();
 
+    public Term() {
+    }
+
+    public Term(Long id, Boolean isSigned, String title, String category, String subcategory) {
+        this.id = id;
+        this.isSigned = isSigned;
+        this.title = title;
+        this.category = category;
+        this.subcategory = subcategory;
+    }
 
     public Boolean getSigned() {
         return isSigned;

@@ -18,7 +18,7 @@ public class TagIcon implements Icon {
         {
             /*icon.paintIcon(c, g, x,y);
             x += icon.getIconWidth();*/
-            icon.paintIcon(c, g, x-25,y-5);
+            icon.paintIcon(c, g, x-60,y-5);
             x += icon.getIconWidth()+5;
         }
     }

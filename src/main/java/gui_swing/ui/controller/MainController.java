@@ -3,9 +3,9 @@ package gui_swing.ui.controller;
 import gui_swing.ui.model.ConfigManager;
 
 public class MainController {
-    private LoginFrameController loginFrameController = new LoginFrameController(this);
-    private ConfigManager jwtToken = new ConfigManager();
-    private ApplicationFrameController applicationFrameController = new ApplicationFrameController(this );
+    private LoginFrameController loginFrameController ;
+    private ConfigManager jwtToken ;
+    private ApplicationFrameController applicationFrameController ;
 
     public ConfigManager getJwtToken() {
         return jwtToken;
@@ -35,6 +35,9 @@ public class MainController {
 
 
     public MainController(){
+        loginFrameController = new LoginFrameController(this);
+        jwtToken = new ConfigManager();
+        applicationFrameController = new ApplicationFrameController(this);
         initComponents(jwtToken);
     }
 
