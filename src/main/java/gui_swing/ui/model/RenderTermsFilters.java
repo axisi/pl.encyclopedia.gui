@@ -42,7 +42,8 @@ public class RenderTermsFilters{
                     new CheckListItem("Historia i kalendarium"),
                     new CheckListItem("Cracovia sacra"),
                     new CheckListItem("Geografia i środowisko przyrodnicze"),
-                    new CheckListItem("Architektura i urbanizacja")
+                    new CheckListItem("Architektura i urbanizacja"),
+                    new CheckListItem("Odsyłaczowe")
 
             });
            /* jLists[1].setListData(new CheckListItem[]{

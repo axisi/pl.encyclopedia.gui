@@ -19,27 +19,54 @@ public class TermTableModel extends DefaultTableModel {
     public Class<?> getColumnClass(int columnIndex) {
         switch (columnIndex){
             case 0:
-            case 1:
+           // case 1:
 
-            case 3:
-            case 4:
+           // case 3:
+           // case 4:
                 return Long.class;
-            case 2:
-            case 5:
+           // case 2:
+            case 1:
 
 
                 return String.class;
-            case 6:
-                return Boolean.class;
-            case 7:
+           // case 6:
+               // return Boolean.class;
+            case 2:
                 return Icon.class;//getValueAt(0,columnIndex).getClass();
             default:
                 return JLabel.class;
         }
     }
     @Override
+    public int getColumnCount() {
+        return 3;
+    }
+    @Override
     public boolean isCellEditable(int row, int column){
         return false;
+    }
+    @Override
+    public String getColumnName(int column) {
+        switch (column) {
+            case 0:
+                return "Lp";
+               /* case 1:
+                return "Id";*/
+            case 1:
+                return "Tytuł";
+           /* case 3:
+                return "Ilość wersji";
+            case 4:
+                return "Aktualna wersja";
+                case 5:
+                return "Autorzy";
+                case 6:
+                return "Podpis";*/
+                case 3:
+                return "Tagi hasła";
+
+        }
+        return null;
     }
 
 

@@ -11,6 +11,7 @@ public class ConfigManager {
     private  static String jwtToken;
     private  static String loggedUser;
     private static String apiURI;
+    private static String tagsFolder;
 
     public ConfigManager() {
         setApiURI();
@@ -33,6 +34,8 @@ public class ConfigManager {
             try {
                 resources.load(url.openStream());
                 System.out.println("Properties File Loaded");
+                System.out.println(resources.getProperty("apiUri"));
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -53,6 +56,8 @@ public class ConfigManager {
         }*/
 
         ConfigManager.apiURI = resources.getProperty("apiUri");
+        ConfigManager.tagsFolder = resources.getProperty("tagsFolder");
+        System.out.println(resources.getProperty("tagsFolder"));
     }
 
     public static String getJwtToken() {
@@ -65,6 +70,18 @@ public class ConfigManager {
 
     public static String getLoggedUser() {
         return loggedUser;
+    }
+
+    public static void setApiURI(String apiURI) {
+        ConfigManager.apiURI = apiURI;
+    }
+
+    public static String getTagsFolder() {
+        return tagsFolder;
+    }
+
+    public static void setTagsFolder(String tagsFolder) {
+        ConfigManager.tagsFolder = tagsFolder;
     }
 
     public static void setLoggedUser(String loggedUser) {

@@ -41,7 +41,7 @@ public  class ApiConnector {
         isEmpty = empty;
     }
 
-    List<Term> responseList ;
+    List<Term> responseList =new ArrayList<>();
 
     String apiURI = ConfigManager.getApiURI()+"/api/";
     public ApiConnector() {
@@ -51,6 +51,7 @@ public  class ApiConnector {
 
 
             webTarget = client.target(apiURI).path("term");
+            //webTarget = client.target(apiURI).path("terms/50");
        /* System.out.println(
 
                 webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken()).get(String.class)
@@ -414,5 +415,12 @@ public  class ApiConnector {
         Term response1=response.readEntity(new GenericType<Term>(){});
 
         return response1.getId().intValue();
+    }
+
+    public List<Term> getTermsMatchedToTag(Float id) {
+        Long idLong = id.longValue();
+        webTarget = client.target(apiURI).path("term/tag/"+idLong+"/matched");
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return invocationBuilder.get(new GenericType<List<Term>>(){});
     }
 }

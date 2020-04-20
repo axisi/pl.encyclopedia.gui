@@ -2,18 +2,23 @@ package gui_swing.ui.view;
 
 
 
-import gui_swing.ui.model.tableModels.AuthorTableModel;
-import gui_swing.ui.model.tableModels.AuthorTermTableModel;
-import gui_swing.ui.model.tableModels.TagTermTableModel;
-import gui_swing.ui.model.tableModels.TermTableModel;
-import net.atlanticbb.tantlinger.shef.HTMLEditorPane;
+import com.intellij.uiDesigner.core.GridConstraints;
+import com.intellij.uiDesigner.core.GridLayoutManager;
+import com.intellij.uiDesigner.core.Spacer;
+import gui_swing.ui.controller.ApplicationFrameController;
+import gui_swing.ui.model.TermTable;
+import gui_swing.ui.model.tableModels.*;
 
 import javax.swing.*;
 import javax.swing.table.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 
 public class ApplicationFrame extends JFrame {
@@ -48,8 +53,10 @@ public class ApplicationFrame extends JFrame {
     private JLabel exitLabel;
     private JList TermsList;
     private JTable termsTable;
+    public List<TermTable> listOfTermTable = new ArrayList<>();
 
     private JPanel bottomDetailsBlankPanel;
+
     private JScrollPane termsTableScrollPane;
     private JPanel bottomDetailsTermsPanel;
     private JPanel bottomDetailsTermPanel;
@@ -64,8 +71,8 @@ public class ApplicationFrame extends JFrame {
     private  JList subcategoryJList;
     private  JList tagsJList;
     private  JList statusesJList;
-
     private JPanel SubgroupsJPanel;
+
     private ArrayList<String> tagsStrings;
     private JButton searchButton;
     private JPanel TagsJPanel;
@@ -153,16 +160,12 @@ public class ApplicationFrame extends JFrame {
     private JScrollPane editorPane;
     private JPanel TermErrorLabelPanel;
 
-
     private JRadioButton radioButton1;
 
-    protected String[] columnToolTips = {null,
+    protected String[] columnToolTips = {
             "Id hasła, pod tym numerem jest ono dostępne w bazie danych.",
             "Tytuł hasła.",
-            "Ile dabe hasło ma różnych wersji.",
-            "Aktualna wersja hasła.",
-            "Autorzy danego hasła.",
-            "Czy dane hasło jest sygnowane",
+
             "Tagi hasła (najedź aby wyświetlić nazwy)"
     };
 
@@ -212,6 +215,14 @@ public class ApplicationFrame extends JFrame {
 
     public JButton getManageTermVersionsButton() {
         return manageTermVersionsButton;
+    }
+
+    public List<TermTable> getListOfTermTable() {
+        return listOfTermTable;
+    }
+
+    public void setListOfTermTable(List<TermTable> listOfTermTable) {
+        this.listOfTermTable = listOfTermTable;
     }
 
     public void setManageTermVersionsButton(JButton manageTermVersionsButton) {
@@ -1263,6 +1274,7 @@ public class ApplicationFrame extends JFrame {
     public ApplicationFrame() {
 
 
+        $$$setupUI$$$();
         setSize(WIDTH, HEIGHT);
         setContentPane(mainPanel);
         setLocationRelativeTo(null);
@@ -1311,7 +1323,139 @@ public class ApplicationFrame extends JFrame {
         tableColumnModelTags.getColumn(2).setPreferredWidth(250);
 
         authorsMenageTable = new JTable(new AuthorTableModel(authorHeaders1,0)){};
-        termsTable = new JTable(new TermTableModel(headers,0)){
+        termsTable = new JTable(new ObjectTableModel<TermTable>() {
+            @Override
+            public Class<?> getColumnClass(int columnIndex) {
+                switch (columnIndex){
+                    case 0:
+                        // case 1:
+
+                        // case 3:
+                        // case 4:
+                        return Long.class;
+                    // case 2:
+                    case 1:
+
+
+                        return String.class;
+                    // case 6:
+                    // return Boolean.class;
+                    case 2:
+                        return Icon.class;//getValueAt(0,columnIndex).getClass();
+                    default:
+                        return JLabel.class;
+                }
+            }
+
+            @Override
+            public Object getValueAt(TermTable termTable, int columnIndex) {
+                switch (columnIndex) {
+                    case 0:
+                        return termTable.getId();
+                    case 1:
+                        return termTable.getTitle();
+                    case 2:
+                        return termTable.getTags();
+                   /* case 3:
+                        return termTable.getVersionCount();
+                    case 4:
+                        return termTable.getActualVersion();
+                    case 5:
+                        return termTable.getAuthors();
+                    case 6:
+                        return termTable.getSigned();
+                    case 7:*/
+
+
+                }
+                return null;
+            }
+
+            @Override
+            public int getColumnCount() {
+                return 3;
+            }
+            @Override
+            public boolean isCellEditable(int row, int column){
+                return false;
+            }
+            @Override
+            public String getColumnName(int column) {
+                switch (column) {
+                    case 0:
+                        return "Id";
+               /* case 1:
+                return "Id";*/
+                    case 1:
+                        return "Tytuł";
+           /* case 3:
+                return "Ilość wersji";
+            case 4:
+                return "Aktualna wersja";
+                case 5:
+                return "Autorzy";
+                case 6:
+                return "Podpis";*/
+                    case 2:
+                        return "Tagi hasła";
+
+                }
+                return null;
+            }
+
+        })
+        {
+            public String getToolTipText(MouseEvent e) {
+                String tip = null;
+                Point p = e.getPoint();
+                Integer rowIndex = rowAtPoint(p);
+                int colIndex = columnAtPoint(p);
+                int realColumnIndex = convertColumnIndexToModel(colIndex);
+
+                if (realColumnIndex == 2) {
+                   // Long rowToCastl =  (Long)getValueAt(rowIndex,0);
+                    /*mainPanel
+                    List<TermTable> termTableList = ApplicationFrameController.list.stream()
+                            .filter(item->item.getId().equals((Long)getValueAt(rowIndex,0)))
+                            .collect(Collectors.toList());*/
+                    TermTable thisTermTable = new TermTable();
+                    for (TermTable termTable: listOfTermTable
+                         ) {
+                        if(termTable.getId().equals(((Long)getValueAt(rowIndex,0)))){
+                            thisTermTable=termTable;
+                        }
+                    }
+                   //TermTable tt = (TermTable)termTableList.getItem(0);
+                    Long rowToCastl =  thisTermTable.getLp();
+                    int rowToCast =  rowToCastl.intValue();
+
+
+                    //int convertedValue = Math.toIntExact(rowToCast);
+                    tip = "Tagi dla hasła '" + getValueAt(rowIndex, colIndex -1 )
+                            + "' to : "
+                            + tagsStrings.get(rowToCast-1);
+
+                }
+
+                return tip;
+            }
+            protected JTableHeader createDefaultTableHeader() {
+                return new JTableHeader(columnModel) {
+                    public String getToolTipText(MouseEvent e) {
+                        String tip = null;
+                        Point p = e.getPoint();
+                        int index = columnModel.getColumnIndexAtX(p.x);
+                        int realIndex = columnModel.getColumn(index).getModelIndex();
+                        return columnToolTips[realIndex];
+                    }
+                };
+            }
+        };
+
+
+
+
+       /* termsTable = new JTable(new TermTableModel(headers,0)){
 
 
             public Component prepareRenderer(
@@ -1360,12 +1504,30 @@ public class ApplicationFrame extends JFrame {
                     }
                 };
             }
-        };
-        TermTableModel defaultTableModel = (TermTableModel) termsTable.getModel();
-        DefaultTableModel tm= (DefaultTableModel) termsTable.getModel();
-        tm.setColumnIdentifiers(headersStr);
-        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<DefaultTableModel>((DefaultTableModel) termsTable.getModel());
-        termsTable.setRowSorter(sorter);
+        };*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        //DefaultTableModel tm= (DefaultTableModel) termsTable.getModel();
+        //tm.setColumnIdentifiers(headersStr);
+       // TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<DefaultTableModel>((DefaultTableModel) termsTable.getModel());
+        //termsTable.setRowSorter(sorter);
         TableColumnModel tableModel= termsTable.getColumnModel();
 
         //Width of termsTable
@@ -1387,10 +1549,10 @@ public class ApplicationFrame extends JFrame {
         tableModel.getColumn(5).setPreferredWidth(145);
         tableModel.getColumn(6).setPreferredWidth(25);*/
        // tableModel.getColumn(7).setPreferredWidth(30);
-        tableModel.getColumn(0).setCellRenderer(centerRenderer);
-        tableModel.getColumn(1).setCellRenderer(centerRenderer);
-        tableModel.getColumn(3).setCellRenderer(centerRenderer);
-        tableModel.getColumn(4).setCellRenderer(centerRenderer);
+       // tableModel.getColumn(0).setCellRenderer(centerRenderer);
+        //tableModel.getColumn(1).setCellRenderer(centerRenderer);
+        //tableModel.getColumn(3).setCellRenderer(centerRenderer);
+       // tableModel.getColumn(4).setCellRenderer(centerRenderer);
         //tableModel.getColumn(7).setCellRenderer(leftRenderer);
         /*List<RowSorter.SortKey> sortKeys = new ArrayList<>(25);
         sortKeys.add(new RowSorter.SortKey(4, SortOrder.ASCENDING));
@@ -1429,6 +1591,838 @@ public class ApplicationFrame extends JFrame {
 
     }
 
+
+    /**
+     * Method generated by IntelliJ IDEA GUI Designer
+     * >>> IMPORTANT!! <<<
+     * DO NOT edit this method OR call it in your code!
+     *
+     * @noinspection ALL
+     */
+    private void $$$setupUI$$$() {
+        createUIComponents();
+        mainPanel = new JPanel();
+        mainPanel.setLayout(new BorderLayout(0, 0));
+        mainPanel.setBackground(new Color(-3947581));
+        mainPanel.setMaximumSize(new Dimension(1280, 800));
+        mainPanel.setOpaque(false);
+        mainPanel.setPreferredSize(new Dimension(1280, 800));
+        topPanel = new JPanel();
+        topPanel.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+        topPanel.setBackground(new Color(-14802385));
+        topPanel.setMaximumSize(new Dimension(1280, 30));
+        topPanel.setMinimumSize(new Dimension(1280, 30));
+        topPanel.setOpaque(true);
+        topPanel.setPreferredSize(new Dimension(1280, 30));
+        mainPanel.add(topPanel, BorderLayout.NORTH);
+        leftPanel = new JPanel();
+        leftPanel.setLayout(new GridLayoutManager(3, 1, new Insets(0, 5, 0, 0), 0, 0));
+        leftPanel.setBackground(new Color(-14802385));
+        leftPanel.setMaximumSize(new Dimension(130, 2147483647));
+        leftPanel.setMinimumSize(new Dimension(130, 770));
+        leftPanel.setOpaque(true);
+        mainPanel.add(leftPanel, BorderLayout.WEST);
+        leftTopPanel = new JPanel();
+        leftTopPanel.setLayout(new GridLayoutManager(1, 1, new Insets(20, 5, 0, 5), -1, -1));
+        leftTopPanel.setOpaque(false);
+        leftPanel.add(leftTopPanel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, new Dimension(-1, 200), null, null, 0, false));
+        iconLabel = new JLabel();
+        iconLabel.setHorizontalAlignment(0);
+        iconLabel.setIcon(new ImageIcon(getClass().getResource("/img/logo-bk min.png")));
+        iconLabel.setText("");
+        leftTopPanel.add(iconLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_NORTHWEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        leftMiddlePanel = new JPanel();
+        leftMiddlePanel.setLayout(new GridLayoutManager(3, 1, new Insets(0, 0, 0, 0), -1, -1));
+        leftMiddlePanel.setOpaque(false);
+        leftPanel.add(leftMiddlePanel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_GROW, new Dimension(-1, 500), new Dimension(-1, 500), new Dimension(-1, 500), 0, false));
+        final JLabel label1 = new JLabel();
+        Font label1Font = this.$$$getFont$$$("Arial Black", Font.BOLD, 14, label1.getFont());
+        if (label1Font != null) label1.setFont(label1Font);
+        label1.setForeground(new Color(-2829100));
+        label1.setText("Lista modułów:");
+        leftMiddlePanel.add(label1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, new Dimension(130, -1), null, null, 0, false));
+        list1 = new JList();
+        list1.setBackground(new Color(-14802385));
+        Font list1Font = this.$$$getFont$$$("Arial Black", Font.BOLD, 12, list1.getFont());
+        if (list1Font != null) list1.setFont(list1Font);
+        list1.setForeground(new Color(-3947581));
+        final DefaultListModel defaultListModel1 = new DefaultListModel();
+        defaultListModel1.addElement("Hasła");
+        defaultListModel1.addElement("Autorzy");
+        defaultListModel1.addElement("Ustawienia");
+        list1.setModel(defaultListModel1);
+        list1.setOpaque(false);
+        list1.setSelectionMode(0);
+        list1.setVisibleRowCount(5);
+        list1.putClientProperty("List.isFileList", Boolean.FALSE);
+        leftMiddlePanel.add(list1, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_WANT_GROW, new Dimension(130, -1), new Dimension(80, 50), new Dimension(80, -1), 0, false));
+        final Spacer spacer1 = new Spacer();
+        leftMiddlePanel.add(spacer1, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, new Dimension(-1, 400), new Dimension(-1, 400), new Dimension(-1, 400), 0, false));
+        leftBottomPanel = new JPanel();
+        leftBottomPanel.setLayout(new GridLayoutManager(4, 1, new Insets(0, 25, 15, 0), -1, -1));
+        leftBottomPanel.setOpaque(false);
+        leftPanel.add(leftBottomPanel, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, new Dimension(-1, 70), new Dimension(-1, 70), null, 0, false));
+        final Spacer spacer2 = new Spacer();
+        leftBottomPanel.add(spacer2, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, new Dimension(-1, 15), null, null, 0, false));
+        exitLabel = new JLabel();
+        exitLabel.setBackground(new Color(-1247233));
+        Font exitLabelFont = this.$$$getFont$$$("Arial Black", Font.BOLD, 12, exitLabel.getFont());
+        if (exitLabelFont != null) exitLabel.setFont(exitLabelFont);
+        exitLabel.setForeground(new Color(-3947581));
+        exitLabel.setText("Zamknij ");
+        leftBottomPanel.add(exitLabel, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        logoutLabel = new JLabel();
+        logoutLabel.setBackground(new Color(-1247233));
+        Font logoutLabelFont = this.$$$getFont$$$("Arial Black", Font.BOLD, 12, logoutLabel.getFont());
+        if (logoutLabelFont != null) logoutLabel.setFont(logoutLabelFont);
+        logoutLabel.setForeground(new Color(-3947581));
+        logoutLabel.setText("Wyloguj");
+        leftBottomPanel.add(logoutLabel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_SOUTHWEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final Spacer spacer3 = new Spacer();
+        leftBottomPanel.add(spacer3, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, new Dimension(-1, 10), null, new Dimension(-1, 10), 0, false));
+        containerContentPanel = new JPanel();
+        containerContentPanel.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), 0, 0));
+        containerContentPanel.setMaximumSize(new Dimension(1150, 770));
+        containerContentPanel.setMinimumSize(new Dimension(1150, 770));
+        containerContentPanel.setOpaque(false);
+        containerContentPanel.setPreferredSize(new Dimension(1150, 770));
+        mainPanel.add(containerContentPanel, BorderLayout.CENTER);
+        topContentPanel = new JPanel();
+        topContentPanel.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+        topContentPanel.setBackground(new Color(-12748334));
+        topContentPanel.setOpaque(true);
+        containerContentPanel.add(topContentPanel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, new Dimension(-1, 70), new Dimension(-1, 70), new Dimension(-1, 70), 0, false));
+        bottomContainerContentPanel = new JPanel();
+        bottomContainerContentPanel.setLayout(new GridLayoutManager(3, 2, new Insets(0, 0, 0, 0), 0, 0));
+        bottomContainerContentPanel.setOpaque(false);
+        containerContentPanel.add(bottomContainerContentPanel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        leftContainerPropertiesPanel = new JPanel();
+        leftContainerPropertiesPanel.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
+        leftContainerPropertiesPanel.setOpaque(true);
+        bottomContainerContentPanel.add(leftContainerPropertiesPanel, new GridConstraints(0, 0, 3, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, new Dimension(250, 700), new Dimension(250, 700), new Dimension(250, 700), 0, false));
+        topPropertiesPanel = new JPanel();
+        topPropertiesPanel.setLayout(new GridLayoutManager(1, 1, new Insets(0, 10, 0, 0), -1, -1));
+        topPropertiesPanel.setBackground(new Color(-9589762));
+        topPropertiesPanel.setOpaque(true);
+        leftContainerPropertiesPanel.add(topPropertiesPanel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, new Dimension(250, 200), new Dimension(250, 200), new Dimension(250, 200), 0, false));
+        loggedUserLabel = new JLabel();
+        loggedUserLabel.setText("");
+        topPropertiesPanel.add(loggedUserLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        bottomPropertiesPanel = new JPanel();
+        bottomPropertiesPanel.setLayout(new CardLayout(0, 0));
+        bottomPropertiesPanel.setBackground(new Color(-12748334));
+        bottomPropertiesPanel.setOpaque(true);
+        leftContainerPropertiesPanel.add(bottomPropertiesPanel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, new Dimension(250, 500), new Dimension(250, 500), new Dimension(250, 500), 0, false));
+        bottomPropertiesTermsPanel = new JPanel();
+        bottomPropertiesTermsPanel.setLayout(new GridLayoutManager(13, 1, new Insets(15, 5, 225, 5), 5, 5));
+        bottomPropertiesTermsPanel.setBackground(new Color(-12748334));
+        bottomPropertiesTermsPanel.setName("bottomPropertiesTermsPanel");
+        bottomPropertiesTermsPanel.setOpaque(true);
+        bottomPropertiesPanel.add(bottomPropertiesTermsPanel, "bottomPropertiesTermsPanel");
+        final JLabel label2 = new JLabel();
+        Font label2Font = this.$$$getFont$$$("Arial Black", Font.BOLD, 11, label2.getFont());
+        if (label2Font != null) label2.setFont(label2Font);
+        label2.setText("Hasła:");
+        bottomPropertiesTermsPanel.add(label2, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        TermsList = new JList();
+        TermsList.setBackground(new Color(-12748334));
+        final DefaultListModel defaultListModel2 = new DefaultListModel();
+        defaultListModel2.addElement("Pokaż wszystkie");
+        defaultListModel2.addElement("Pokaż według filtrów");
+        defaultListModel2.addElement("Nowe hasło");
+        TermsList.setModel(defaultListModel2);
+        TermsList.setOpaque(false);
+        TermsList.setSelectionMode(0);
+        bottomPropertiesTermsPanel.add(TermsList, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, 50), null, 0, false));
+        searchButton = new JButton();
+        searchButton.setOpaque(true);
+        searchButton.setText("Szukaj");
+        searchButton.setVisible(false);
+        bottomPropertiesTermsPanel.add(searchButton, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final Spacer spacer4 = new Spacer();
+        bottomPropertiesTermsPanel.add(spacer4, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        editCheckBox = new JCheckBox();
+        editCheckBox.setOpaque(false);
+        editCheckBox.setText("Edytować");
+        editCheckBox.setVisible(false);
+        bottomPropertiesTermsPanel.add(editCheckBox, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        addTermButton = new JButton();
+        addTermButton.setText("Dodaj hasło");
+        addTermButton.setVisible(false);
+        bottomPropertiesTermsPanel.add(addTermButton, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        getStatusesForSubcategoryButton = new JButton();
+        getStatusesForSubcategoryButton.setActionCommand("");
+        getStatusesForSubcategoryButton.setLabel("Pobierz statusy dla podkategorii");
+        getStatusesForSubcategoryButton.setText("Pobierz statusy dla podkategorii");
+        getStatusesForSubcategoryButton.setVisible(false);
+        bottomPropertiesTermsPanel.add(getStatusesForSubcategoryButton, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        updateTermButton = new JButton();
+        updateTermButton.setText("Aktualizuj hasło");
+        updateTermButton.setVisible(false);
+        bottomPropertiesTermsPanel.add(updateTermButton, new GridConstraints(7, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        sendTermToNextStepButton = new JButton();
+        sendTermToNextStepButton.setText("Prześlij hasło na następny krok");
+        sendTermToNextStepButton.setVisible(false);
+        bottomPropertiesTermsPanel.add(sendTermToNextStepButton, new GridConstraints(8, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        manageTermStatusesButton = new JButton();
+        manageTermStatusesButton.setText("Zarządzaj statusami hasła");
+        manageTermStatusesButton.setVisible(false);
+        bottomPropertiesTermsPanel.add(manageTermStatusesButton, new GridConstraints(9, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        manageTermVersionsButton = new JButton();
+        manageTermVersionsButton.setText("Zarządzaj wersjami hasła");
+        manageTermVersionsButton.setVisible(false);
+        bottomPropertiesTermsPanel.add(manageTermVersionsButton, new GridConstraints(10, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        redirectTermToIndicatedAuthorButton = new JButton();
+        redirectTermToIndicatedAuthorButton.setText("Przekaż hasło do wksazanego autora");
+        redirectTermToIndicatedAuthorButton.setVisible(false);
+        bottomPropertiesTermsPanel.add(redirectTermToIndicatedAuthorButton, new GridConstraints(12, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        manageTermReferenceButton = new JButton();
+        manageTermReferenceButton.setText("Przekaż hasło do wksazanego autora");
+        manageTermReferenceButton.setVisible(false);
+        bottomPropertiesTermsPanel.add(manageTermReferenceButton, new GridConstraints(11, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 1, false));
+        bottomPropertiesAuthorsPanel = new JPanel();
+        bottomPropertiesAuthorsPanel.setLayout(new GridLayoutManager(6, 1, new Insets(15, 5, 225, 5), -1, -1));
+        bottomPropertiesAuthorsPanel.setBackground(new Color(-15680741));
+        bottomPropertiesAuthorsPanel.setName("bottomPropertiesAuthorsPanel");
+        bottomPropertiesAuthorsPanel.setOpaque(false);
+        bottomPropertiesPanel.add(bottomPropertiesAuthorsPanel, "bottomPropertiesAuthorsPanel");
+        authorsList = new JList();
+        authorsList.setBackground(new Color(-12748334));
+        authorsList.setDoubleBuffered(true);
+        final DefaultListModel defaultListModel3 = new DefaultListModel();
+        defaultListModel3.addElement("Zarządzanie autorami");
+        defaultListModel3.addElement("-");
+        authorsList.setModel(defaultListModel3);
+        authorsList.setOpaque(false);
+        bottomPropertiesAuthorsPanel.add(authorsList, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(150, 50), null, 0, false));
+        final Spacer spacer5 = new Spacer();
+        bottomPropertiesAuthorsPanel.add(spacer5, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        addAuthorButton = new JButton();
+        addAuthorButton.setText("Dodaj autora");
+        addAuthorButton.setVisible(false);
+        bottomPropertiesAuthorsPanel.add(addAuthorButton, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        updateAuthorButton = new JButton();
+        updateAuthorButton.setText("Aktualizuj autora");
+        updateAuthorButton.setVisible(false);
+        bottomPropertiesAuthorsPanel.add(updateAuthorButton, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        deleteAuthorButton = new JButton();
+        deleteAuthorButton.setText("Usuń autora");
+        deleteAuthorButton.setVisible(false);
+        bottomPropertiesAuthorsPanel.add(deleteAuthorButton, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label3 = new JLabel();
+        Font label3Font = this.$$$getFont$$$("Arial Black", Font.BOLD, 11, label3.getFont());
+        if (label3Font != null) label3.setFont(label3Font);
+        label3.setText("Autorzy:");
+        bottomPropertiesAuthorsPanel.add(label3, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        bottomPropertiesBlankPanel = new JPanel();
+        bottomPropertiesBlankPanel.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+        bottomPropertiesBlankPanel.setName("bottomPropertiesBlankPanel");
+        bottomPropertiesBlankPanel.setOpaque(false);
+        bottomPropertiesPanel.add(bottomPropertiesBlankPanel, "bottomPropertiesBlankPanel");
+        bottomPropertiesAgreementsPanel = new JPanel();
+        bottomPropertiesAgreementsPanel.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+        bottomPropertiesAgreementsPanel.setBackground(new Color(-4513357));
+        bottomPropertiesAgreementsPanel.setName("bottomPropertiesAgreementsPanel");
+        bottomPropertiesAgreementsPanel.setOpaque(true);
+        bottomPropertiesPanel.add(bottomPropertiesAgreementsPanel, "bottomPropertiesAgreementsPanel");
+        bottomPropertiesIllustrationsPanel = new JPanel();
+        bottomPropertiesIllustrationsPanel.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+        bottomPropertiesIllustrationsPanel.setBackground(new Color(-4539636));
+        bottomPropertiesIllustrationsPanel.setName("bottomPropertiesIllustrationsPanel");
+        bottomPropertiesPanel.add(bottomPropertiesIllustrationsPanel, "bottomPropertiesIllustrationsPanel");
+        bottomPropertiesSettingsPanel = new JPanel();
+        bottomPropertiesSettingsPanel.setLayout(new GridLayoutManager(3, 1, new Insets(15, 5, 225, 5), -1, -1));
+        bottomPropertiesSettingsPanel.setBackground(new Color(-4494843));
+        bottomPropertiesSettingsPanel.setName("bottomPropertiesSettingsPanel");
+        bottomPropertiesSettingsPanel.setOpaque(false);
+        bottomPropertiesPanel.add(bottomPropertiesSettingsPanel, "bottomPropertiesSettingsPanel");
+        final JLabel label4 = new JLabel();
+        Font label4Font = this.$$$getFont$$$("Arial Black", Font.BOLD, 11, label4.getFont());
+        if (label4Font != null) label4.setFont(label4Font);
+        label4.setText("Ustawienia:");
+        bottomPropertiesSettingsPanel.add(label4, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final Spacer spacer6 = new Spacer();
+        bottomPropertiesSettingsPanel.add(spacer6, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        settingsList = new JList();
+        settingsList.setBackground(new Color(-12748334));
+        final DefaultListModel defaultListModel4 = new DefaultListModel();
+        defaultListModel4.addElement("Podkategorie");
+        defaultListModel4.addElement("Tagi");
+        defaultListModel4.addElement("Użytkownicy");
+        settingsList.setModel(defaultListModel4);
+        settingsList.setOpaque(false);
+        settingsList.setSelectionMode(0);
+        bottomPropertiesSettingsPanel.add(settingsList, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, 50), null, 1, false));
+        rightContainerDetailsPanel = new JPanel();
+        rightContainerDetailsPanel.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
+        rightContainerDetailsPanel.setOpaque(true);
+        bottomContainerContentPanel.add(rightContainerDetailsPanel, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, new Dimension(900, 700), new Dimension(900, 700), new Dimension(900, 700), 0, false));
+        topDetailsPanel = new JPanel();
+        topDetailsPanel.setLayout(new CardLayout(0, 0));
+        topDetailsPanel.setBackground(new Color(-2829100));
+        topDetailsPanel.setName("topDetailsPanel");
+        topDetailsPanel.setOpaque(true);
+        rightContainerDetailsPanel.add(topDetailsPanel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, new Dimension(900, 200), new Dimension(900, -1), new Dimension(900, -1), 0, false));
+        topDetailsPanelBlank = new JPanel();
+        topDetailsPanelBlank.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+        topDetailsPanelBlank.setName("topDetailsPanelBlank");
+        topDetailsPanel.add(topDetailsPanelBlank, "topDetailsPanelBlank");
+        final Spacer spacer7 = new Spacer();
+        topDetailsPanelBlank.add(spacer7, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        topDetailsPanelFilters = new JPanel();
+        topDetailsPanelFilters.setLayout(new GridLayoutManager(1, 4, new Insets(0, 0, 0, 0), -1, -1));
+        topDetailsPanelFilters.setMaximumSize(new Dimension(900, 2147483647));
+        topDetailsPanelFilters.setMinimumSize(new Dimension(900, 58));
+        topDetailsPanelFilters.setName("topDetailsPanelFilters");
+        topDetailsPanelFilters.setPreferredSize(new Dimension(900, 156));
+        topDetailsPanel.add(topDetailsPanelFilters, "topDetailsPanelFilters");
+        GroupJPanel = new JPanel();
+        GroupJPanel.setLayout(new GridLayoutManager(2, 1, new Insets(5, 5, 5, 5), -1, -1));
+        GroupJPanel.setName("GroupJPanel");
+        topDetailsPanelFilters.add(GroupJPanel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, new Dimension(210, -1), new Dimension(210, -1), new Dimension(210, -1), 0, false));
+        final JLabel label5 = new JLabel();
+        label5.setText("Kategorie");
+        GroupJPanel.add(label5, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JScrollPane scrollPane3 = new JScrollPane();
+        GroupJPanel.add(scrollPane3, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        final DefaultListModel defaultListModel5 = new DefaultListModel();
+        categoryJList.setModel(defaultListModel5);
+        scrollPane3.setViewportView(categoryJList);
+        SubGroupJPanel = new JPanel();
+        SubGroupJPanel.setLayout(new GridLayoutManager(2, 1, new Insets(5, 5, 5, 5), -1, -1));
+        topDetailsPanelFilters.add(SubGroupJPanel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, new Dimension(210, -1), new Dimension(210, -1), new Dimension(210, -1), 0, false));
+        final JLabel label6 = new JLabel();
+        label6.setText("Podkategorie");
+        SubGroupJPanel.add(label6, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JScrollPane scrollPane4 = new JScrollPane();
+        SubGroupJPanel.add(scrollPane4, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        scrollPane4.setViewportView(subcategoryJList);
+        TagsJPanel = new JPanel();
+        TagsJPanel.setLayout(new GridLayoutManager(2, 1, new Insets(5, 5, 5, 5), -1, -1));
+        topDetailsPanelFilters.add(TagsJPanel, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, new Dimension(210, -1), new Dimension(210, -1), new Dimension(210, -1), 0, false));
+        final JLabel label7 = new JLabel();
+        label7.setText("Tagi");
+        TagsJPanel.add(label7, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JScrollPane scrollPane5 = new JScrollPane();
+        TagsJPanel.add(scrollPane5, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        scrollPane5.setViewportView(tagsJList);
+        StatusJPanel = new JPanel();
+        StatusJPanel.setLayout(new GridLayoutManager(2, 1, new Insets(5, 5, 5, 25), -1, -1));
+        topDetailsPanelFilters.add(StatusJPanel, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, new Dimension(210, -1), new Dimension(210, -1), new Dimension(210, -1), 0, false));
+        final JLabel label8 = new JLabel();
+        label8.setText("Status");
+        StatusJPanel.add(label8, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JScrollPane scrollPane6 = new JScrollPane();
+        StatusJPanel.add(scrollPane6, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        scrollPane6.setViewportView(statusesJList);
+        topTermDetailsPanel = new JPanel();
+        topTermDetailsPanel.setLayout(new GridLayoutManager(1, 3, new Insets(5, 5, 5, 5), -1, -1));
+        topTermDetailsPanel.setMaximumSize(new Dimension(900, 200));
+        topTermDetailsPanel.setMinimumSize(new Dimension(900, 200));
+        topTermDetailsPanel.setName("topTermDetailsPanel");
+        topTermDetailsPanel.setOpaque(false);
+        topTermDetailsPanel.setPreferredSize(new Dimension(900, 200));
+        topDetailsPanel.add(topTermDetailsPanel, "topTermDetailsPanel");
+        final JPanel panel1 = new JPanel();
+        panel1.setLayout(new GridLayoutManager(2, 1, new Insets(5, 5, 5, 5), -1, -1));
+        panel1.setOpaque(false);
+        topTermDetailsPanel.add(panel1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        scrollAuthors.putClientProperty("html.disable", Boolean.FALSE);
+        panel1.add(scrollAuthors, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, new Dimension(400, 150), new Dimension(400, 150), new Dimension(400, 150), 0, false));
+        final JLabel label9 = new JLabel();
+        label9.setText("Autorzy");
+        panel1.add(label9, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JPanel panel2 = new JPanel();
+        panel2.setLayout(new GridLayoutManager(2, 2, new Insets(5, 5, 5, 5), -1, -1));
+        panel2.setOpaque(false);
+        topTermDetailsPanel.add(panel2, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        final JLabel label10 = new JLabel();
+        label10.setText("Tagi");
+        panel2.add(label10, new GridConstraints(0, 0, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel2.add(tagTermScroll, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, 1, 1, new Dimension(150, -1), new Dimension(150, -1), new Dimension(150, -1), 0, false));
+        final JPanel panel3 = new JPanel();
+        panel3.setLayout(new GridLayoutManager(2, 1, new Insets(5, 5, 5, 5), -1, -1));
+        panel3.setOpaque(false);
+        topTermDetailsPanel.add(panel3, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        final JLabel label11 = new JLabel();
+        label11.setText("Scieżka statusów hasła (zaznaczony aktualny etap)");
+        panel3.add(label11, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel3.add(scrollPane2, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        scrollPane2.setViewportView(statusesTermJList);
+        topDetailsTagsPanel = new JPanel();
+        topDetailsTagsPanel.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+        topDetailsTagsPanel.setName("topDetailsTagsPanel");
+        topDetailsPanel.add(topDetailsTagsPanel, "topDetailsTagsPanel");
+        bottomDetailsPanel = new JPanel();
+        bottomDetailsPanel.setLayout(new CardLayout(0, 0));
+        bottomDetailsPanel.setBackground(new Color(-3947581));
+        bottomDetailsPanel.setOpaque(true);
+        rightContainerDetailsPanel.add(bottomDetailsPanel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, new Dimension(500, 500), null, null, 0, false));
+        bottomDetailsTermsPanel = new JPanel();
+        bottomDetailsTermsPanel.setLayout(new GridLayoutManager(2, 1, new Insets(25, 25, 0, 25), -1, -1));
+        bottomDetailsTermsPanel.setBackground(new Color(-12511981));
+        bottomDetailsTermsPanel.setName("bottomDetailsTermsPanel");
+        bottomDetailsTermsPanel.setOpaque(false);
+        bottomDetailsTermsPanel.setVisible(true);
+        bottomDetailsPanel.add(bottomDetailsTermsPanel, "bottomDetailsTermsPanel");
+        termsTableScrollPane = new JScrollPane();
+        termsTableScrollPane.setAutoscrolls(true);
+        termsTableScrollPane.setOpaque(false);
+        termsTableScrollPane.setVerticalScrollBarPolicy(20);
+        termsTableScrollPane.setVisible(true);
+        bottomDetailsTermsPanel.add(termsTableScrollPane, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        termsTable.setBackground(new Color(-257));
+        termsTable.setCellSelectionEnabled(false);
+        termsTable.setOpaque(false);
+        termsTableScrollPane.setViewportView(termsTable);
+        final JPanel panel4 = new JPanel();
+        panel4.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+        panel4.setOpaque(false);
+        bottomDetailsTermsPanel.add(panel4, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, new Dimension(-1, 25), new Dimension(-1, 25), new Dimension(-1, 25), 0, false));
+        termsErrorLabel = new JLabel();
+        termsErrorLabel.setText("");
+        panel4.add(termsErrorLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        bottomDetailsBlankPanel = new JPanel();
+        bottomDetailsBlankPanel.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+        bottomDetailsBlankPanel.setBackground(new Color(-12631789));
+        bottomDetailsBlankPanel.setName("bottomDetailsBlankPanel");
+        bottomDetailsBlankPanel.setOpaque(false);
+        bottomDetailsBlankPanel.setVisible(false);
+        bottomDetailsPanel.add(bottomDetailsBlankPanel, "bottomDetailsBlankPanel");
+        final Spacer spacer8 = new Spacer();
+        bottomDetailsBlankPanel.add(spacer8, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        bottomDetailsAuthorsPanel = new JPanel();
+        bottomDetailsAuthorsPanel.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
+        bottomDetailsAuthorsPanel.setName("bottomDetailsAuthorsPanel");
+        bottomDetailsAuthorsPanel.setOpaque(false);
+        bottomDetailsPanel.add(bottomDetailsAuthorsPanel, "bottomDetailsAuthorsPanel");
+        final JPanel panel5 = new JPanel();
+        panel5.setLayout(new GridLayoutManager(3, 8, new Insets(10, 10, 10, 10), -1, -1));
+        panel5.setOpaque(false);
+        bottomDetailsAuthorsPanel.add(panel5, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        final JLabel label12 = new JLabel();
+        label12.setText("Imię: ");
+        panel5.add(label12, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        nameTextField = new JTextField();
+        panel5.add(nameTextField, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, new Dimension(150, -1), null, 0, false));
+        final JLabel label13 = new JLabel();
+        label13.setText("Nazwisko: ");
+        panel5.add(label13, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        surnameTextField = new JTextField();
+        panel5.add(surnameTextField, new GridConstraints(1, 3, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, new Dimension(150, -1), null, 0, false));
+        final JLabel label14 = new JLabel();
+        label14.setText("Podpis: ");
+        panel5.add(label14, new GridConstraints(1, 4, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 1, false));
+        signTextField = new JTextField();
+        panel5.add(signTextField, new GridConstraints(1, 5, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, new Dimension(150, -1), null, 0, false));
+        final JLabel label15 = new JLabel();
+        label15.setText("Email: ");
+        panel5.add(label15, new GridConstraints(1, 6, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        emailTextField = new JTextField();
+        panel5.add(emailTextField, new GridConstraints(1, 7, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, new Dimension(150, -1), null, 0, false));
+        authorsIdLabel = new JLabel();
+        authorsIdLabel.setText("ID:");
+        panel5.add(authorsIdLabel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JPanel panel6 = new JPanel();
+        panel6.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+        panel6.setOpaque(false);
+        panel5.add(panel6, new GridConstraints(2, 0, 1, 8, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        authorPanelErrorLabel = new JLabel();
+        authorPanelErrorLabel.setText("");
+        panel6.add(authorPanelErrorLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_SOUTHEAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JPanel panel7 = new JPanel();
+        panel7.setLayout(new GridLayoutManager(1, 1, new Insets(10, 10, 60, 20), -1, -1));
+        panel7.setOpaque(false);
+        bottomDetailsAuthorsPanel.add(panel7, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, new Dimension(-1, 400), new Dimension(-1, 400), new Dimension(-1, 400), 0, false));
+        final JScrollPane scrollPane7 = new JScrollPane();
+        panel7.add(scrollPane7, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        authorsMenageTable.setOpaque(false);
+        authorsMenageTable.setPreferredScrollableViewportSize(new Dimension(450, 400));
+        scrollPane7.setViewportView(authorsMenageTable);
+        bottomDetailsTagsPanel = new JPanel();
+        bottomDetailsTagsPanel.setLayout(new GridLayoutManager(1, 2, new Insets(25, 25, 25, 25), -1, -1));
+        bottomDetailsTagsPanel.setName("bottomDetailsTagsPanel");
+        bottomDetailsTagsPanel.setOpaque(false);
+        bottomDetailsPanel.add(bottomDetailsTagsPanel, "bottomDetailsTagsPanel");
+        final JPanel panel8 = new JPanel();
+        panel8.setLayout(new GridLayoutManager(9, 2, new Insets(5, 5, 5, 5), -1, -1));
+        panel8.setOpaque(false);
+        bottomDetailsTagsPanel.add(panel8, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, new Dimension(410, -1), new Dimension(410, -1), new Dimension(410, -1), 1, false));
+        addTagButton = new JButton();
+        addTagButton.setText("Dodaj tag");
+        panel8.add(addTagButton, new GridConstraints(3, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        deleteTagButton = new JButton();
+        deleteTagButton.setText("Usuń tag");
+        panel8.add(deleteTagButton, new GridConstraints(5, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JPanel panel9 = new JPanel();
+        panel9.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
+        panel8.add(panel9, new GridConstraints(2, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        choseTagColorButton = new JButton();
+        choseTagColorButton.setText("Wybierz kolor");
+        panel9.add(choseTagColorButton, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        tagIconLabel = new JLabel();
+        tagIconLabel.setText("");
+        panel9.add(tagIconLabel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        tagsNameField = new JTextField();
+        tagsNameField.setText("");
+        panel8.add(tagsNameField, new GridConstraints(1, 0, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        final JScrollPane scrollPane8 = new JScrollPane();
+        panel8.add(scrollPane8, new GridConstraints(7, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        final DefaultListModel defaultListModel6 = new DefaultListModel();
+        list5.setModel(defaultListModel6);
+        list5.setOpaque(true);
+        scrollPane8.setViewportView(list5);
+        final JLabel label16 = new JLabel();
+        label16.setText("Tagi:");
+        panel8.add(label16, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final Spacer spacer9 = new Spacer();
+        panel8.add(spacer9, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_FIXED, new Dimension(-1, 10), new Dimension(-1, 10), new Dimension(-1, 10), 0, false));
+        updateTagButton = new JButton();
+        updateTagButton.setAlignmentY(0.5f);
+        updateTagButton.setText("Aktualizuj tag");
+        panel8.add(updateTagButton, new GridConstraints(4, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        tagsSettingsErrorLabel = new JLabel();
+        tagsSettingsErrorLabel.setText("");
+        panel8.add(tagsSettingsErrorLabel, new GridConstraints(8, 0, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JPanel panel10 = new JPanel();
+        panel10.setLayout(new GridLayoutManager(3, 1, new Insets(5, 5, 5, 5), -1, -1));
+        panel10.setOpaque(false);
+        bottomDetailsTagsPanel.add(panel10, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, new Dimension(410, -1), new Dimension(410, -1), new Dimension(410, -1), 0, false));
+        final JScrollPane scrollPane9 = new JScrollPane();
+        panel10.add(scrollPane9, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        termsTagsTable.setOpaque(false);
+        scrollPane9.setViewportView(termsTagsTable);
+        final JLabel label17 = new JLabel();
+        label17.setText("Hasła oznaczone tagiem:");
+        panel10.add(label17, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        saveTermsToTagButton = new JButton();
+        saveTermsToTagButton.setText("Zapisz hasła do tagów");
+        panel10.add(saveTermsToTagButton, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        bottomDetailsSettingsPanel = new JPanel();
+        bottomDetailsSettingsPanel.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
+        bottomDetailsSettingsPanel.setMaximumSize(new Dimension(900, 525));
+        bottomDetailsSettingsPanel.setMinimumSize(new Dimension(900, 525));
+        bottomDetailsSettingsPanel.setName("bottomDetailsSettingsPanel");
+        bottomDetailsSettingsPanel.setOpaque(false);
+        bottomDetailsSettingsPanel.setPreferredSize(new Dimension(900, 525));
+        bottomDetailsPanel.add(bottomDetailsSettingsPanel, "bottomDetailsSettingsPanel");
+        final JPanel panel11 = new JPanel();
+        panel11.setLayout(new GridLayoutManager(1, 4, new Insets(0, 0, 0, 0), -1, -1));
+        panel11.setOpaque(false);
+        bottomDetailsSettingsPanel.add(panel11, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, new Dimension(900, 400), new Dimension(900, 400), new Dimension(900, 400), 0, false));
+        right = new JPanel();
+        right.setLayout(new GridLayoutManager(3, 1, new Insets(5, 5, 5, 10), 5, 5));
+        right.setOpaque(false);
+        panel11.add(right, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, new Dimension(250, 500), new Dimension(250, 500), new Dimension(250, 500), 0, true));
+        final JLabel label18 = new JLabel();
+        label18.setText("Wybrane statusy:");
+        right.add(label18, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        saveSubcategoryStatuses = new JButton();
+        saveSubcategoryStatuses.setText("Zapisz statusy dla kategorii");
+        right.add(saveSubcategoryStatuses, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JScrollPane scrollPane10 = new JScrollPane();
+        right.add(scrollPane10, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        list4.setMaximumSize(new Dimension(-1, -1));
+        list4.setMinimumSize(new Dimension(-1, -1));
+        final DefaultListModel defaultListModel7 = new DefaultListModel();
+        list4.setModel(defaultListModel7);
+        list4.setOpaque(true);
+        list4.setPreferredSize(new Dimension(-1, -1));
+        scrollPane10.setViewportView(list4);
+        left = new JPanel();
+        left.setLayout(new GridLayoutManager(6, 1, new Insets(0, 0, 0, 0), 3, 3));
+        left.setOpaque(false);
+        panel11.add(left, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, new Dimension(370, 500), new Dimension(370, 500), new Dimension(370, 500), 0, true));
+        final JLabel label19 = new JLabel();
+        label19.setName("");
+        label19.setText("Podkategoria ");
+        left.add(label19, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        addSubcategoryButton = new JButton();
+        addSubcategoryButton.setText("Dodaj");
+        left.add(addSubcategoryButton, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, new Dimension(290, -1), new Dimension(290, -1), new Dimension(290, -1), 0, false));
+        SubcategoryTextField = new JTextField();
+        SubcategoryTextField.setText("");
+        left.add(SubcategoryTextField, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, new Dimension(290, -1), new Dimension(290, -1), new Dimension(290, -1), 0, false));
+        final Spacer spacer10 = new Spacer();
+        left.add(spacer10, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, new Dimension(-1, 100), 0, false));
+        deleteSubcategoryButton = new JButton();
+        deleteSubcategoryButton.setText("Usuń");
+        left.add(deleteSubcategoryButton, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, new Dimension(290, -1), new Dimension(290, -1), new Dimension(290, -1), 0, false));
+        final JScrollPane scrollPane11 = new JScrollPane();
+        left.add(scrollPane11, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        scrollPane11.setViewportView(list2);
+        leftCenter = new JPanel();
+        leftCenter.setLayout(new GridLayoutManager(2, 1, new Insets(5, 5, 5, 5), 5, 5));
+        leftCenter.setOpaque(false);
+        panel11.add(leftCenter, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, new Dimension(250, 500), new Dimension(250, 500), new Dimension(370, 500), 0, true));
+        final JLabel label20 = new JLabel();
+        label20.setText("Dostępne statusy:");
+        leftCenter.add(label20, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JScrollPane scrollPane12 = new JScrollPane();
+        leftCenter.add(scrollPane12, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        list3.setMaximumSize(new Dimension(-1, -1));
+        list3.setMinimumSize(new Dimension(-1, -1));
+        final DefaultListModel defaultListModel8 = new DefaultListModel();
+        list3.setModel(defaultListModel8);
+        list3.setOpaque(true);
+        list3.setPreferredSize(new Dimension(-1, -1));
+        scrollPane12.setViewportView(list3);
+        rightCenter = new JPanel();
+        rightCenter.setLayout(new GridLayoutManager(6, 1, new Insets(0, 0, 0, 0), -1, -1));
+        rightCenter.setOpaque(false);
+        panel11.add(rightCenter, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, new Dimension(30, -1), new Dimension(30, -1), new Dimension(30, -1), 0, false));
+        upButton = new JButton();
+        upButton.setActionCommand("");
+        upButton.setIcon(new ImageIcon(getClass().getResource("/img/arrows/up.png")));
+        upButton.setText("");
+        rightCenter.add(upButton, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, new Dimension(30, 30), new Dimension(30, 30), new Dimension(30, 30), 0, false));
+        downButton = new JButton();
+        downButton.setIcon(new ImageIcon(getClass().getResource("/img/arrows/down.png")));
+        downButton.setLabel("");
+        downButton.setText("");
+        rightCenter.add(downButton, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, new Dimension(30, 30), new Dimension(30, 30), new Dimension(30, 30), 0, false));
+        leftButton = new JButton();
+        leftButton.setIcon(new ImageIcon(getClass().getResource("/img/arrows/left.png")));
+        leftButton.setLabel("");
+        leftButton.setText("");
+        rightCenter.add(leftButton, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, new Dimension(30, 30), new Dimension(30, 30), new Dimension(30, 30), 0, false));
+        rightButton = new JButton();
+        rightButton.setIcon(new ImageIcon(getClass().getResource("/img/arrows/right.png")));
+        rightButton.setInheritsPopupMenu(false);
+        rightButton.setText("");
+        rightCenter.add(rightButton, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, new Dimension(30, 30), new Dimension(30, 30), new Dimension(30, 30), 0, false));
+        final Spacer spacer11 = new Spacer();
+        rightCenter.add(spacer11, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        final Spacer spacer12 = new Spacer();
+        rightCenter.add(spacer12, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        final JPanel panel12 = new JPanel();
+        panel12.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 35), -1, -1));
+        panel12.setOpaque(false);
+        bottomDetailsSettingsPanel.add(panel12, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, new Dimension(900, 25), new Dimension(900, 25), new Dimension(900, 25), 0, false));
+        settingsErrorLabel = new JLabel();
+        settingsErrorLabel.setAutoscrolls(true);
+        settingsErrorLabel.setText("");
+        panel12.add(settingsErrorLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        bottomDetailsTermPanel = new JPanel();
+        bottomDetailsTermPanel.setLayout(new GridBagLayout());
+        bottomDetailsTermPanel.setBackground(new Color(-15582399));
+        bottomDetailsTermPanel.setForeground(new Color(-4501441));
+        bottomDetailsTermPanel.setMaximumSize(new Dimension(-1, -1));
+        bottomDetailsTermPanel.setMinimumSize(new Dimension(-1, -1));
+        bottomDetailsTermPanel.setName("bottomDetailsTermPanel");
+        bottomDetailsTermPanel.setOpaque(false);
+        bottomDetailsTermPanel.setPreferredSize(new Dimension(-1, -1));
+        bottomDetailsTermPanel.setRequestFocusEnabled(true);
+        bottomDetailsPanel.add(bottomDetailsTermPanel, "bottomDetailsTermPanel");
+        final JPanel panel13 = new JPanel();
+        panel13.setLayout(new GridLayoutManager(4, 1, new Insets(10, 10, 30, 10), -1, -1));
+        panel13.setOpaque(false);
+        GridBagConstraints gbc;
+        gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 6;
+        gbc.gridwidth = 14;
+        gbc.weightx = 1.0;
+        gbc.weighty = 1.0;
+        gbc.fill = GridBagConstraints.BOTH;
+        bottomDetailsTermPanel.add(panel13, gbc);
+        final JPanel panel14 = new JPanel();
+        panel14.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+        panel14.setMaximumSize(new Dimension(-1, -1));
+        panel14.setMinimumSize(new Dimension(-1, -1));
+        panel14.setOpaque(false);
+        panel14.setPreferredSize(new Dimension(-1, -1));
+        panel14.setVisible(false);
+        panel13.add(panel14, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, new Dimension(-1, 50), new Dimension(-1, 50), new Dimension(-1, 50), 0, false));
+        termHistoryVersionLabel = new JLabel();
+        termHistoryVersionLabel.setText("Numer wersji:");
+        panel14.add(termHistoryVersionLabel);
+        setAsActualVersionButton = new JButton();
+        setAsActualVersionButton.setText("Ustaw jako aktualna");
+        panel14.add(setAsActualVersionButton);
+        boldButton = new JButton();
+        boldButton.setHideActionText(true);
+        boldButton.setIcon(new ImageIcon(getClass().getResource("/img/arrows/bold.png")));
+        boldButton.setMaximumSize(new Dimension(19, 19));
+        boldButton.setMinimumSize(new Dimension(19, 19));
+        boldButton.setPreferredSize(new Dimension(19, 19));
+        boldButton.setText("");
+        boldButton.setVisible(false);
+        panel14.add(boldButton);
+        italicsButton = new JButton();
+        italicsButton.setIcon(new ImageIcon(getClass().getResource("/img/arrows/italic.png")));
+        italicsButton.setLabel("");
+        italicsButton.setMaximumSize(new Dimension(19, 19));
+        italicsButton.setMinimumSize(new Dimension(19, 19));
+        italicsButton.setPreferredSize(new Dimension(19, 19));
+        italicsButton.setText("");
+        italicsButton.setVisible(false);
+        panel14.add(italicsButton);
+        underlineButton = new JButton();
+        underlineButton.setIcon(new ImageIcon(getClass().getResource("/img/arrows/underLine.png")));
+        underlineButton.setLabel("");
+        underlineButton.setMaximumSize(new Dimension(19, 19));
+        underlineButton.setMinimumSize(new Dimension(19, 19));
+        underlineButton.setPreferredSize(new Dimension(19, 19));
+        underlineButton.setText("");
+        underlineButton.setVisible(false);
+        panel14.add(underlineButton);
+        shefPanel = new JPanel();
+        shefPanel.setLayout(new BorderLayout(0, 0));
+        shefPanel.setMaximumSize(new Dimension(-1, -1));
+        shefPanel.setMinimumSize(new Dimension(-1, -1));
+        shefPanel.setOpaque(false);
+        shefPanel.setPreferredSize(new Dimension(-1, -1));
+        panel13.add(shefPanel, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, 1, new Dimension(-1, 350), new Dimension(-1, 350), new Dimension(-1, 350), 0, false));
+        final JPanel panel15 = new JPanel();
+        panel15.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+        panel15.setOpaque(false);
+        panel13.add(panel15, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        versesTermLabel = new JLabel();
+        versesTermLabel.setOpaque(false);
+        versesTermLabel.setText("Uzupełnij pola");
+        panel13.add(versesTermLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_NORTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 2, false));
+        isSignedCheckBox = new JCheckBox();
+        isSignedCheckBox.setOpaque(false);
+        isSignedCheckBox.setText("Czy hasło ma być podpisane?");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 13;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.WEST;
+        bottomDetailsTermPanel.add(isSignedCheckBox, gbc);
+        termDetailsIdLabel = new JLabel();
+        termDetailsIdLabel.setText("ID: ");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.EAST;
+        bottomDetailsTermPanel.add(termDetailsIdLabel, gbc);
+        final JLabel label21 = new JLabel();
+        label21.setText("Kategoria: ");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.anchor = GridBagConstraints.EAST;
+        bottomDetailsTermPanel.add(label21, gbc);
+        subcategoryComboBox = new JComboBox();
+        subcategoryComboBox.setOpaque(false);
+        gbc = new GridBagConstraints();
+        gbc.gridx = 2;
+        gbc.gridy = 3;
+        gbc.gridwidth = 11;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.BOTH;
+        bottomDetailsTermPanel.add(subcategoryComboBox, gbc);
+        categoryComboBox = new JComboBox();
+        categoryComboBox.setOpaque(false);
+        gbc = new GridBagConstraints();
+        gbc.gridx = 2;
+        gbc.gridy = 2;
+        gbc.gridwidth = 11;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.BOTH;
+        bottomDetailsTermPanel.add(categoryComboBox, gbc);
+        final JLabel label22 = new JLabel();
+        label22.setHorizontalAlignment(4);
+        label22.setText("Wersja tego hasła oznaczona jako aktualna: ");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.anchor = GridBagConstraints.EAST;
+        bottomDetailsTermPanel.add(label22, gbc);
+        final JLabel label23 = new JLabel();
+        label23.setText("Podkategoria: ");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.anchor = GridBagConstraints.EAST;
+        bottomDetailsTermPanel.add(label23, gbc);
+        final JLabel label24 = new JLabel();
+        label24.setOpaque(false);
+        label24.setText("Nagłówek:  ");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.EAST;
+        bottomDetailsTermPanel.add(label24, gbc);
+        textField1 = new JTextField();
+        textField1.setEditable(true);
+        textField1.setEnabled(true);
+        textField1.setFocusCycleRoot(true);
+        Font textField1Font = this.$$$getFont$$$(null, Font.BOLD, 11, textField1.getFont());
+        if (textField1Font != null) textField1.setFont(textField1Font);
+        textField1.setOpaque(true);
+        gbc = new GridBagConstraints();
+        gbc.gridx = 2;
+        gbc.gridy = 1;
+        gbc.gridwidth = 12;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(0, 0, 0, 220);
+        bottomDetailsTermPanel.add(textField1, gbc);
+        actualTermHistoryVersionLabel = new JLabel();
+        actualTermHistoryVersionLabel.setText("");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 2;
+        gbc.gridy = 4;
+        gbc.gridwidth = 11;
+        gbc.fill = GridBagConstraints.BOTH;
+        bottomDetailsTermPanel.add(actualTermHistoryVersionLabel, gbc);
+        termIdLabel = new JLabel();
+        termIdLabel.setText("");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 13;
+        gbc.gridy = 2;
+        gbc.fill = GridBagConstraints.BOTH;
+        bottomDetailsTermPanel.add(termIdLabel, gbc);
+        final JLabel label25 = new JLabel();
+        label25.setText("Wersja hasła aktualnie edytowana: ");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        gbc.anchor = GridBagConstraints.EAST;
+        bottomDetailsTermPanel.add(label25, gbc);
+        editedTermHistoryVersionLabel = new JLabel();
+        editedTermHistoryVersionLabel.setText("");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 2;
+        gbc.gridy = 5;
+        gbc.gridwidth = 11;
+        gbc.fill = GridBagConstraints.BOTH;
+        bottomDetailsTermPanel.add(editedTermHistoryVersionLabel, gbc);
+        label12.setLabelFor(nameTextField);
+        label13.setLabelFor(surnameTextField);
+        label14.setLabelFor(signTextField);
+        label15.setLabelFor(emailTextField);
+        label21.setLabelFor(categoryComboBox);
+        label23.setLabelFor(subcategoryComboBox);
+        label24.setLabelFor(textField1);
+    }
+
+    /**
+     * @noinspection ALL
+     */
+    private Font $$$getFont$$$(String fontName, int style, int size, Font currentFont) {
+        if (currentFont == null) return null;
+        String resultName;
+        if (fontName == null) {
+            resultName = currentFont.getName();
+        } else {
+            Font testFont = new Font(fontName, Font.PLAIN, 10);
+            if (testFont.canDisplay('a') && testFont.canDisplay('1')) {
+                resultName = fontName;
+            } else {
+                resultName = currentFont.getName();
+            }
+        }
+        return new Font(resultName, style >= 0 ? style : currentFont.getStyle(), size >= 0 ? size : currentFont.getSize());
+    }
+
+    /**
+     * @noinspection ALL
+     */
+    public JComponent $$$getRootComponent$$$() {
+        return mainPanel;
+    }
 
 }
 
