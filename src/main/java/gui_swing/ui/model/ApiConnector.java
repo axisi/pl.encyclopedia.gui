@@ -5,17 +5,15 @@ package gui_swing.ui.model;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.util.JSONPObject;
 import gui_swing.ui.model.filters.ListsF;
-import org.json.JSONObject;
 
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.net.ConnectException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public  class ApiConnector {
@@ -422,5 +420,75 @@ public  class ApiConnector {
         webTarget = client.target(apiURI).path("term/tag/"+idLong+"/matched");
         invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
         return invocationBuilder.get(new GenericType<List<Term>>(){});
+    }
+
+    public String getContentOfTerm(Long termId, Long version) {
+        webTarget = client.target(apiURI).path("term/id/"+termId+"/version/"+version);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return invocationBuilder.get(new GenericType<String>(){});
+
+    }
+
+    public Collection<? extends Long> findAllTermsWitchHeaderContains(String text) {
+
+        webTarget = client.target(apiURI).path("term/header/contains/"+text);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return invocationBuilder.get(new GenericType<List<Long>>(){});
+    }
+
+    public void getTermsByFullText(ArrayList<Long> idsOfFoundTerms) {
+
+        webTarget = client.target(apiURI).path("term/fulltext");
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        Response response =  invocationBuilder.post(Entity.entity(idsOfFoundTerms,MediaType.APPLICATION_JSON));
+        responseList = response.readEntity(new GenericType<List<Term>>(){});
+        if(responseList.get(0).getId()==-1L)
+            this.setEmpty(true);
+        else
+            this.setEmpty(false);
+
+    }
+
+    public Collection<? extends Long> findTermsWitchAllVersionContentContains(String text) {
+        webTarget = client.target(apiURI).path("term/content/contains/all/"+text);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return invocationBuilder.get(new GenericType<List<Long>>(){});
+    }
+
+    public Collection<? extends Long> findTermsWitchActualVersionContentContains(String text) {
+        webTarget = client.target(apiURI).path("term/content/contains/actual/"+text);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return invocationBuilder.get(new GenericType<List<Long>>(){});
+    }
+
+    public ArrayList<Term> getTermReferences(Integer termId) {
+        webTarget = client.target(apiURI).path("term/references/"+termId);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return invocationBuilder.get(new GenericType<ArrayList<Term>>(){});
+    }
+
+    public ArrayList<Term> getTermForWhomThisTermIsReferenced(Integer termId) {
+        webTarget = client.target(apiURI).path("term/referenced/"+termId);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return invocationBuilder.get(new GenericType<ArrayList<Term>>(){});
+    }
+
+    public ArrayList<Term> getTermReferencesProposal(Integer termId) {
+        webTarget = client.target(apiURI).path("term/references/proposal/"+termId);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return invocationBuilder.get(new GenericType<ArrayList<Term>>(){});
+    }
+
+    public ArrayList<Term> getTermForWhomThisTermIsReferencedProposal(Integer termId) {
+        webTarget = client.target(apiURI).path("term/referenced/proposal/"+termId);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return invocationBuilder.get(new GenericType<ArrayList<Term>>(){});
+    }
+
+    public Boolean addReferenceToTerm(Integer termId, Integer referenceId) {
+        webTarget = client.target(apiURI).path("term/reference/add/"+termId+"/"+referenceId);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return invocationBuilder.get(new GenericType<Boolean>(){});
+
     }
 }

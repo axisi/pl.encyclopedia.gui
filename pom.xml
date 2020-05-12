@@ -146,156 +146,36 @@
             <scope>test</scope>
         </dependency>
 
-        <!--
-            CHEF
-        -->
-       <!-- <dependency>
-            <groupId>org.bushe</groupId>
-            <artifactId>eventbus</artifactId>
-            <version>1.4</version>
-        </dependency>-->
 
-         <!--<dependency>
-           <groupId>com.openindex.3rdparty</groupId>
-           <artifactId>SwingActionManager</artifactId>
-           <version>0.8.1</version>
-           <scope>compile</scope>
-         </dependency>-->
-        <!--<dependency>
-            <groupId>net.sf.jtidy</groupId>
-            <artifactId>jtidy</artifactId>
-            <version>r938</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.fifesoft</groupId>
-            <artifactId>rsyntaxtextarea</artifactId>
-            <version>2.5.3</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>annotations</artifactId>
-            <version>3.0.0</version>
-            <optional>true</optional>
-        </dependency>-->
 
-        <!--<dependency>
-            <groupId>com.openindex.3rdparty</groupId>
-            <artifactId>SwingActionManager</artifactId>
-            <version>0.8.1</version>
-            <scope>compile</scope>
-        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml -->
+        <!-- https://mvnrepository.com/artifact/org.docx4j/docx4j -->
         <dependency>
-            <groupId>net.sf.jtidy</groupId>
-            <artifactId>jtidy</artifactId>
-            <version>r938</version>
-            <scope>compile</scope>
+            <groupId>org.docx4j</groupId>
+            <artifactId>docx4j</artifactId>
+            <version>6.1.2</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.docx4j/docx4j-ImportXHTML -->
         <dependency>
-            <groupId>com.fifesoft</groupId>
-            <artifactId>rsyntaxtextarea</artifactId>
-            <version>2.5.3</version>
-            <scope>compile</scope>
+            <groupId>org.docx4j</groupId>
+            <artifactId>docx4j-ImportXHTML</artifactId>
+            <version>8.0.0</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
         <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>annotations</artifactId>
-            <version>3.0.0</version>
-            <optional>true</optional>
-        </dependency>-->
-
-        <!-- test -->
-        <!--<dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.11</version>
-            <scope>test</scope>
-        </dependency>-->
-       <!-- <dependency>
-            <groupId>stuff</groupId>
-            <artifactId>library</artifactId>
-            <version>1.0</version>
-            <systemPath>${lib.location}/SHEF.jar</systemPath>
-            <scope>system</scope>
-        </dependency>-->
-       <!-- <dependency>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <version>3.8.1</version>
-            <type>maven-plugin</type>
-        </dependency>-->
-
-       <!-- <dependency>
-            <groupId>selenium_2_53_1</groupId>
-            <artifactId>com.seleniumhq.selenium_2_53_1 </artifactId>
-            <version>2.53.1</version>
-            <scope>system</scope>
-            <systemPath>
-                C:/Users/axisii/IdeaProjects/Nowy folder/GUI/src/main/lib/SHEF.jar
-            </systemPath>
-        </dependency>
-
-        <dependency>
-            <groupId>selenium_2_53_2</groupId>
-            <artifactId>com.seleniumhq.selenium_2_53_2 </artifactId>
-            <version>2.53.1</version>
-            <scope>system</scope>
-            <systemPath>
-                C:/Users/axisii/IdeaProjects/Nowy folder/GUI/src/main/lib/lib/jtidy-8.0.jar
-            </systemPath>
-        </dependency>
-        <dependency>
-            <groupId>selenium_2_53_3</groupId>
-            <artifactId>com.seleniumhq.selenium_2_53_3 </artifactId>
-            <version>2.53.1</version>
-            <scope>system</scope>
-            <systemPath>
-                C:/Users/axisii/IdeaProjects/Nowy folder/GUI/src/main/lib/lib/novaworx-syntax-0.0.7.jar
-            </systemPath>
-        </dependency>
-        <dependency>
-            <groupId>selenium_2_53_4</groupId>
-            <artifactId>com.seleniumhq.selenium_2_53_4 </artifactId>
-            <version>2.53.1</version>
-            <scope>system</scope>
-            <systemPath>
-                C:/Users/axisii/IdeaProjects/Nowy folder/GUI/src/main/lib/lib/sam.jar
-            </systemPath>
-        </dependency>-->
-
-     <!--   <dependency>
-            <groupId>SHEF</groupId>
-            <artifactId>SHEF</artifactId>
-            <scope>system</scope>
-            <version>1.0</version>
-            <systemPath>${basedir}\src\main\lib\SHEF.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>jtidy</groupId>
-            <artifactId>jtidy</artifactId>
-            <scope>system</scope>
-            <version>1.0</version>
-            <systemPath>${basedir}\src\main\lib\lib\jtidy-8.0.jar</systemPath>
-        </dependency>
-<dependency>
-            <groupId>sam</groupId>
-            <artifactId>sam</artifactId>
-            <scope>system</scope>
-            <version>1.0</version>
-            <systemPath>${basedir}\src\main\lib\lib\sam.jar</systemPath>
-        </dependency>
-<dependency>
-            <groupId>novaworx</groupId>
-            <artifactId>novaworx</artifactId>
-            <scope>system</scope>
-            <version>1.0</version>
-            <systemPath>${basedir}\src\main\lib\lib\novaworx-syntax-0.0.7.jar</systemPath>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.13.1</version>
         </dependency>
 
 
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>3.7</version>
+        </dependency>
 
-        - https://mvnrepository.com/artifact/org.bushe/eventbus -->
+
         <dependency>
             <groupId>org.bushe</groupId>
             <artifactId>eventbus</artifactId>
@@ -307,6 +187,7 @@
             <artifactId>forms_rt</artifactId>
             <version>6.0.5</version>
         </dependency>
+
     </dependencies>
 
 </project>

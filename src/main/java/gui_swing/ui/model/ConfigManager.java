@@ -12,6 +12,7 @@ public class ConfigManager {
     private  static String loggedUser;
     private static String apiURI;
     private static String tagsFolder;
+    private static String tempFolder;
 
     public ConfigManager() {
         setApiURI();
@@ -55,8 +56,9 @@ public class ConfigManager {
             e.printStackTrace();
         }*/
 
-        ConfigManager.apiURI = resources.getProperty("apiUri");
-        ConfigManager.tagsFolder = resources.getProperty("tagsFolder");
+        ConfigManager.setApiURI (resources.getProperty("apiUri"));
+        ConfigManager.setTagsFolder( resources.getProperty("tagsFolder"));
+        ConfigManager.setTempFolder( resources.getProperty("tempFolder"));
         System.out.println(resources.getProperty("tagsFolder"));
     }
 
@@ -78,6 +80,14 @@ public class ConfigManager {
 
     public static String getTagsFolder() {
         return tagsFolder;
+    }
+
+    public static String getTempFolder() {
+        return tempFolder;
+    }
+
+    public static void setTempFolder(String tempFolder) {
+        ConfigManager.tempFolder = tempFolder;
     }
 
     public static void setTagsFolder(String tagsFolder) {

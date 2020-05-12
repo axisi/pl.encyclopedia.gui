@@ -7,7 +7,13 @@ import gui_swing.ui.model.filters.*;
 import gui_swing.ui.model.tableModels.ObjectTableModel;
 import gui_swing.ui.view.ApplicationFrame;
 import net.atlanticbb.tantlinger.shef.HTMLEditorPane;
-//import sun.java2d.pipe.AlphaPaintPipe;
+import org.apache.poi.xwpf.usermodel.*;
+import org.docx4j.XmlUtils;
+import org.docx4j.convert.in.xhtml.XHTMLImporterImpl;
+import org.docx4j.openpackaging.exceptions.InvalidFormatException;
+import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.docx4j.org.xhtmlrenderer.util.XRLog;
+
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -18,16 +24,23 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.URI;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Objects;
 
 public class ApplicationFrameController {
     //    private final static String termsPanel = "bottomPropertiesTermsPanel";
 //    private final static String authorsPanel = "bottomPropertiesAuthorsPanel";
-    private ApplicationFrame applicationFrame;
+    private static ApplicationFrame applicationFrame;
+
+    public static ApplicationFrame getApplicationFrame() {
+        return applicationFrame;
+    }
+
     private static Point point = new Point();
     private MainController mainController;
     private JPanel topPanel;
@@ -50,6 +63,8 @@ public class ApplicationFrameController {
     String newTermSuccessesAdded;
     private JButton markReferenceButton;
     private Integer lettersOnVerse = 52;
+
+    private JPanel bottomDetailsFiltersPanel;
 
     private JList categoryJList;
     private JList subcategoryJList;
@@ -76,19 +91,19 @@ public class ApplicationFrameController {
     CardLayout cardLayout;
     CardLayout cardLayout2;
     private ArrayList<String> tagsStrings;
-    private RenderTermsFilters renderTermsFilters;
+    public static RenderTermsFilters renderTermsFilters;
     private JPanel termErrorLabelPanel;
     private JButton addTermButton;
     Boolean statusesWereSet = false;
     private JLabel versesTermLabel;
     private JLabel termHistoryVersionLabel;
     private JEditorPane editorPane1;
-    HTMLEditorPane htmlEditorPane = new HTMLEditorPane();
+    HTMLEditorPane htmlEditorPane;
     PaginationDataProvider<TermTable> dataProvider;
     private JTable authorsTable;
     private JList tagsTermJList;
     private JList statusesTermJList;
-    private MouseListeners.CheckListItemMouseListenerStatuses checkListItemMouseListenerStatuses = new MouseListeners.CheckListItemMouseListenerStatuses();
+    private static MouseListeners.CheckListItemMouseListenerStatuses checkListItemMouseListenerStatuses = new MouseListeners.CheckListItemMouseListenerStatuses();
     public  static Boolean termsTableShown = false;
 
     private JComboBox categoryComboBox;
@@ -110,6 +125,17 @@ public class ApplicationFrameController {
     private JButton manageTermReferenceButton;
     private JLabel editedTermHistoryVersionLabel;
 
+// FUll text search -----------------------------------------------------------------------------------------------------------------------------------------------
+
+    private JTextField fullTextSearchField;
+    private JRadioButton headersRadioButton;
+    private JRadioButton contentRadioButton;
+    private JButton fullTextSearchButton;
+    private JRadioButton allVersionsRadioButton;
+    private JLabel fullTextSearchLabel;
+
+
+// FUll text search -----------------------------------------------------------------------------------------------------------------------------------------------
 
     //Authors begin------------------------------------------------------------------------------------------------------------------------------------------------
     private JList authorsList;
@@ -132,7 +158,19 @@ public class ApplicationFrameController {
 
     //Authors end----------------------------------------------------------------END-----------------------------------------------------------------------------
 
+// buttons
 
+    private JButton categoryPlusButton;
+    private JButton categoryMinusButton;
+    private JButton subcategoryMinusButton;
+    private JButton subcategoryPlusButton;
+    private JButton tagsPlusButton;
+    private JButton tagsMinusButton;
+    private JButton statusMinusButton;
+    private JButton statusPlusButton;
+
+
+// buttons
     // settings tab----------------------------------------------------------START-------------------------------------------------------------------------------
 
     private JList settingsList;
@@ -171,6 +209,7 @@ public class ApplicationFrameController {
     private String selectedTagColorName;
     private JButton saveTermsToTagButton;
     private JButton updateTagButton;
+
     //------------------------------------------------tags
     // settings tab----------------------------------------------------------END---------------------------------------------------------------------------------
 
@@ -181,7 +220,7 @@ public class ApplicationFrameController {
 
 
     private JButton getStatusesForSubcategoryButton;
-
+    public static JFrame frameWithTerms;
 
     public ApplicationFrameController(MainController mainController) {
 
@@ -214,6 +253,16 @@ public class ApplicationFrameController {
         statusesJList = applicationFrame.getStatusesJList();
         markReferenceButton = applicationFrame.getMarkReferenceButton();
         list= applicationFrame.getListOfTermTable();
+        bottomDetailsFiltersPanel = applicationFrame.getBottomDetailsFiltersPanel();
+
+        categoryPlusButton = applicationFrame.getCategoryPlusButton();
+        categoryMinusButton = applicationFrame.getCategoryMinusButton();
+        subcategoryMinusButton = applicationFrame.getSubcategoryMinusButton();
+        subcategoryPlusButton = applicationFrame.getSubcategoryPlusButton();
+        tagsPlusButton = applicationFrame.getTagsPlusButton();
+        tagsMinusButton = applicationFrame.getTagsMinusButton();
+        statusMinusButton = applicationFrame.getStatusMinusButton();
+        statusPlusButton = applicationFrame.getStatusPlusButton();
 
 
         //termTableModel= applicationFrame.getTermTableModel();
@@ -253,18 +302,42 @@ public class ApplicationFrameController {
         termDetailsIdLabel = applicationFrame.getTermDetailsIdLabel();
 
         shefPanel = applicationFrame.getShefPanel();
-        JMenuBar jMenuBar = new JMenuBar();
+        htmlEditorPane = new HTMLEditorPane();
+       // JMenuBar jMenuBar = new JMenuBar();
                 /*JFrame frame = new JFrame();
                 frame.getContentPane().add(htmlEditorPane);
                 frame.setVisible(true);*/
         //editorPane1 =null;
-        jMenuBar.add(htmlEditorPane.getEditMenu());
+
+       /* jMenuBar.add(htmlEditorPane.getEditMenu());
         jMenuBar.add(htmlEditorPane.getFormatMenu());
-        jMenuBar.add(htmlEditorPane.getInsertMenu());
-        shefPanel.add(jMenuBar, BorderLayout.PAGE_START);
+        jMenuBar.add(htmlEditorPane.getInsertMenu());*/
+         //htmlEditorPane.getInsertMenu().setEnabled(true);
+
+        //shefPanel.add(jMenuBar, BorderLayout.PAGE_START);
         shefPanel.add(htmlEditorPane, BorderLayout.CENTER);
         htmlEditorPane.setAutoscrolls(true);
         htmlEditorPane.setOpaque(false);
+        htmlEditorPane.setWysiwygEnabled(true);
+        htmlEditorPane.setToolBarVisible(true);
+      /*  try {
+            UIManager.setLookAndFeel(
+                    UIManager.getSystemLookAndFeelClassName());
+        } catch(Exception ex){}*/
+        /* HTMLEditorPane htmlEditorPane1 = new HTMLEditorPane();
+
+        JMenuBar menuBar = new JMenuBar();
+        menuBar.add(htmlEditorPane1.getEditMenu());
+        menuBar.add(htmlEditorPane1.getFormatMenu());
+        menuBar.add(htmlEditorPane1.getInsertMenu());
+
+        JFrame jframe = new JFrame();
+        jframe.setJMenuBar(menuBar);
+
+        jframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        jframe.setSize(800, 600);
+        jframe.getContentPane().add(htmlEditorPane1);
+        jframe.setVisible(true);*/
 
 
         updateTermButton = applicationFrame.getUpdateTermButton();
@@ -292,7 +365,17 @@ public class ApplicationFrameController {
         authorsMenageTable = applicationFrame.getAuthorsMenageTable();
         am = (DefaultTableModel) authorsMenageTable.getModel();
         //Authors end-------------------------------------------------------------END--------------------------------------------------------------------------------
+// FUll text search -----------------------------------------------------------------------------------------------------------------------------------------------
 
+        fullTextSearchField = applicationFrame.getFullTextSearchField();
+        headersRadioButton = applicationFrame.getHeadersRadioButton();
+        contentRadioButton = applicationFrame.getContentRadioButton();
+        fullTextSearchButton = applicationFrame.getFullTextSearchButton();
+        allVersionsRadioButton = applicationFrame.getAllVersionsRadioButton();
+        fullTextSearchLabel = applicationFrame.getFullTextSearchLabel();
+
+
+// FUll text search -----------------------------------------------------------------------------------------------------------------------------------------------
 
         // settings tab----------------------------------------------------------START-------------------------------------------------------------------------------
 
@@ -346,10 +429,10 @@ public class ApplicationFrameController {
         termsTable.getTableHeader().setReorderingAllowed(false);
         authorsMenageTable.getTableHeader().setReorderingAllowed(false);
         authorsTable.getTableHeader().setReorderingAllowed(false);
-
+        redirectTermToIndicatedAuthorButton = applicationFrame. getRedirectTermToIndicatedAuthorButton();
     }
 
-    private void comboboxFill(JComboBox comboBox, ArrayList<String> stringValuesToInsert) {
+    public static void comboboxFill(JComboBox comboBox, ArrayList<String> stringValuesToInsert) {
         DefaultComboBoxModel defaultComboBoxModel = (DefaultComboBoxModel) comboBox.getModel();
         defaultComboBoxModel.removeAllElements();
         comboBox.addItem("");
@@ -432,7 +515,7 @@ public class ApplicationFrameController {
                         switch (termsList.getSelectedValue().toString()) {
                             case "Pokaż wszystkie":
                                 //System.out.println( bottomDetailsTermsPanel.getName());
-                               if(!termsTableShown){
+
                                    hideFiltersSearchPanels();
                                    try {
                                        apiConnector.getAllTerm();
@@ -441,10 +524,8 @@ public class ApplicationFrameController {
                                        logoutBecauseOfError();
                                    }
                                    renderTermTable();
-                               }else{
-                                   //JOptionPane.showMessageDialog(applicationFrame,"Jest już otwarte oknko z hasłami, zamknij je aby otworzyć nowe","Uwaga!",JOptionPane.WARNING_MESSAGE);
-                                   JOptionPane.showMessageDialog(applicationFrame,"Jest już otwarte oknko z hasłami, zamknij je aby otworzyć nowe","Uwaga!",JOptionPane.WARNING_MESSAGE);
-                               }
+
+
                                 break;
                             case "Pokaż według filtrów":
                                 hideFiltersSearchPanels();
@@ -471,7 +552,7 @@ public class ApplicationFrameController {
                                         defaultListModel.addElement(new CheckListItem(s));
                                     }
 
-                                    cardLayout2.show(topDetailsPanel, topDetailsPanelFilters.getName());
+                                    cardLayout1.show(bottomDetailsPanel, bottomDetailsFiltersPanel.getName());
                                 } catch (Exception ex) {
 
                                     System.out.println(ex.getMessage());
@@ -683,7 +764,8 @@ public class ApplicationFrameController {
                 if (mouseEvent.getClickCount() == 2 && table.getSelectedRow() != -1) {
                     hideFiltersSearchPanels();
                     Integer integerId = Integer.valueOf(termsTable.getValueAt(termsTable.getSelectedRow(), 0).toString());
-                    fillTermFormWithFreshData(integerId);
+                    //fillTermFormWithFreshData(integerId);
+                    createNewTermWindow(integerId);
                 }
             }
         });
@@ -735,7 +817,7 @@ public class ApplicationFrameController {
         searchButton.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(!termsTableShown){
+
                     // ArrayList<String>[] searchMatrix= new ArrayList<String>[4];
                     ListsF searchMatrix = new ListsF();
                     CategoryF<String> categoriesList = new CategoryF<String>();
@@ -774,10 +856,7 @@ public class ApplicationFrameController {
                         }*/
                         }
                     }
-                }else
-                {
-                    JOptionPane.showMessageDialog(applicationFrame,"Jest już otwarte oknko z hasłami, zamknij je aby otworzyć nowe","Uwaga!",JOptionPane.WARNING_MESSAGE);
-                }
+
 
             }
         });
@@ -797,12 +876,12 @@ public class ApplicationFrameController {
                     term.setActualVersion(termHistory.getVersion());
                     term.setTitle(textField1.getText());
                     term.setSigned(isSignedCheckBox.isSelected());
-                    termHistory.setContent(htmlEditorPane.getText());
+                    termHistory.setContent(NCRConverter.convertNcrToText (htmlEditorPane.getText()));
                     term.setCategory(String.valueOf(categoryComboBox.getSelectedItem()));
                     term.setSubcategory(String.valueOf(subcategoryComboBox.getSelectedItem()));
                     //System.out.println("a");
 
-                    packFormDataToEntity(termHistory, term);
+                    TermWindow.packFormDataToEntity(termHistory, term,statusesJList,tagsJList,authorsTable);
 
                     prepareTermForm(true);
                     try {
@@ -840,9 +919,8 @@ public class ApplicationFrameController {
                         termHistory = apiConnector.getTermHistory(termHistoryId);
                     }
                 }
-                termHistory.setContent(htmlEditorPane.getText());
+                termHistory.setContent(NCRConverter.convertNcrToText(htmlEditorPane.getText()));
 
-                packFormDataToEntity(termHistory, newTerm);
                 try {
                     Integer termId1 = apiConnector.updateTerm(newTerm);
                     fillTermFormWithFreshData(termId1);
@@ -854,6 +932,60 @@ public class ApplicationFrameController {
 
 
             }
+        });
+        redirectTermToIndicatedAuthorButton.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                XWPFDocument document = new XWPFDocument();
+                //Write the Document in file system
+                try {
+                   /* FileOutputStream out = new FileOutputStream(new File());
+                    XWPFTable table = document.createTable();
+                    XWPFTableRow tableRowOne = table.getRow(0);
+                    tableRowOne.getCell(0).setText("Edytowane hasło:");
+                    tableRowOne.addNewTableCell().setText(textField1.getText());
+
+                    XWPFTableRow tableRowTwo = table.createRow();
+                    tableRowTwo.getCell(0).setText("ID:" );
+                    tableRowTwo.getCell(1).setText( termDetailsIdLabel.getText().substring(4));
+
+                    XWPFTableRow tableRowThree = table.createRow();
+                    tableRowThree.getCell(0).setText("Kategoria: " );
+                    tableRowThree.getCell(1).setText(categoryComboBox.getSelectedItem().toString() );
+                    tableRowThree.getCell(0).getCTTc().addNewTcPr().addNewTcW().setW(BigInteger.valueOf(2000L));
+                    tableRowThree.getCell(1).getCTTc().addNewTcPr().addNewTcW().setW(BigInteger.valueOf(7000L));
+
+                    XWPFParagraph paragraph = document.createParagraph();
+                    XWPFRun r1 = paragraph.createRun();
+                    r1.addCarriageReturn();
+                    r1.addCarriageReturn();*/
+
+                   // String xhtml = htmlEditorPane.getWysiwygText();
+                    Long termId = Long.valueOf(termDetailsIdLabel.getText().substring(4));
+                    Long version = Long.valueOf(editedTermHistoryVersionLabel.getText());
+                    String xhtml = apiConnector.getContentOfTerm( termId, version);
+                    WordprocessingMLPackage wordMLPackage = WordprocessingMLPackage.createPackage();
+                    XRLog.setLoggingEnabled(false);
+                    XHTMLImporterImpl XHTMLImporter = new XHTMLImporterImpl(wordMLPackage);
+                    XRLog.setLoggingEnabled(false);
+                    wordMLPackage.getMainDocumentPart().getContent().addAll(XHTMLImporter.convert( xhtml, null) );
+                    XRLog.setLoggingEnabled(false);
+                    System.out.println(XmlUtils.marshaltoString(wordMLPackage.getMainDocumentPart().getJaxbElement(), true,true));
+                    wordMLPackage.save(new java.io.File(ConfigManager.getTempFolder()+textField1.getText()+".docx"));
+
+                    /*XWPFTable tableContent = document.createTable();
+                    XWPFTableRow tableRowOneContent = tableContent.getRow(0);
+                    tableRowOneContent.getCell(0).setText("");
+                    tableRowOneContent.getCell(0).getCTTc().addNewTcPr().addNewTcW().setW(BigInteger.valueOf(9000L));*/
+
+
+                    //document.write(out);
+                    //out.close();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+
         });
 //-----------------------------------------------------------------------------------------------TermBUTTONS-----STOP-------------------------------------------------------------------------------
 //---------------------------------------------------------------------Settings subcategory START ----------------------------------------------------------------------------
@@ -1209,8 +1341,144 @@ public class ApplicationFrameController {
                 return doc.getLength() / lettersOnVerse;
             }
         });
+
+        // plus&minusesListeners -----------------------------------------------------------------------------------------------------------------------------------------------
+
+        categoryPlusButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                plusMinusMethod(categoryJList,true);
+            }
+        });
+        categoryMinusButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                plusMinusMethod(categoryJList,false);
+            }
+        });
+        subcategoryPlusButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                plusMinusMethod(subcategoryJList,true);
+            }
+        });
+        subcategoryMinusButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                plusMinusMethod(subcategoryJList,false);
+            }
+        });
+        tagsPlusButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                plusMinusMethod(tagsJList,true);
+            }
+        });
+        tagsMinusButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                plusMinusMethod(tagsJList,false);
+            }
+        });
+        statusPlusButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                plusMinusMethod(statusesJList,true);
+            }
+        });
+        statusMinusButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                plusMinusMethod(statusesJList,false);
+            }
+        });
+        // plus&minusesListeners -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+        // FUll text search -----------------------------------------------------------------------------------------------------------------------------------------------
+
+        fullTextSearchButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                fullTextSearchButtonMethod(fullTextSearchField.getText(),headersRadioButton.isSelected(),contentRadioButton.isSelected(),allVersionsRadioButton.isSelected());
+            }
+        });
+
+        // FUll text search -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
     }
 
+    private void fullTextSearchButtonMethod(String text, boolean headers, boolean contents, boolean versions) {
+            fullTextSearchLabel.setText("");
+            ArrayList<Long> idsOfFoundTerms= new ArrayList<>();
+            if(text.length()>0){
+                if(headers){
+                    idsOfFoundTerms.addAll(apiConnector.findAllTermsWitchHeaderContains(text));
+                }
+                if(contents){
+                    if(versions){
+                        idsOfFoundTerms.addAll(apiConnector.findTermsWitchAllVersionContentContains(text));
+                    }else{
+                        idsOfFoundTerms.addAll(apiConnector.findTermsWitchActualVersionContentContains(text));
+                    }
+                }
+
+                if(idsOfFoundTerms.size()>0){
+                    idsOfFoundTerms = removeDuplicates(idsOfFoundTerms);
+                    idsOfFoundTerms.sort(Long::compareTo );
+                    apiConnector.getTermsByFullText(idsOfFoundTerms);
+                    renderTermTable();
+                }else{
+                    fullTextSearchLabel.setText("Brak haseł zawierających wpisaną frazę.");
+                }
+            }else{
+                fullTextSearchLabel.setText("Szukana fraza nie może być pusta.");
+            }
+
+    }
+
+    private void plusMinusMethod(JList jList, boolean action) {
+        if(action){
+            for (int i = 0; i < jList.getModel().getSize(); i++) {
+                CheckListItem item = (CheckListItem) jList.getModel().getElementAt(i);
+                if(!item.isSelected())
+                    item.setSelected(true);
+            }
+        }else{
+            for (int i = 0; i < jList.getModel().getSize(); i++) {
+                CheckListItem item = (CheckListItem) jList.getModel().getElementAt(i);
+                if(item.isSelected())
+                    item.setSelected(false);
+            }
+        }
+        cardLayout1.show(bottomDetailsPanel, bottomDetailsBlankPanel.getName());
+        cardLayout1.show(bottomDetailsPanel, bottomDetailsFiltersPanel.getName());
+
+    }
+
+    private void createNewTermWindow(Integer integerId) {
+        TermWindow termFrame = new TermWindow(integerId);
+    }
+    public static <T> ArrayList<T> removeDuplicates(ArrayList<T> list)
+    {
+
+        // Create a new LinkedHashSet
+        Set<T> set = new LinkedHashSet<>();
+
+        // Add the elements to set
+        set.addAll(list);
+
+        // Clear the list
+        list.clear();
+
+        // add the elements of set
+        // with no duplicates to the list
+        list.addAll(set);
+
+        // return the list
+        return list;
+    }
     private void fillTermFormWithFreshData(Integer integerId) {
         termsList.clearSelection();
         prepareTermForm(false);
@@ -1249,7 +1517,7 @@ public class ApplicationFrameController {
         fillDataToTermForm(term, false, integerId);
     }
 
-    private void packFormDataToEntity(TermHistory termHistory, Term term) {
+    /*private void packFormDataToEntity(TermHistory termHistory, Term term) {
         ArrayList<String> statuses = new ArrayList<>();
         ArrayList<String> tags = new ArrayList<>();
         ArrayList<String> authors = new ArrayList<>();
@@ -1284,7 +1552,7 @@ public class ApplicationFrameController {
         term.setAuthors(authors);
         term.setTagsString(tags);
         term.setStatuses(statuses);
-    }
+    }*/
 
     private void clearAuthorPanel() {
         nameTextField.setText("");
@@ -1362,7 +1630,7 @@ public class ApplicationFrameController {
         //tagsSettingsList.setEnabled(true);
     }
 
-    private String getColorTagIcon(Color selectedTagColor, String selectedTagColorName) {
+    public static String getColorTagIcon(Color selectedTagColor, String selectedTagColorName) {
         BufferedImage bufferedImage = new BufferedImage(12, 12, BufferedImage.TYPE_INT_RGB);
         //imageIcons.add(new ImageIcon("src/main/resources/img/tags/"+tag.getIconName()));
 
@@ -1504,6 +1772,7 @@ public class ApplicationFrameController {
         subcategoryComboBox.setSelectedItem(term.getSubcategory());
         getStatusesForSubcategoryButton.setVisible(true);
         updateTermButton.setVisible(true);
+        redirectTermToIndicatedAuthorButton.setVisible(true);
         /*if(subcategoryComboBox.getSelectedIndex()!=0)
             renderTermsFilters.setTagsJList(statusesTermJList, apiConnector.getStatusesOfSubcategory(subcategoryComboBox.getSelectedItem().toString()));*/
     }
@@ -1511,25 +1780,7 @@ public class ApplicationFrameController {
     private void fillActualTermHistoryStatusAndContent(Integer termId) {
         Term term = apiConnector.getTerm(termId);
         TermHistory termHistory = apiConnector.getActualTermHistoryOfTerm(termId);
-        ArrayList<String> statuses = apiConnector.getStatusesOfTerm(termId);
-        String actualStatus = apiConnector.getStatusOfTermHistory(termHistory.getId());
-        editedTermHistoryVersionLabel.setText("" + termHistory.getVersion().intValue());
-        if (statuses.size() > 0) {
-            CheckListItem[] checkListItems = new CheckListItem[statuses.size()];
-            for (int i = 0; i < statuses.size(); i++) {
-                if (statuses.get(i).equals(actualStatus))
-                    checkListItems[i] = new CheckListItem(statuses.get(i), true);
-                else
-                    checkListItems[i] = new CheckListItem(statuses.get(i), false);
-
-            }
-            //statusesTermJList.setSelectionModel(new NoSelectionModel());
-            statusesTermJList.setListData(checkListItems);
-            //statusesTermJList.removeMouseListener(checkListItemMouseListenerStatuses);
-
-            //renderTermsFilters.setTagsJList(statusesTermJList,statuses);
-
-        }
+        TermWindow.fillTermHistoryDetailsIntoForm(apiConnector, termId, editedTermHistoryVersionLabel, statusesTermJList);
         termHistoryVersionLabel.setText("Numer widocznej wersji: '" + termHistory.getVersion().intValue() + "'");
         htmlEditorPane.setText(termHistory.getContent());
     }
@@ -1543,21 +1794,7 @@ public class ApplicationFrameController {
     }
 
     private void fillTermAuthorTable(Integer integerId) {
-        ArrayList<Float> authors = apiConnector.getAllAuthorsIdsFloat();
-        for (Float f : authors
-        ) {
-            Author author = apiConnector.getAuthor(f.intValue());
-            String authorFullName = author.getName() + " " + author.getSurname();
-            Float authorId = author.getId();
-            Long isAuthorAssignToTerm = apiConnector.isAuthorAssignToTerm(f, integerId);
-
-            if (isAuthorAssignToTerm >= -0L)
-
-                authorsTableModelInTermDetails.addRow(new Object[]{authorId.intValue(), true, authorFullName, isAuthorAssignToTerm});
-            else
-                authorsTableModelInTermDetails.addRow(new Object[]{authorId.intValue(), false, authorFullName, null});
-
-        }
+        TermWindow.fillAuthorsTable(authorsTableModelInTermDetails, apiConnector, integerId);
     }
 
     private void hideButtonsAndRefreshViewAfterAuthorsAction() {
@@ -1629,10 +1866,14 @@ public class ApplicationFrameController {
         searchButton.setVisible(false);
         getStatusesForSubcategoryButton.setVisible(false);
         updateTermButton.setVisible(false);
+        redirectTermToIndicatedAuthorButton.setVisible(false);
         cardLayout2.show(topDetailsPanel, topDetailsPanelBlank.getName());
     }
 
-    private void renderTermTable() {
+    private  void renderTermTable() {
+        if (frameWithTerms !=null){
+            frameWithTerms.dispose();
+        }
         tagsStrings.clear();
         termsErrorLabel.setText("");
         //cardLayout1.show(bottomDetailsPanel, bottomDetailsTermsPanel.getName());
@@ -1646,19 +1887,25 @@ public class ApplicationFrameController {
         dataProvider = createDataProvide();
         PaginatedTableDecorator<TermTable> paginatedDecorator = PaginatedTableDecorator.decorate(termsTable,
                 dataProvider, new int[]{5, 10, 20, 50, 75, 100}, 50);
-        JFrame frame = createFrame();
+        frameWithTerms = createFrame();
         paginatedDecorator.getContentPanel();
-        frame.add(paginatedDecorator.getContentPanel());
-        frame.setLocationRelativeTo(null);
+        JPanel jPanel = new JPanel(new BorderLayout());
+        JLabel jLabel = new JLabel(String.format("Znaleziono %s haseł.",apiConnector.getResponseList().size()));
+       jPanel.add(jLabel,BorderLayout.EAST);
+        frame.add(jPanel,BorderLayout.NORTH);
+        frameWithTerms.add(paginatedDecorator.getContentPanel(),BorderLayout.CENTER);
+        frameWithTerms.setLocationRelativeTo(null);
         termsTableShown=true;
-        frame.setVisible(true);
+        frameWithTerms.setVisible(true);
 
     }
 
-    private static JFrame createFrame() {
+    public  JFrame createFrame() {
          frame = new JFrame("Hasła");
         //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(new Dimension(1000, 600));
+        frame.setLayout(new BorderLayout());
+
         frame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -1672,24 +1919,25 @@ public class ApplicationFrameController {
         int iteratorTollTip = 0;
         list.clear();
 
-        Long LpLong = 1L;
-        for (Term t : apiConnector.getResponseList()) {
 
-            Integer counter = 0;
-            //Object[] terms = {"Lp", "Id", "Tytuł", "Ilość wersji", "Aktualna wersja", "Autorzy", "Podpis", "Tagi"};
+
+            Long LpLong = 1L;
+            for (Term t : apiConnector.getResponseList()) {
+
+                Integer counter = 0;
+                //Object[] terms = {"Lp", "Id", "Tytuł", "Ilość wersji", "Aktualna wersja", "Autorzy", "Podpis", "Tagi"};
             /*for (TermHistory t1 : t.getTermHistories()) {
                 counter++;
             }*/
-            //tm.setColumnIdentifiers(terms);
+                //tm.setColumnIdentifiers(terms);
 
             /*ImageIcon icon = new ImageIcon("src/main/resources/img/tags/tag-black.png");
             ImageIcon icon2 = new ImageIcon("src/main/resources/img/tags/tag-blue.png");*/
 
 
-
-
             List<Tag> tagList = t.getTags();
             List<ImageIcon> imageIcons = new ArrayList<>();
+            List<String> imageStrings = new ArrayList<>();
 
             String tagString = "";
             if (!tagList.isEmpty()) {
@@ -1702,6 +1950,7 @@ public class ApplicationFrameController {
                     //imageIcons.add(new ImageIcon("src/main/resources/img/tags/"+tag.getIconName()));
                     String iconPath = getColorTagIcon(color, tagColorName);
                     imageIcons.add(new ImageIcon(iconPath));
+                    imageStrings.add(tag.getName());
 
                 }
 
@@ -1721,7 +1970,7 @@ public class ApplicationFrameController {
 
             //Koniec wstawiania
 
-            TagIcon tagIcon = new TagIcon(imageIcons);
+            TagIcon tagIcon = new TagIcon(imageIcons,imageStrings);
 
              //tm.addRow(new Object[]{tm.getRowCount()+1,t.getId(),t.getTitle(),counter,t.getActualVersion(),authorsToTable,apiConnector.isSigned(t.getId().intValue()),tagIcon});
             TermTable termTable = new TermTable();
