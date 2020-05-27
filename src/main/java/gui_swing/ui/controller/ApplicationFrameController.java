@@ -2,6 +2,8 @@ package gui_swing.ui.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import gui_swing.ui.model.*;
+import gui_swing.ui.model.Components.ChangesPanel;
+import gui_swing.ui.model.Components.TermWindow;
 import gui_swing.ui.model.Listeners.MouseListeners;
 import gui_swing.ui.model.filters.*;
 import gui_swing.ui.model.tableModels.ObjectTableModel;
@@ -10,7 +12,6 @@ import net.atlanticbb.tantlinger.shef.HTMLEditorPane;
 import org.apache.poi.xwpf.usermodel.*;
 import org.docx4j.XmlUtils;
 import org.docx4j.convert.in.xhtml.XHTMLImporterImpl;
-import org.docx4j.openpackaging.exceptions.InvalidFormatException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.org.xhtmlrenderer.util.XRLog;
 
@@ -24,11 +25,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.math.BigInteger;
-import java.net.URI;
 import java.util.*;
 import java.util.List;
 
@@ -1459,6 +1456,7 @@ public class ApplicationFrameController {
 
     private void createNewTermWindow(Integer integerId) {
         TermWindow termFrame = new TermWindow(integerId);
+        termFrame.getFrame().setTitle(apiConnector.getTerm(integerId).getTitle());
     }
     public static <T> ArrayList<T> removeDuplicates(ArrayList<T> list)
     {
@@ -1868,6 +1866,7 @@ public class ApplicationFrameController {
         updateTermButton.setVisible(false);
         redirectTermToIndicatedAuthorButton.setVisible(false);
         cardLayout2.show(topDetailsPanel, topDetailsPanelBlank.getName());
+        cardLayout1.show(bottomDetailsPanel,bottomDetailsBlankPanel.getName());
     }
 
     private  void renderTermTable() {
@@ -1891,6 +1890,19 @@ public class ApplicationFrameController {
         paginatedDecorator.getContentPanel();
         JPanel jPanel = new JPanel(new BorderLayout());
         JLabel jLabel = new JLabel(String.format("Znaleziono %s haseł.",apiConnector.getResponseList().size()));
+        JButton replaceInSelected = new JButton("Zamień w wyszukanych");
+        jPanel.add(replaceInSelected,BorderLayout.WEST);
+        replaceInSelected.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ArrayList<Long>longs = new ArrayList<>();
+                for (Term term:apiConnector.getResponseList()
+                     ) {
+                    longs.add(term.getId());
+                }
+                new ChangesPanel(longs);
+            }
+        });
        jPanel.add(jLabel,BorderLayout.EAST);
         frame.add(jPanel,BorderLayout.NORTH);
         frameWithTerms.add(paginatedDecorator.getContentPanel(),BorderLayout.CENTER);

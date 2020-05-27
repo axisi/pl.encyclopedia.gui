@@ -1,15 +1,16 @@
-package gui_swing.ui.model;
+package gui_swing.ui.model.Components;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import gui_swing.ui.controller.ApplicationFrameController;
+import gui_swing.ui.model.*;
 import gui_swing.ui.model.Listeners.MouseListeners;
 import gui_swing.ui.model.Listeners.TermListeners;
 import gui_swing.ui.model.tableModels.AuthorTermTableModel;
-import gui_swing.ui.view.ApplicationFrame;
 import net.atlanticbb.tantlinger.shef.HTMLEditorPane;
-import org.apache.commons.lang3.StringEscapeUtils;
+import net.atlanticbb.tantlinger.ui.text.AbstractEditor;
 
 import javax.swing.*;
+import javax.swing.event.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 import java.awt.*;
@@ -17,10 +18,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
+import java.util.regex.Pattern;
 
 public class TermWindow {
     private ArrayList<String> tagsStrings = ApplicationFrameController.getApplicationFrame().getTagsStrings();
@@ -62,15 +63,29 @@ public class TermWindow {
 
     private JLabel actualVersionLabel;
     private JLabel editedVersionLabel;
-    private  ApiConnector apiConnector;
+    private ApiConnector apiConnector;
 
     private  JButton updateTermButton;
     private JButton referencesButton;
+    private JButton allVersionsButton;
+
+    private ArrayList<ReferencesPanel> referencesPanelArrayList;
+
+
+
+    private String temporaryContent;
+    private boolean temporaryIsSelected =false;
+    private Integer temporaryPosition;
+    private int temporaryLength;
+    private AbstractEditor htmlTextArea;
+
+
+    private  JButton replacePhrasesButton;
+
+
+
 
     private ReferencesPanel referencesPanel;
-
-
-
 
     public TermWindow(Integer id){
 
@@ -156,7 +171,29 @@ public class TermWindow {
     }
 
     private void prepareForm() {
+       /* observableList = FXCollections.observableArrayList();
+        observableList.addListener(new InvalidationListener() {
+            @Override
+            public void invalidated(Observable observable) {
+
+            }
+        });*/
         this.setFrame(new JFrame());
+        referencesPanelArrayList = new ArrayList<>();
+        getFrame().setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        getFrame().addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                for (ReferencesPanel referencesPanel: referencesPanelArrayList
+                     ) {
+                    referencesPanel.dispose();
+                }
+                jFrame.dispose();
+            }
+
+
+        });
+
         this.setTopPanel(new JPanel());
         this.setTextPanel(new JPanel());
         this.setTopLeftPanel(new JPanel());
@@ -275,6 +312,7 @@ public class TermWindow {
         updateTermButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                clearSelection();
                 Long termHistoryId;
                 String category = categoryComboBox.getModel().getSelectedItem().toString();
                 String subcategory = subCategoryComboBox.getModel().getSelectedItem().toString();
@@ -303,6 +341,14 @@ public class TermWindow {
             }
         });
         bottomTopPanel.add(updateTermButton);
+        replacePhrasesButton = new JButton("Zamień wiele...");
+        replacePhrasesButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ChangesPanel changesPanel = new ChangesPanel();
+            }
+        });
+        bottomTopPanel.add(replacePhrasesButton);
 
         //buttonsPanel end
         // fullTextPanel
@@ -310,12 +356,12 @@ public class TermWindow {
         bottomBottomPanel.setLayout(new BorderLayout());
         JTextField fullTextSearchField = new JTextField();
         fullTextSearchField.setPreferredSize(new Dimension(250,20));
-        JButton fullTextSearchButton = new JButton(new ImageIcon("src/main/resources/img/arrows/search.png"));
+        JButton fullTextSearchButton = new JButton(new ImageIcon(getClass().getResource("/img/arrows/search.png")));
         fullTextSearchButton.setPreferredSize(new Dimension(30,30));
-        //JRadioButton findInCurrentText = new JRadioButton("W tym haśle",null,true);
-        JRadioButton findInOtherTerms= new JRadioButton("Wszystkie..,",null,true);
+        JRadioButton findInCurrentText = new JRadioButton("W tym haśle",null,true);
+        JRadioButton findInOtherTerms= new JRadioButton("Wszystkie..,",null,false);
         JRadioButton findInOtherTermsAllVersions = new JRadioButton("Wszystkie*...");
-        //findInCurrentText.setToolTipText("Szukaj w tym haśle");
+        findInCurrentText.setToolTipText("Szukaj w tym haśle");
         findInOtherTerms.setToolTipText("Szukaj w innych hasłach");
         findInOtherTermsAllVersions.setToolTipText("Szukaj we wszystkich wersjach innych haseł");
 
@@ -323,7 +369,7 @@ public class TermWindow {
         JLabel fullTextLabel = new JLabel();
         fullTextLabel.setForeground(Color.RED);
         fullTextPanel.add(fullTextLabel);
-        //fullTextPanel.add(findInCurrentText);
+        fullTextPanel.add(findInCurrentText);
         fullTextPanel.add(findInOtherTerms);
         fullTextPanel.add(findInOtherTermsAllVersions);
         fullTextPanel.add(fullTextSearchField);
@@ -355,7 +401,15 @@ public class TermWindow {
                         fullTextLabel.setText("Szukana fraza nie może być pusta");
                     }
                 }else{
-                    fullTextLabel.setText("Wybierz jedną z opcji przeszukiwania.");
+
+                    if(findInCurrentText.isSelected()){
+                        if(fullTextSearchField.getText().length()>0){
+                            findInThisText(fullTextSearchField.getText());
+                        }else {
+                            fullTextLabel.setText("Szukana fraza nie może być pusta");
+                        }
+                    }else
+                        fullTextLabel.setText("Wybierz jedną z opcji przeszukiwania.");
                 }
             }
         });
@@ -371,24 +425,96 @@ public class TermWindow {
         referencesButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                    referencesPanel = new ReferencesPanel(termId);
-                    referencesPanel.setTitle(apiConnector.getTerm(termId).getTitle());
+                  ReferencesPanel  referencesPanel1 = new ReferencesPanel(termId);
+                    referencesPanel1.setTitle(apiConnector.getTerm(termId).getTitle());
                     //referencesPanel.setPreferredSize(new Dimension(600,400));
-                    referencesPanel.setMinimumSize(new Dimension(950,400));
-                    referencesPanel.setVisible(true);
+                    referencesPanel1.setMinimumSize(new Dimension(950,400));
+                    Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+                    referencesPanel1.setLocation(dim.width/2-referencesPanel1.getSize().width/2, dim.height/2-referencesPanel1.getSize().height/2);
+                    referencesPanel1.setVisible(true);
+                    referencesPanelArrayList.add(referencesPanel1);
             }
         });
         //references
+        //Versions
+        allVersionsButton = new JButton("Wersje hasła...");
+        bottomTopPanel.add(allVersionsButton);
+        allVersionsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new TermVersionPanel(termId.longValue());
+            }
+        });
+
+
+        //Versions
 
         textPanel.setLayout(new BorderLayout());
         htmlEditorPane= new HTMLEditorPane();
-        //findInCurrentText.addActionListener(new TermListeners.RadioButtonsActionListener(findInCurrentText,findInOtherTerms,findInOtherTermsAllVersions));
-        findInOtherTerms.addActionListener(new TermListeners.RadioButtonsActionListener(findInOtherTerms,findInOtherTermsAllVersions));
-        findInOtherTermsAllVersions.addActionListener(new TermListeners.RadioButtonsActionListener(findInOtherTermsAllVersions,findInOtherTerms));
+        findInCurrentText.addActionListener(new TermListeners.RadioButtonsActionListener(findInCurrentText,findInOtherTerms,findInOtherTermsAllVersions));
+        findInOtherTerms.addActionListener(new TermListeners.RadioButtonsActionListener(findInOtherTerms,findInOtherTermsAllVersions,findInCurrentText));
+        findInOtherTermsAllVersions.addActionListener(new TermListeners.RadioButtonsActionListener(findInOtherTermsAllVersions,findInOtherTerms,findInCurrentText));
         textPanel.add(htmlEditorPane,BorderLayout.CENTER);
+        htmlTextArea = htmlEditorPane.getSelectedEditor();
+
+
+
+
+        htmlTextArea.getDocument().addDocumentListener(new DocumentListener() {
+             @Override
+             public void insertUpdate(DocumentEvent e) {
+                 markListenerMethod(true);
+             }
+
+             @Override
+             public void removeUpdate(DocumentEvent e) {
+                 markListenerMethod(false);
+             }
+
+             @Override
+             public void changedUpdate(DocumentEvent e) {
+                 //markListenerMethod();
+             }
+         });
+
+
+
+
+
         jFrame.setMinimumSize(new Dimension(1000, 600));
         jFrame.setVisible(true);
 
+    }
+
+    private void markListenerMethod(Boolean operation) {
+        if(temporaryIsSelected){
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    temporaryPosition =(operation==true)? htmlEditorPane.getCaretPosition()-1:htmlEditorPane.getCaretPosition()+1;
+                    clearSelection();
+                }
+            });
+        }
+    }
+
+    private void findInThisText(String text) {
+        clearSelection();
+
+        temporaryContent = htmlEditorPane.getText();
+
+        temporaryPosition = htmlEditorPane.getCaretPosition();
+        htmlEditorPane.setText(findInTextAndMarkIt(text));
+        temporaryLength = htmlEditorPane.getText().length();
+        temporaryIsSelected= true;
+
+    }
+
+    private void clearSelection() {
+        if(temporaryIsSelected){
+            htmlEditorPane.setText(temporaryContent);
+            htmlEditorPane.setCaretPosition(temporaryPosition);
+            temporaryIsSelected=false;
+        }
     }
 
     private void renderTermTable() {
@@ -518,12 +644,22 @@ public class TermWindow {
 
         //content = "&#260; &#261; &#262; &#263; &#280; &#281; &#321; &#322; &#323; &#324; &#211; &#243; &#346; &#347; &#377; &#378; &#379; &#380;";
         content = NCRConverter.convertNcrToText(content);
-
+        Integer contentLength = content.length();
         //content = content.replaceAll("(text)(?![^<]*>|[^<>]*</)","<style=\"color: #bfff00\">"+text+"</style>");
-         //content = content.replaceAll("("+text+")(?![^<]*>)","<font= size=\"7\" face=\"Times New Roman,serif\" color=\"#ed2fc4\">"+text+"</font>");
-         content = content.replaceAll("("+text+")(?![^<]*>)","<t>"+text+"</t>");
+         //content = content.replaceAll("("+text+")(?![^<]*>)","<font= size=\"12\" face=\"Times New Roman,serif\" background-color=\"#bfff00\">"+text+"</font>");
+         content = content.replaceAll("("+ Pattern.quote(text) +")(?![^<]*>)","<span style=\"background-color:#00ff80;\">"+text+"</span>");
+         //content = content.replaceAll("("+text+")(?![^<]*>)","<t>"+text+"</t>");
+        if(contentLength!=content.length())
+            return content;
+        else{
+            String content1=NCRConverter.html2text(content);
+            if(content1.length()!=content1.replaceAll(Pattern.quote(text),"").length()){
 
-        return content;
+                return content1.replaceAll(Pattern.quote(text),"<span style=\"background-color:#00ff80;\">"+text+"</span>");
+
+            }else
+                return content;
+        }
     }
 
     public static void packFormDataToEntity(TermHistory termHistory, Term term,JList statusesList,JList tagsList,JTable authorsTable) {
@@ -835,5 +971,28 @@ public class TermWindow {
 
     public void setTextPanel(JPanel textPanel) {
         this.textPanel = textPanel;
+    }
+    public String getTemporaryContent() {
+        return temporaryContent;
+    }
+
+    public void setTemporaryContent(String temporaryContent) {
+        this.temporaryContent = temporaryContent;
+    }
+
+    public boolean isTemporaryIsSelected() {
+        return temporaryIsSelected;
+    }
+
+    public void setTemporaryIsSelected(boolean temporaryIsSelected) {
+        this.temporaryIsSelected = temporaryIsSelected;
+    }
+
+    public Integer getTemporaryPosition() {
+        return temporaryPosition;
+    }
+
+    public void setTemporaryPosition(Integer temporaryPosition) {
+        this.temporaryPosition = temporaryPosition;
     }
 }

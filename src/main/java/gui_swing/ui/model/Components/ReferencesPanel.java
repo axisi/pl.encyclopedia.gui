@@ -1,12 +1,18 @@
-package gui_swing.ui.model;
+package gui_swing.ui.model.Components;
 
+import gui_swing.ui.model.ApiConnector;
 import gui_swing.ui.model.Listeners.TermListeners;
+import gui_swing.ui.model.NCRConverter;
+import gui_swing.ui.model.ReferencesSearchPanel;
+import gui_swing.ui.model.Term;
 import gui_swing.ui.model.tableModels.ReferencesTermTableModel;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 
 public class ReferencesPanel extends JFrame {
@@ -41,14 +47,39 @@ public class ReferencesPanel extends JFrame {
     private JButton rDeleteButton;
     private JLabel rErrorLabel;
 
+    private ReferencesPanel referencesPanel;
+
+
+
     // options panels
 
 
-
+    private ArrayList<ReferencesSearchPanel> referencesSearchPanels = new ArrayList<>();
     private Integer termId;
 
     public ReferencesPanel(Integer termId){
         super();
+
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                for (ReferencesSearchPanel referencesSearchPanel : referencesSearchPanels
+                     ) {
+                    referencesSearchPanel.dispose();
+                }
+                dispose();
+            }
+
+            @Override
+            public void windowClosed(WindowEvent e) {
+                for (ReferencesSearchPanel referencesSearchPanel : referencesSearchPanels
+                ) {
+                    referencesSearchPanel.dispose();
+                }
+                dispose();
+            }
+        });
         this.setTermId(termId);
         apiConnector = new ApiConnector();
         mainPanel= new JPanel();
@@ -68,7 +99,7 @@ public class ReferencesPanel extends JFrame {
         strings.addElement("Tytuł");*/
         termContainingReferencesToTable = new JTable(new ReferencesTermTableModel());
         termContainingReferencesToScrollPanel = new JScrollPane(termContainingReferencesToTable);
-        fillTableWithTerms(apiConnector.getTermReferences(termId),termContainingReferencesToTable);
+        fillLeftTable(termId);
 
 
 
@@ -114,12 +145,15 @@ public class ReferencesPanel extends JFrame {
 
 
         // options panels
+        referencesPanel = this;
+
     }
 
     private void prepareOptionPanel(JPanel rootPanel, JPanel topPanel,
                                     JPanel botPanel, JButton proposalButton,
                                     JTextField textField,JButton searchButton, JButton deleteButton,
                                     JLabel errorLabel, ApiConnector apiConnector,Integer option) {
+
         rootPanel.setLayout(new BorderLayout());
         topPanel = new JPanel(new FlowLayout());
         botPanel = new JPanel();
@@ -130,11 +164,12 @@ public class ReferencesPanel extends JFrame {
         textField.setMaximumSize(new Dimension(150,30));
         textField.setPreferredSize(new Dimension(150,30));
 
-        searchButton = new JButton(new ImageIcon("src/main/resources/img/arrows/search.png"));
+        searchButton = new JButton(new ImageIcon(getClass().getResource("/img/arrows/search.png")));
         searchButton.setPreferredSize(new Dimension(30,30));
         deleteButton = new JButton("Usuń wiersz");
         deleteButton.setToolTipText("Usuń wiersz");
         errorLabel= new JLabel("Test");
+
 
         topPanel.add(proposalButton);
         topPanel.add(textField);
@@ -148,26 +183,131 @@ public class ReferencesPanel extends JFrame {
         rootPanel.add(topPanel,BorderLayout.NORTH);
         rootPanel.add(botPanel,BorderLayout.SOUTH);
 
+
         switch (option){
             case 1:
                 errorLabel.setText("W haśle znaleziono "+howManyReferencesInTerm()+" potencjalnych referencji.");
                 proposalButton.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        ReferencesSearchPanel referencesSearchPanel = new ReferencesSearchPanel(option,getTermId());
-                        referencesSearchPanel.setMinimumSize(new Dimension(600,500));
+                        ReferencesSearchPanel referencesSearchPanel = new ReferencesSearchPanel(1,getTermId(),referencesPanel);
+                        referencesSearchPanels.add (referencesSearchPanel);
+                        referencesSearchPanel.setMinimumSize(new Dimension(600,550));
+                        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+                        referencesSearchPanel.setLocation(dim.width/2-referencesSearchPanel.getSize().width/2, dim.height/2-referencesSearchPanel.getSize().height/2);
                         referencesSearchPanel.setVisible(true);
+                    }
+                });
+
+
+                searchButton.addActionListener(new searchButtonActionListenerL(textField,errorLabel,3));
+                deleteButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        if (termContainingReferencesToTable.getSelectedRow()>-1){
+                            Integer referenceId = (Integer) termContainingReferencesToTable.getValueAt(termContainingReferencesToTable.getSelectedRow(),0);
+                            Boolean result = apiConnector.deleteTermReference(termId,referenceId);
+                            fillLeftTable(termId);
+                        }
                     }
                 });
             break;
             default:
+                errorLabel.setText("Aby wygenerować ewentualne propozycje wciśnij'Generuj propozycje'");
+                proposalButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        ReferencesSearchPanel referencesSearchPanel = new ReferencesSearchPanel(2,getTermId(),referencesPanel);
+                        referencesSearchPanels.add (referencesSearchPanel);
 
+                        referencesSearchPanel.setMinimumSize(new Dimension(600,550));
+                        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+                        referencesSearchPanel.setLocation(dim.width/2-referencesSearchPanel.getSize().width/2, dim.height/2-referencesSearchPanel.getSize().height/2);
+                        referencesSearchPanel.setVisible(true);
+                    }
+                });
 
+                searchButton.addActionListener(new searchButtonActionListenerL(textField,errorLabel,4));
+
+                deleteButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        if (termsContainingReferencesToThisTermTable.getSelectedRow()>-1){
+                            Integer referenceId = (Integer) termsContainingReferencesToThisTermTable.getValueAt(termsContainingReferencesToThisTermTable.getSelectedRow(),0);
+                            Boolean result = apiConnector.deleteTermReferenced(termId,referenceId);
+                            fillRightTable(termId);
+                        }
+                    }
+                });
         }
 
 
 
     }
+
+    private Integer howManyReferencesIsOtherTerms() {
+        Integer counter = 0;
+        for (Term t: apiConnector.getTermForWhomThisTermIsReferencedProposal(getTermId())
+             ) {
+            counter++;
+        }
+        return counter;
+
+    }
+
+
+
+    private class  searchButtonActionListenerL implements ActionListener{
+        JTextField textField;
+        JLabel jLabel;
+        Integer option;
+
+        public searchButtonActionListenerL(JTextField textField, JLabel jLabel,Integer option) {
+            this.textField = textField;
+            this.jLabel = jLabel;
+            this.option = option;
+        }
+
+        public JTextField getTextField() {
+            return textField;
+        }
+
+        public void setTextField(JTextField textField) {
+            this.textField = textField;
+        }
+
+        public JLabel getjLabel() {
+            return jLabel;
+        }
+
+        public void setjLabel(JLabel jLabel) {
+            this.jLabel = jLabel;
+        }
+
+        public Integer getOption() {
+            return option;
+        }
+
+        public void setOption(Integer option) {
+            this.option = option;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if(textField.getText().length()>0){
+                ReferencesSearchPanel referencesSearchPanel = new ReferencesSearchPanel(option,getTermId(),referencesPanel,textField.getText());
+                referencesSearchPanels.add (referencesSearchPanel);
+                referencesSearchPanel.setMinimumSize(new Dimension(600,550));
+                Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+                referencesSearchPanel.setLocation(dim.width/2-referencesSearchPanel.getSize().width/2, dim.height/2-referencesSearchPanel.getSize().height/2);
+                referencesSearchPanel.setVisible(true);
+            }else{
+                jLabel.setText("Szukana fraza nie moze być pusta.");
+            }
+        }
+    }
+
+
 
     private  Integer howManyReferencesInTerm() {
         String content= apiConnector.getActualTermHistoryOfTerm(getTermId()).getContent();
@@ -205,4 +345,19 @@ public class ReferencesPanel extends JFrame {
     }
 
 
+    public void fillLeftTable(Integer termId) {
+        fillTableWithTerms(apiConnector.getTermReferences(termId),termContainingReferencesToTable);
+
+    }
+    public void fillRightTable(Integer termId) {
+        fillTableWithTerms(apiConnector.getTermForWhomThisTermIsReferenced(termId),termsContainingReferencesToThisTermTable);
+    }
+
+    public JButton getlSearchButton() {
+        return lSearchButton;
+    }
+
+    public void setlSearchButton(JButton lSearchButton) {
+        this.lSearchButton = lSearchButton;
+    }
 }

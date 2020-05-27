@@ -7,11 +7,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gui_swing.ui.model.filters.ListsF;
 
+import javax.swing.*;
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -442,7 +444,8 @@ public  class ApiConnector {
         invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
         Response response =  invocationBuilder.post(Entity.entity(idsOfFoundTerms,MediaType.APPLICATION_JSON));
         responseList = response.readEntity(new GenericType<List<Term>>(){});
-        if(responseList.get(0).getId()==-1L)
+
+        if(responseList.isEmpty())
             this.setEmpty(true);
         else
             this.setEmpty(false);
@@ -490,5 +493,64 @@ public  class ApiConnector {
         invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
         return invocationBuilder.get(new GenericType<Boolean>(){});
 
+    }
+    public Boolean addReferencedToTerm(Integer termId, Integer referencedId) {
+        webTarget = client.target(apiURI).path("term/referenced/add/"+termId+"/"+referencedId);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return invocationBuilder.get(new GenericType<Boolean>(){});
+
+    }
+
+    public Boolean deleteTermReference(Integer termId, Integer referenceId) {
+        webTarget = client.target(apiURI).path("term/reference/delete/"+termId+"/"+referenceId);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return invocationBuilder.get(new GenericType<Boolean>(){});
+    }
+
+    public Boolean deleteTermReferenced(Integer termId, Integer referenceId) {
+        webTarget = client.target(apiURI).path("term/referenced/delete/"+termId+"/"+referenceId);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return invocationBuilder.get(new GenericType<Boolean>(){});
+    }
+
+    public void updateTermHistory(Long aLong, TermHistory termHistory) {
+        webTarget = client.target(apiURI).path("termHistory/add/"+aLong);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        invocationBuilder.post(Entity.entity(termHistory,MediaType.APPLICATION_JSON));
+
+    }
+
+    public String getCreatedByOfTermHistory(Long id) {
+        webTarget = client.target(apiURI).path("termHistory/createdBy/"+id);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return invocationBuilder.get(new GenericType<String>(){});
+    }
+
+    public static class GradientButton extends JButton {
+       private Color color;
+        public GradientButton(String name, Color color) {
+            super(name);
+            setContentAreaFilled(false);
+            setFocusPainted(false); // used for demonstration
+            this.color = color;
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            final Graphics2D g2 = (Graphics2D) g.create();
+            g2.setPaint(new GradientPaint(
+                    new Point(0, 0),
+                    Color.WHITE,
+                    new Point(0, getHeight()),
+                    color));
+            g2.fillRect(0, 0, getWidth(), getHeight());
+            g2.dispose();
+
+            super.paintComponent(g);
+        }
+
+        public static GradientButton newInstance(String name, Color color) {
+            return new GradientButton(name,color);
+        }
     }
 }
