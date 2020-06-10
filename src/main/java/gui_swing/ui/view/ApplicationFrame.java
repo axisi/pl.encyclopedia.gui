@@ -1442,7 +1442,7 @@ public class ApplicationFrame extends JFrame {
         authorHeaders1.addElement("Id");
         authorHeaders1.addElement("Imię");
         authorHeaders1.addElement("Nazwisko");
-        authorHeaders1.addElement("Podpis");
+        authorHeaders1.addElement("Telefon");
         authorHeaders1.addElement("Email");
         authorHeaders1.addElement("Ilość przypisanych haseł");
 
@@ -1885,9 +1885,9 @@ public class ApplicationFrame extends JFrame {
         TermsList = new JList();
         TermsList.setBackground(new Color(-12748334));
         final DefaultListModel defaultListModel2 = new DefaultListModel();
-        defaultListModel2.addElement("Pokaż wszystkie");
-        defaultListModel2.addElement("Pokaż według filtrów");
-        defaultListModel2.addElement("Nowe hasło");
+        defaultListModel2.addElement("Wszystkie");
+        defaultListModel2.addElement("Filtruj");
+        defaultListModel2.addElement("Dodaj hasło");
         TermsList.setModel(defaultListModel2);
         TermsList.setOpaque(false);
         TermsList.setSelectionMode(0);
@@ -2076,7 +2076,7 @@ public class ApplicationFrame extends JFrame {
         bottomDetailsTermsPanel.setBackground(new Color(-12511981));
         bottomDetailsTermsPanel.setName("bottomDetailsTermsPanel");
         bottomDetailsTermsPanel.setOpaque(false);
-        bottomDetailsTermsPanel.setVisible(true);
+        bottomDetailsTermsPanel.setVisible(false);
         bottomDetailsPanel.add(bottomDetailsTermsPanel, "bottomDetailsTermsPanel");
         termsTableScrollPane = new JScrollPane();
         termsTableScrollPane.setAutoscrolls(true);
@@ -2124,7 +2124,7 @@ public class ApplicationFrame extends JFrame {
         surnameTextField = new JTextField();
         panel5.add(surnameTextField, new GridConstraints(1, 3, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, new Dimension(150, -1), null, 0, false));
         final JLabel label10 = new JLabel();
-        label10.setText("Podpis: ");
+        label10.setText("Telefon:");
         panel5.add(label10, new GridConstraints(1, 4, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 1, false));
         signTextField = new JTextField();
         panel5.add(signTextField, new GridConstraints(1, 5, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, new Dimension(150, -1), null, 0, false));

@@ -1,6 +1,7 @@
 package gui_swing.ui.model.Components;
 
 import gui_swing.ui.model.*;
+import gui_swing.ui.model.tableModels.GradientButton;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
@@ -13,6 +14,7 @@ public class ChangesPanel extends JFrame {
 
 
     private ArrayList<Long> termsArray;
+    private ArrayList<Long> termsArrayConst;
     private Integer index;
     private String searchedString;
     private String replacedString;
@@ -42,9 +44,9 @@ public class ChangesPanel extends JFrame {
     private JTextField replacedText;
 
     private JButton startButton;
-    private ApiConnector.GradientButton acceptButton;
-    private ApiConnector.GradientButton skipButton;
-    private ApiConnector.GradientButton cancelButton;
+    private GradientButton acceptButton;
+    private GradientButton skipButton;
+    private GradientButton cancelButton;
 
     private JCheckBox caseSensitiveCheckBox;
 
@@ -59,10 +61,11 @@ public class ChangesPanel extends JFrame {
     public ChangesPanel(ArrayList<Long> list){
         super();
         this.termsArray = list;
+        this.termsArrayConst = (ArrayList<Long>) list.clone();
 
 
         apiConnector = new ApiConnector();
-        if(Objects.isNull(termsArray))
+        if(Objects.isNull(termsArrayConst))
             termsArray = new ArrayList<>();
 
         mainPanel= new JPanel();
@@ -170,9 +173,9 @@ public class ChangesPanel extends JFrame {
         leftScrollPane.setPreferredSize(new Dimension(600,650));
         leftScrollPane.setMaximumSize(new Dimension(800,800));
         topCenterPane.setVisible(false);
-        acceptButton = new ApiConnector.GradientButton("Zatwierdź",Color.GREEN.darker());
-        skipButton = new ApiConnector.GradientButton("Odrzuć",Color.YELLOW.darker());
-        cancelButton = new ApiConnector.GradientButton("Anuluj",Color.pink.darker());
+        acceptButton = new GradientButton("Zatwierdź",Color.GREEN.darker());
+        skipButton = new GradientButton("Odrzuć",Color.YELLOW.darker());
+        cancelButton = new GradientButton("Anuluj",Color.pink.darker());
 
 
         topBottomPane.add(acceptButton);
@@ -189,12 +192,11 @@ public class ChangesPanel extends JFrame {
                 searchedString = searchedText.getText();
                 replacedString = replacedText.getText();
                 if(termsArray.size()==0){
-                    //apiConnector.getTermsByFullText((ArrayList<Long>) apiConnector.findTermsWitchActualVersionContentContains(searchedString));
-                    /*for (Term t: apiConnector.findTermsWitchActualVersionContentContains(searchedString)
-                    ) {
-                        termsArray.add(t.getId());
-                    }*/
-                    termsArray = (ArrayList<Long>) apiConnector.findTermsWitchActualVersionContentContains(searchedString);
+                   if(termsArrayConst.size()==0){
+                       termsArray = (ArrayList<Long>) apiConnector.findTermsWitchActualVersionContentContains(searchedString);
+                   }else
+                       termsArray= (ArrayList<Long>) termsArrayConst.clone();
+
                 }
                 topCenterPane.setVisible(true);
                 replacedText.setEditable(false);

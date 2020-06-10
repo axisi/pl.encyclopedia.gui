@@ -13,12 +13,22 @@ public class Author {
     private String name;
     private String surname;
     private String email;
-    private String sign;
+   // private String sign;
+    private String telephone;
+
     ArrayList< Object > listCategoryManager = new ArrayList < Object > ();
     ArrayList < Object > termHistoriesAuthors = new ArrayList < Object > ();
 
 
     // Getter Methods
+
+    public String getTelephone() {
+        return telephone;
+    }
+
+    public void setTelephone(String telephone) {
+        this.telephone = telephone;
+    }
 
     public float getId() {
         return id;
@@ -44,9 +54,9 @@ public class Author {
         return email;
     }
 
-    public String getSign() {
+    /*public String getSign() {
         return sign;
-    }
+    }*/
 
     // Setter Methods
 
@@ -74,7 +84,7 @@ public class Author {
         this.email = email;
     }
 
-    public void setSign(String sign) {
+    /*public void setSign(String sign) {
         this.sign = sign;
-    }
+    }*/
 }

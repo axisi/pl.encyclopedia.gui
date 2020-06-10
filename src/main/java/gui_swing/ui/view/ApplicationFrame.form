@@ -389,9 +389,9 @@
                             <properties>
                               <background color="-12748334"/>
                               <model>
-                                <item value="Pokaż wszystkie"/>
-                                <item value="Pokaż według filtrów"/>
-                                <item value="Nowe hasło"/>
+                                <item value="Wszystkie"/>
+                                <item value="Filtruj"/>
+                                <item value="Dodaj hasło"/>
                               </model>
                               <opaque value="false"/>
                               <selectionMode value="0"/>
@@ -852,7 +852,7 @@
                           <background color="-12511981"/>
                           <name value="bottomDetailsTermsPanel"/>
                           <opaque value="false"/>
-                          <visible value="true"/>
+                          <visible value="false"/>
                         </properties>
                         <border type="none"/>
                         <children>
@@ -985,7 +985,7 @@
                                 </constraints>
                                 <properties>
                                   <labelFor value="a1602"/>
-                                  <text value="Podpis: "/>
+                                  <text value="Telefon:"/>
                                 </properties>
                               </component>
                               <component id="a1602" class="javax.swing.JTextField" binding="signTextField">

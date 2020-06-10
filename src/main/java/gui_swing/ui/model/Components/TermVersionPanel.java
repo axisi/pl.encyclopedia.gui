@@ -7,16 +7,19 @@ import gui_swing.ui.model.tableModels.TermVersionTableModel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.time.format.DateTimeFormatter;
 
 public class TermVersionPanel extends JFrame {
 
    private JPanel mainPanel;
    private JScrollPane scrollPane;
    private JTable jTable;
-   private Long termId;
+   private Integer termId;
    ApiConnector apiConnector;
 
-   public TermVersionPanel(Long termId){
+   public TermVersionPanel(Integer termId){
        super();
        this.termId = termId;
        apiConnector = new ApiConnector();
@@ -29,16 +32,37 @@ public class TermVersionPanel extends JFrame {
        Term term = apiConnector.getTerm(termId.intValue());
        setTitle("Wersje hasła: "+term.getTitle());
        TermVersionTableModel termVersionTableModel= (TermVersionTableModel) jTable.getModel();
+       DateTimeFormatter myFormatObj = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+       //jTable.setPreferredSize(new Dimension(600,550));
       for (TermHistory t: term.getTermHistories()
            ) {
-         termVersionTableModel.addRow(new Object[]{t.getVersion(),t.getCreationDate(),apiConnector.getCreatedByOfTermHistory(t.getId())});
+
+         termVersionTableModel.addRow(new Object[]{
+                 t.getVersion()
+                 ,t.getCreationDate().toLocalDateTime().format(myFormatObj)
+                 , term.getActualVersion() == t.getVersion()
+                 ,apiConnector.getStatusOfTermHistory(t.getId())
+                 ,apiConnector.getCreatedByOfTermHistory(t.getId())});
       }
        jTable.getTableHeader().setReorderingAllowed(false);
-       this.setMinimumSize(new Dimension(600,550));
+      jTable.getColumnModel().getColumn(0).setPreferredWidth(30);
+      jTable.getColumnModel().getColumn(1).setPreferredWidth(150);
+      //jTable.getTableHeader().setBackground(Color.BLUE);
+       scrollPane.setPreferredSize(new Dimension(700,650));
+       this.setMinimumSize(new Dimension(800,750));
        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
        this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
        this.setVisible(true);
-
+       jTable.addMouseListener(new MouseAdapter() {
+           @Override
+           public void mouseClicked(MouseEvent e) {
+               if(e.getClickCount()==2&&jTable.getSelectedRow()!=-1){
+                   new TermWindow(termId,
+                           apiConnector.getTermHistoryToTermWidthVersion(termId
+                                   ,Integer.valueOf(jTable.getValueAt(jTable.getSelectedRow(),0).toString())).getId().intValue());
+               }
+           }
+       });
 
 
    }

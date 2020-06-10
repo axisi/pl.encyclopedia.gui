@@ -1,34 +1,29 @@
 package gui_swing.ui.model.tableModels;
 
 import javax.swing.table.DefaultTableModel;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.Vector;
 
-public class TermVersionTableModel extends DefaultTableModel {
-    public TermVersionTableModel(Vector<?> columnNames, int rowCount) {
+public class UserOptionTableModel extends DefaultTableModel {
+
+    public UserOptionTableModel(Vector<?> columnNames, int rowCount) {
         super(columnNames, rowCount);
     }
 
-    public TermVersionTableModel() {
+    public UserOptionTableModel() {
     }
     @Override
     public int getColumnCount() {
-        return 5;
+        return 4;
     }
     @Override
     public Class<?> getColumnClass(int columnIndex) {
         switch (columnIndex){
             case 0:
                 return Integer.class;
-            case 1:
-                return DateTimeFormatter.class;
-            case 2:
-                return Boolean.class;
             default:
-                return String.class;
+                return  String.class;
+
         }
     }
     @Override
@@ -39,15 +34,13 @@ public class TermVersionTableModel extends DefaultTableModel {
     public String getColumnName(int column) {
         switch (column) {
             case 0:
-                return "Numer wersji";
+                return "Id";
             case 1:
-                return "Data stworzenia";
+                return "Login";
             case 2:
-                return "Czy aktualna";
-            case 3:
-                return "Status";
+                return "Email";
             default:
-                return "Utworzona przez";
+                return "Rola";
         }
     }
 }

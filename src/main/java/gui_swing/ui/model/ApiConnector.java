@@ -526,31 +526,56 @@ public  class ApiConnector {
         return invocationBuilder.get(new GenericType<String>(){});
     }
 
-    public static class GradientButton extends JButton {
-       private Color color;
-        public GradientButton(String name, Color color) {
-            super(name);
-            setContentAreaFilled(false);
-            setFocusPainted(false); // used for demonstration
-            this.color = color;
-        }
 
-        @Override
-        protected void paintComponent(Graphics g) {
-            final Graphics2D g2 = (Graphics2D) g.create();
-            g2.setPaint(new GradientPaint(
-                    new Point(0, 0),
-                    Color.WHITE,
-                    new Point(0, getHeight()),
-                    color));
-            g2.fillRect(0, 0, getWidth(), getHeight());
-            g2.dispose();
+    public TermHistory getTermHistoryToTermWidthVersion(Integer termId, Integer versionNumber) {
+        webTarget = client.target(apiURI).path("termHistory/term/"+termId+"/version/"+versionNumber);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return invocationBuilder.get(new GenericType<TermHistory>(){});
+    }
 
-            super.paintComponent(g);
-        }
+    public ArrayList<User> getAllEnabledUsers() {
+        webTarget = client.target(apiURI).path("users/enabled");
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return invocationBuilder.get(new GenericType<ArrayList<User>>(){});
+    }
 
-        public static GradientButton newInstance(String name, Color color) {
-            return new GradientButton(name,color);
-        }
+    public ArrayList<String> getAllRolesName() {
+        webTarget = client.target(apiURI).path("roles/names");
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return invocationBuilder.get(new GenericType<ArrayList<String>>(){});
+    }
+
+    public User getUser(Integer id) {
+        webTarget = client.target(apiURI).path("user/"+id);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return invocationBuilder.get(new GenericType<User>(){});
+    }
+
+    public Boolean hideUser(Integer id) {
+        webTarget = client.target(apiURI).path("user/hide/"+id);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+       return invocationBuilder.get(new GenericType<Boolean>(){});
+    }
+
+    public void updateUser(User user) {
+        webTarget = client.target(apiURI).path("user");
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        Response response =  invocationBuilder.put(Entity.entity(user,MediaType.APPLICATION_JSON));
+
+
+    }
+    public void addUser(User user) {
+        webTarget = client.target(apiURI).path("user");
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        Response response =  invocationBuilder.post(Entity.entity(user,MediaType.APPLICATION_JSON));
+
+
+    }
+
+
+    public UserRole getUserRole(Long id) {
+        webTarget = client.target(apiURI).path("userRole/user/"+id);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return invocationBuilder.get(new GenericType<UserRole>(){});
     }
 }

@@ -20,6 +20,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
@@ -81,14 +82,19 @@ public class TermWindow {
 
 
     private  JButton replacePhrasesButton;
+    private  JButton getStatusesToSubcategoryButton;
 
 
+
+    private Integer termHistoryId =-1;
 
 
     private ReferencesPanel referencesPanel;
 
-    public TermWindow(Integer id){
-
+    public TermWindow(Integer id, Integer ... termHistoryId){
+        if(termHistoryId.length!=0){
+            this.termHistoryId = termHistoryId[0];
+        }
         setTermId(id);
         prepareForm();
         fillForm();
@@ -116,7 +122,11 @@ public class TermWindow {
             CheckListItem checkListItem = (CheckListItem) tagsList.getModel().getElementAt(i);
             checkListItem.setSelected(apiConnector.isTagMarksTerm(apiConnector.getTagId(checkListItem.toString()), termId.longValue()));
         }
-        TermHistory termHistory = apiConnector.getActualTermHistoryOfTerm(termId);
+        TermHistory termHistory;
+        if(termHistoryId==-1)
+            termHistory = apiConnector.getActualTermHistoryOfTerm(termId);
+        else
+            termHistory = apiConnector.getTermHistory(termHistoryId.longValue());
         ApplicationFrameController.renderTermsFilters.setJListCheckBoxFeatures(statusesList, 0);
         statusesList.addMouseListener(new MouseListeners.CheckListItemMouseListenerStatuses());
         fillTermHistoryDetailsIntoForm(apiConnector, termId, editedVersionLabel, statusesList);
@@ -442,12 +452,56 @@ public class TermWindow {
         allVersionsButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new TermVersionPanel(termId.longValue());
+                new TermVersionPanel(termId);
             }
         });
 
 
         //Versions
+        //addReferencesButton add
+        getStatusesToSubcategoryButton = new JButton("Pobierz statusy podkategorii");
+        getStatusesToSubcategoryButton.setToolTipText("Pobierz statusy podkategorii");
+        bottomTopPanel.add(getStatusesToSubcategoryButton);
+        getStatusesToSubcategoryButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String subcategoryText= subCategoryComboBox.getSelectedItem().toString();
+                if (Objects.isNull(subcategoryText)){
+
+                }else
+                {
+                    ArrayList<String> strings = apiConnector.getStatusesOfSubcategory(subcategoryText);
+                  /*  statusesList.setListData(null);
+                  DefaultListModel defaultListModel =  (DefaultListModel) statusesList.getModel();
+                  defaultListModel.removeAllElements();*/
+
+
+
+
+
+
+                        CheckListItem[] checkListItems = new CheckListItem[strings.size()];
+                        for (int i = 0; i < strings.size(); i++) {
+                            if (i==0)
+                                checkListItems[i] = new CheckListItem(strings.get(i), true);
+                            else
+                                checkListItems[i] = new CheckListItem(strings.get(i), false);
+
+                        }
+                        //statusesTermJList.setSelectionModel(new NoSelectionModel());
+                        statusesList.setListData(checkListItems);
+                        //statusesTermJList.removeMouseListener(checkListItemMouseListenerStatuses);
+
+                        //renderTermsFilters.setTagsJList(statusesTermJList,statuses);
+
+
+
+
+                }
+            }
+        });
+
+        //addReferencesButton add
 
         textPanel.setLayout(new BorderLayout());
         htmlEditorPane= new HTMLEditorPane();

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import gui_swing.ui.model.*;
 import gui_swing.ui.model.Components.ChangesPanel;
 import gui_swing.ui.model.Components.TermWindow;
+import gui_swing.ui.model.Components.UsersOptionPanel;
 import gui_swing.ui.model.Listeners.MouseListeners;
 import gui_swing.ui.model.filters.*;
 import gui_swing.ui.model.tableModels.ObjectTableModel;
@@ -300,41 +301,13 @@ public class ApplicationFrameController {
 
         shefPanel = applicationFrame.getShefPanel();
         htmlEditorPane = new HTMLEditorPane();
-       // JMenuBar jMenuBar = new JMenuBar();
-                /*JFrame frame = new JFrame();
-                frame.getContentPane().add(htmlEditorPane);
-                frame.setVisible(true);*/
-        //editorPane1 =null;
 
-       /* jMenuBar.add(htmlEditorPane.getEditMenu());
-        jMenuBar.add(htmlEditorPane.getFormatMenu());
-        jMenuBar.add(htmlEditorPane.getInsertMenu());*/
-         //htmlEditorPane.getInsertMenu().setEnabled(true);
-
-        //shefPanel.add(jMenuBar, BorderLayout.PAGE_START);
         shefPanel.add(htmlEditorPane, BorderLayout.CENTER);
         htmlEditorPane.setAutoscrolls(true);
         htmlEditorPane.setOpaque(false);
         htmlEditorPane.setWysiwygEnabled(true);
         htmlEditorPane.setToolBarVisible(true);
-      /*  try {
-            UIManager.setLookAndFeel(
-                    UIManager.getSystemLookAndFeelClassName());
-        } catch(Exception ex){}*/
-        /* HTMLEditorPane htmlEditorPane1 = new HTMLEditorPane();
 
-        JMenuBar menuBar = new JMenuBar();
-        menuBar.add(htmlEditorPane1.getEditMenu());
-        menuBar.add(htmlEditorPane1.getFormatMenu());
-        menuBar.add(htmlEditorPane1.getInsertMenu());
-
-        JFrame jframe = new JFrame();
-        jframe.setJMenuBar(menuBar);
-
-        jframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        jframe.setSize(800, 600);
-        jframe.getContentPane().add(htmlEditorPane1);
-        jframe.setVisible(true);*/
 
 
         updateTermButton = applicationFrame.getUpdateTermButton();
@@ -510,7 +483,7 @@ public class ApplicationFrameController {
                 if (e.getValueIsAdjusting()) {
                     if (iconLabelFlag) {
                         switch (termsList.getSelectedValue().toString()) {
-                            case "Pokaż wszystkie":
+                            case "Wszystkie":
                                 //System.out.println( bottomDetailsTermsPanel.getName());
 
                                    hideFiltersSearchPanels();
@@ -524,7 +497,7 @@ public class ApplicationFrameController {
 
 
                                 break;
-                            case "Pokaż według filtrów":
+                            case "Filtruj":
                                 hideFiltersSearchPanels();
                                 // System.out.println( bottomDetailsBlankPanel.getName());
                                 cardLayout1.show(bottomDetailsPanel, bottomDetailsBlankPanel.getName());
@@ -562,11 +535,12 @@ public class ApplicationFrameController {
                                 cardLayout1.show(bottomDetailsPanel, bottomDetailsBlankPanel.getName());
                                 break;
 
-                            case "Nowe hasło":
+                            case "Dodaj hasło":
                                 hideFiltersSearchPanels();
                                 cardLayout1.show(bottomDetailsPanel, bottomDetailsTermPanel.getName());
 
                                 addTermButton.setVisible(true);
+                                getStatusesForSubcategoryButton.setVisible(true);
 
                                 prepareTermForm(true);
 
@@ -586,19 +560,7 @@ public class ApplicationFrameController {
         });
         // Authors begin---------------------------------------------------------------------------------------------------------
 
-        /*markReferenceButton.addActionListener(new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                HTMLEditorPane htmlEditorPane = new HTMLEditorPane();
-                *//*JFrame frame = new JFrame();
-                frame.getContentPane().add(htmlEditorPane);
-                frame.setVisible(true);*//*
-                //editorPane1 =null;
-                shefPanel= htmlEditorPane;
-                shefPanel.setVisible(true);
-                //shefPanel.setMinimumSize(new Dimension(100,100));
-            }
-        });*/
+
         authorsList.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
@@ -632,7 +594,7 @@ public class ApplicationFrameController {
                         author.setName(nameTextField.getText());
                         author.setSurname(surnameTextField.getText());
                         author.setEmail(emailTextField.getText());
-                        author.setSign(signTextField.getText());
+                        author.setTelephone(signTextField.getText());
 
                         authorPanelErrorLabel.setText(apiConnector.addNewAuthor(author));
 
@@ -665,7 +627,7 @@ public class ApplicationFrameController {
                     nameTextField.setText(author.getName());
                     surnameTextField.setText(author.getSurname());
                     emailTextField.setText(author.getEmail());
-                    signTextField.setText(author.getSign());
+                    signTextField.setText(author.getTelephone());
                     if (!updateAuthorButton.isVisible()) {
                         updateAuthorButton.setVisible(true);
                     }
@@ -691,11 +653,11 @@ public class ApplicationFrameController {
                 int result = -2;
                 Author author = apiConnector.getAuthor(selectedAuthorId.intValue());
                 if (!(Objects.equals(author.getName(), (nameTextField.getText())) && Objects.equals(author.getSurname(), (surnameTextField.getText()))
-                        && Objects.equals(author.getEmail(), (emailTextField.getText())) && Objects.equals(author.getSign(), (emailTextField.getText())))) {
+                        && Objects.equals(author.getEmail(), (emailTextField.getText())) && Objects.equals(author.getTelephone(), (emailTextField.getText())))) {
                     String message = "Czy chcesz zaktualizować autora o id: '" + (int) author.getId() + "' \nObecne imię : '" +
-                            author.getName() + "', nazwisko: '" + author.getSurname() + "', podpis: '" + author.getSign() + "', email: '" +
+                            author.getName() + "', nazwisko: '" + author.getSurname() + "', telefon: '" + author.getTelephone() + "', email: '" +
                             author.getEmail() + "'.\n Nowe dane autora będą następujące - imię: '" + nameTextField.getText() + "', nazwisko: '" +
-                            surnameTextField.getText() + "', podpis: '" + signTextField.getText() + "', email: '" + emailTextField.getText() + "'?";
+                            surnameTextField.getText() + "', telefon: '" + signTextField.getText() + "', email: '" + emailTextField.getText() + "'?";
                     result = JOptionPane.showOptionDialog(applicationFrame, message, "Aktualizacja autora", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
                 } else
                     authorPanelErrorLabel.setText("Dla autora o id " + (int) author.getId() + "  nie zostały zmienione żadne dane.");
@@ -703,7 +665,7 @@ public class ApplicationFrameController {
                 if (result == 0) {
                     author.setName(nameTextField.getText());
                     author.setSurname(surnameTextField.getText());
-                    author.setSign(signTextField.getText());
+                    author.setTelephone(signTextField.getText());
                     author.setEmail(emailTextField.getText());
                     authorPanelErrorLabel.setText(apiConnector.updateAuthor(author));
                     hideButtonsAndRefreshViewAfterAuthorsAction();
@@ -720,6 +682,7 @@ public class ApplicationFrameController {
 
             }
         });
+
 
         /*termsTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
@@ -792,12 +755,11 @@ public class ApplicationFrameController {
 
                                 renderTagsJList();
 
-                                //tagsModel.addRow(new Object[]{true,1,"szikakaka"});
-
-
                                 break;
 
                             case "Użytkownicy":
+                                settingsCardClear();
+                                new UsersOptionPanel();
 
                             case "Kategorie":
                                 settingsCardClear();
@@ -1593,22 +1555,20 @@ public class ApplicationFrameController {
         selectedTagColorName = selectedTagColor.getRed() + "-" + selectedTagColor.getGreen() + "-" + selectedTagColor.getBlue();
         String tagIconPath = getColorTagIcon(color, tagColorName);
         tagIconLabel.setIcon(new ImageIcon(tagIconPath));
-        List<Term> terms;
+        //List<Term> terms;
         List<Term> termsMatched;
 
-            terms  = apiConnector.getAllTerm();
+            //terms  = apiConnector.getAllTerm();
             termsMatched = apiConnector.getTermsMatchedToTag(tag.getId());
 
-        for (Term t : terms
-        ) {
-            Boolean isTagMarksTerm = false;
-            for (Term tt: termsMatched
-                 ) {
-                if (tt.getId()== t.getId())
-                    isTagMarksTerm = true;
+
+
+
+            for (Term tt: termsMatched){
+                tagsModel.addRow(new Object[]{true, tt.getId().intValue(), tt.getTitle()});
             }
-            tagsModel.addRow(new Object[]{isTagMarksTerm, t.getId().intValue(), t.getTitle()});
-        }
+
+
         TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(termsTagsTable.getModel());
         termsTagsTable.setRowSorter(sorter);
         ArrayList<RowSorter.SortKey> sortKeys = new ArrayList<RowSorter.SortKey>();
@@ -1825,7 +1785,7 @@ public class ApplicationFrameController {
             ) {
                 Float id = a.getId();
                 Integer howManyTerms = apiConnector.howManyTerms(id.intValue());
-                am.addRow(new Object[]{id.intValue(), a.getName(), a.getSurname(), a.getSign(), a.getEmail(), howManyTerms});
+                am.addRow(new Object[]{id.intValue(), a.getName(), a.getSurname(), a.getTelephone(), a.getEmail(), howManyTerms});
             }
         } catch (Exception ex) {
             logoutBecauseOfError();
