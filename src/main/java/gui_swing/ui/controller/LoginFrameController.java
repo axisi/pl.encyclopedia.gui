@@ -1,5 +1,6 @@
 package gui_swing.ui.controller;
 
+import gui_swing.ui.model.ApiConnector;
 import gui_swing.ui.model.ConfigManager;
 import gui_swing.ui.view.LoginFrame;
 import org.apache.http.HttpResponse;
@@ -33,6 +34,7 @@ public class LoginFrameController {
     private MainController mainController;
     private String login;
     private String password;
+    private ApiConnector apiConnector;
 
 
 
@@ -51,6 +53,7 @@ public class LoginFrameController {
 
 
     private void initComponents(MainController mainController) {
+        apiConnector = new ApiConnector();
         loginFrame = new LoginFrame();
         loginButton = loginFrame.getLoginButton();
         exitButton = loginFrame.getExitButton();
@@ -100,15 +103,22 @@ public class LoginFrameController {
                             } else {
                                 loginFrame.getStatusLabel().setForeground(Color.GREEN);
                                 loginFrame.getStatusLabel().setText("Logged-in");
-                                ConfigManager.setJwtToken(output);
                                 ConfigManager.setLoggedUser(login);
-                                mainController.getApplicationFrameController().setValuesInLoggedUserLabel();
-                                //mainController.getJwtToken().setJwtToken(output);
-                                //JOptionPane.showMessageDialog(null,"Udało się zalogować do systemu." );
-                                //loginFrame.setVisible(true);
+                                ConfigManager.setJwtToken(output);
+                                /*if(apiConnector.getUser1(login).getChangeRequired()){*/
 
-                                mainController.getApplicationFrameController().showMainFrameWindow();
-                                loginFrame.dispose();
+                               /* }else{*/
+
+                                    mainController.setApplicationFrameController(new ApplicationFrameController(mainController));
+                                    mainController.getApplicationFrameController().setValuesInLoggedUserLabel();
+                                    //mainController.getJwtToken().setJwtToken(output);
+                                    //JOptionPane.showMessageDialog(null,"Udało się zalogować do systemu." );
+                                    //loginFrame.setVisible(true);
+
+                                    //mainController.getApplicationFrameController().showMainFrameWindow();
+                                    loginFrame.dispose();
+
+                                //}
 
                             }
                         }

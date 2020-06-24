@@ -5,16 +5,18 @@ import gui_swing.ui.model.*;
 import gui_swing.ui.model.Components.ChangesPanel;
 import gui_swing.ui.model.Components.TermWindow;
 import gui_swing.ui.model.Components.UsersOptionPanel;
+import gui_swing.ui.model.Components.WordGeneratePanel;
 import gui_swing.ui.model.Listeners.MouseListeners;
 import gui_swing.ui.model.filters.*;
+import gui_swing.ui.model.tableModels.GradientButton;
 import gui_swing.ui.model.tableModels.ObjectTableModel;
 import gui_swing.ui.view.ApplicationFrame;
 import net.atlanticbb.tantlinger.shef.HTMLEditorPane;
-import org.apache.poi.xwpf.usermodel.*;
+/*import org.apache.poi.xwpf.usermodel.*;
 import org.docx4j.XmlUtils;
 import org.docx4j.convert.in.xhtml.XHTMLImporterImpl;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
-import org.docx4j.org.xhtmlrenderer.util.XRLog;
+import org.docx4j.org.xhtmlrenderer.util.XRLog;*/
 
 
 import javax.imageio.ImageIO;
@@ -25,10 +27,13 @@ import javax.swing.text.Document;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class ApplicationFrameController {
     //    private final static String termsPanel = "bottomPropertiesTermsPanel";
@@ -220,14 +225,35 @@ public class ApplicationFrameController {
     private JButton getStatusesForSubcategoryButton;
     public static JFrame frameWithTerms;
 
+    private ArrayList<UsersOptionPanel> usersOptionPanels;
+    public static ArrayList<TermWindow> termWindows;
+    public static ArrayList<ChangesPanel> changesPanels = new ArrayList<>();
+    public static ArrayList<WordGeneratePanel> wordGenerationPanels = new ArrayList<>();
+
     public ApplicationFrameController(MainController mainController) {
 
         initComponents(mainController);
         initListeners();
+        isPasswordChangeRequired();
 
     }
 
+    private void isPasswordChangeRequired() {
+
+         String searchedUser = ConfigManager.getLoggedUser();
+         User user =  apiConnector.getUser(searchedUser);
+
+       if(user.getChangeRequired()){
+           applicationFrame.setVisible(false);
+           new PasswordChangeController(user);
+       }else{
+           showMainFrameWindow();
+       }
+    }
+
     private void initComponents(MainController mainController) {
+        termWindows = new ArrayList<>();
+        usersOptionPanels = new ArrayList<>();
         applicationFrame = new ApplicationFrame();
         this.mainController = mainController;
         topPanel = applicationFrame.getTopPanel();
@@ -759,7 +785,7 @@ public class ApplicationFrameController {
 
                             case "Użytkownicy":
                                 settingsCardClear();
-                                new UsersOptionPanel();
+                               usersOptionPanels.add( new UsersOptionPanel());
 
                             case "Kategorie":
                                 settingsCardClear();
@@ -805,7 +831,7 @@ public class ApplicationFrameController {
 
                         } else {
                             termsErrorLabel.setText("Żadne z haseł nie spełnia zadanych kryteriów.");
-                            cardLayout1.show(bottomDetailsPanel, bottomDetailsTermsPanel.getName());
+                            cardLayout1.show(bottomDetailsPanel, bottomDetailsBlankPanel.getName());
 
                         /*if (tm.getRowCount() != 0) {
                             for (int i = tm.getRowCount() - 1; i > -1; i--) {
@@ -892,13 +918,13 @@ public class ApplicationFrameController {
 
             }
         });
-        redirectTermToIndicatedAuthorButton.addActionListener(new AbstractAction() {
+        /*redirectTermToIndicatedAuthorButton.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 XWPFDocument document = new XWPFDocument();
                 //Write the Document in file system
                 try {
-                   /* FileOutputStream out = new FileOutputStream(new File());
+                   *//* FileOutputStream out = new FileOutputStream(new File());
                     XWPFTable table = document.createTable();
                     XWPFTableRow tableRowOne = table.getRow(0);
                     tableRowOne.getCell(0).setText("Edytowane hasło:");
@@ -917,7 +943,7 @@ public class ApplicationFrameController {
                     XWPFParagraph paragraph = document.createParagraph();
                     XWPFRun r1 = paragraph.createRun();
                     r1.addCarriageReturn();
-                    r1.addCarriageReturn();*/
+                    r1.addCarriageReturn();*//*
 
                    // String xhtml = htmlEditorPane.getWysiwygText();
                     Long termId = Long.valueOf(termDetailsIdLabel.getText().substring(4));
@@ -932,10 +958,10 @@ public class ApplicationFrameController {
                     System.out.println(XmlUtils.marshaltoString(wordMLPackage.getMainDocumentPart().getJaxbElement(), true,true));
                     wordMLPackage.save(new java.io.File(ConfigManager.getTempFolder()+textField1.getText()+".docx"));
 
-                    /*XWPFTable tableContent = document.createTable();
+                    *//*XWPFTable tableContent = document.createTable();
                     XWPFTableRow tableRowOneContent = tableContent.getRow(0);
                     tableRowOneContent.getCell(0).setText("");
-                    tableRowOneContent.getCell(0).getCTTc().addNewTcPr().addNewTcW().setW(BigInteger.valueOf(9000L));*/
+                    tableRowOneContent.getCell(0).getCTTc().addNewTcPr().addNewTcW().setW(BigInteger.valueOf(9000L));*//*
 
 
                     //document.write(out);
@@ -945,7 +971,7 @@ public class ApplicationFrameController {
                 }
             }
 
-        });
+        });*/
 //-----------------------------------------------------------------------------------------------TermBUTTONS-----STOP-------------------------------------------------------------------------------
 //---------------------------------------------------------------------Settings subcategory START ----------------------------------------------------------------------------
         addSubcategoryButton.addActionListener(new AbstractAction() {
@@ -1417,7 +1443,8 @@ public class ApplicationFrameController {
     }
 
     private void createNewTermWindow(Integer integerId) {
-        TermWindow termFrame = new TermWindow(integerId);
+        termWindows.add( new TermWindow(integerId));
+        TermWindow termFrame = termWindows.get(termWindows.size()-1);
         termFrame.getFrame().setTitle(apiConnector.getTerm(integerId).getTitle());
     }
     public static <T> ArrayList<T> removeDuplicates(ArrayList<T> list)
@@ -1799,13 +1826,34 @@ public class ApplicationFrameController {
         backToMainPanel();
         ConfigManager.setLoggedUser("");
         ConfigManager.setJwtToken("");
-        applicationFrame.setVisible(false);
+        applicationFrame.dispose();
+        //applicationFrame.setVisible(false);
         mainController.setLoginFrameController(new LoginFrameController(mainController));
         mainController.getLoginFrameController().showMainFrameWindow();
+        disposeTermWindows();
+        disposeUserOptionPanel();
+        disposeChangesPanel();
         if(frame!=null){
             frame.dispose();
             termsTableShown= false;
 
+        }
+    }
+
+    private void disposeChangesPanel() {
+        for (ChangesPanel c: changesPanels
+             ) {
+            c.dispose();
+        }
+    }
+
+    private void disposeTermWindows() {
+        for (TermWindow t: termWindows
+             ) {
+            t.disposeTermVersionPanels();
+            t.disposeReferencesPanels();
+            t.disposeChangesPanels();
+            t.getFrame().dispose();
         }
     }
 
@@ -1850,8 +1898,14 @@ public class ApplicationFrameController {
         paginatedDecorator.getContentPanel();
         JPanel jPanel = new JPanel(new BorderLayout());
         JLabel jLabel = new JLabel(String.format("Znaleziono %s haseł.",apiConnector.getResponseList().size()));
-        JButton replaceInSelected = new JButton("Zamień w wyszukanych");
-        jPanel.add(replaceInSelected,BorderLayout.WEST);
+        JButton replaceInSelected = new GradientButton("Zamień w wyszukanych",Color.orange.darker());
+        JButton wordGeneratePanelButton = new GradientButton("Generuj plik",Color.MAGENTA.brighter());
+        JPanel leftPanel = new JPanel();
+
+        jPanel.add(leftPanel,BorderLayout.WEST);
+        leftPanel.add(replaceInSelected);
+        leftPanel.add(wordGeneratePanelButton);
+
         replaceInSelected.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -1860,9 +1914,10 @@ public class ApplicationFrameController {
                      ) {
                     longs.add(term.getId());
                 }
-                new ChangesPanel(longs);
+                changesPanels.add(new ChangesPanel(longs));
             }
         });
+        wordGeneratePanelButton.addActionListener(new ShowWaitActionMain("Generowanie"));
        jPanel.add(jLabel,BorderLayout.EAST);
         frame.add(jPanel,BorderLayout.NORTH);
         frameWithTerms.add(paginatedDecorator.getContentPanel(),BorderLayout.CENTER);
@@ -2027,6 +2082,79 @@ public class ApplicationFrameController {
             });
         }*/
         iconLabelFlag = true;
+    }
+
+    public void disposeUserOptionPanel(){
+        for (UsersOptionPanel u: usersOptionPanels
+             ) {
+            u.disposeUserForms();
+            u.dispose();
+        }
+
+    }
+
+    public class ShowWaitActionMain extends AbstractAction {
+        protected static final long SLEEP_TIME = 10 * 1000;
+
+        public ShowWaitActionMain(String name) {
+            super(name);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent evt) {
+            SwingWorker<Void, Void> mySwingWorker = new SwingWorker<Void, Void>() {
+                @Override
+                protected Void doInBackground() throws Exception {
+
+                    Boolean success = true;
+                    String errorComment ="";
+
+                    // mimic some long-running process here...
+                    ArrayList<Long>longs = new ArrayList<>();
+                    for (Term term:apiConnector.getResponseList()) {
+                        longs.add(term.getId());
+                    }
+                    wordGenerationPanels.add(new WordGeneratePanel(longs));
+
+
+
+                    // mimic some long-running process here...
+
+
+                    return null;
+                }
+            };
+
+            Window win = SwingUtilities.getWindowAncestor((AbstractButton) evt.getSource());
+            final JDialog dialog = new JDialog(win, "Generowanie listy", Dialog.ModalityType.APPLICATION_MODAL);
+
+            mySwingWorker.addPropertyChangeListener(new PropertyChangeListener() {
+
+                @Override
+                public void propertyChange(PropertyChangeEvent evt) {
+                    if (evt.getPropertyName().equals("state")) {
+                        if (evt.getNewValue() == SwingWorker.StateValue.DONE) {
+                            dialog.dispose();
+
+                        }
+                    }
+                }
+            });
+            mySwingWorker.execute();
+
+
+            JProgressBar progressBar = new JProgressBar();
+            progressBar.setIndeterminate(true);
+            JPanel panel = new JPanel(new BorderLayout());
+            panel.add(progressBar, BorderLayout.CENTER);
+            panel.add(new JLabel("Proszę czekać......."), BorderLayout.PAGE_START);
+            dialog.add(panel);
+            dialog.pack();
+            dialog.setLocationRelativeTo(win);
+            dialog.setVisible(true);
+        }
+
+
     }
 
 }

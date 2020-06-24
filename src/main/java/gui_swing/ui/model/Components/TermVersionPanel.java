@@ -1,5 +1,6 @@
 package gui_swing.ui.model.Components;
 
+import gui_swing.ui.controller.ApplicationFrameController;
 import gui_swing.ui.model.ApiConnector;
 import gui_swing.ui.model.Term;
 import gui_swing.ui.model.TermHistory;
@@ -52,14 +53,17 @@ public class TermVersionPanel extends JFrame {
        this.setMinimumSize(new Dimension(800,750));
        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
        this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
+       this.pack();
        this.setVisible(true);
        jTable.addMouseListener(new MouseAdapter() {
            @Override
            public void mouseClicked(MouseEvent e) {
                if(e.getClickCount()==2&&jTable.getSelectedRow()!=-1){
-                   new TermWindow(termId,
+                   ApplicationFrameController.termWindows.add( new TermWindow(termId,
                            apiConnector.getTermHistoryToTermWidthVersion(termId
-                                   ,Integer.valueOf(jTable.getValueAt(jTable.getSelectedRow(),0).toString())).getId().intValue());
+                                   ,Integer.valueOf(jTable.getValueAt(jTable.getSelectedRow(),0).toString())).getId().intValue()));
+                   TermWindow termFrame =ApplicationFrameController.termWindows.get(ApplicationFrameController.termWindows.size()-1);
+                   termFrame.getFrame().setTitle(apiConnector.getTerm(termId).getTitle());
                }
            }
        });

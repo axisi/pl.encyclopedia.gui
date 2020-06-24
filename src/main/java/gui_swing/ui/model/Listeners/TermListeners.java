@@ -1,5 +1,6 @@
 package gui_swing.ui.model.Listeners;
 
+import gui_swing.ui.controller.ApplicationFrameController;
 import gui_swing.ui.model.Components.TermWindow;
 
 import javax.swing.*;
@@ -42,7 +43,8 @@ public class TermListeners {
        public void mousePressed(MouseEvent mouseEvent){
            JTable table = (JTable) mouseEvent.getSource();
            if (mouseEvent.getClickCount() == 2 && table.getSelectedRow() != -1){
-              TermWindow termWindow = new TermWindow((Integer) table.getValueAt(table.getSelectedRow(),0));
+               ApplicationFrameController.termWindows.add( new TermWindow((Integer) table.getValueAt(table.getSelectedRow(),0)));
+              TermWindow termWindow = ApplicationFrameController.termWindows.get(ApplicationFrameController.termWindows.size()-1);
               termWindow.getFrame().setTitle((String) table.getValueAt(table.getSelectedRow(),1));
            }
        }

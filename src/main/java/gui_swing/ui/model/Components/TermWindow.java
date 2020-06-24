@@ -71,6 +71,8 @@ public class TermWindow {
     private JButton allVersionsButton;
 
     private ArrayList<ReferencesPanel> referencesPanelArrayList;
+    private ArrayList<TermVersionPanel> termVersionPanels;
+    private ArrayList<ChangesPanel> changesPanels;
 
 
 
@@ -189,7 +191,9 @@ public class TermWindow {
             }
         });*/
         this.setFrame(new JFrame());
+        termVersionPanels = new ArrayList<>();
         referencesPanelArrayList = new ArrayList<>();
+        changesPanels = new ArrayList<>();
         getFrame().setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         getFrame().addWindowListener(new WindowAdapter() {
             @Override
@@ -341,7 +345,9 @@ public class TermWindow {
                 packFormDataToEntity(termHistory, newTerm,statusesList,tagsList,authorsTable);
                 try {
                     Integer termId1 = apiConnector.updateTerm(newTerm);
-                    new TermWindow(termId);
+                    ApplicationFrameController.termWindows.add( new TermWindow(termId));
+                    TermWindow termFrame = ApplicationFrameController.termWindows.get(ApplicationFrameController.termWindows.size()-1);
+                    termFrame.getFrame().setTitle(apiConnector.getTerm(termId).getTitle());
                     jFrame.dispose();
 
                 } catch (JsonProcessingException ex) {
@@ -355,7 +361,7 @@ public class TermWindow {
         replacePhrasesButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ChangesPanel changesPanel = new ChangesPanel();
+                changesPanels.add( new ChangesPanel());
             }
         });
         bottomTopPanel.add(replacePhrasesButton);
@@ -452,7 +458,7 @@ public class TermWindow {
         allVersionsButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new TermVersionPanel(termId);
+                termVersionPanels.add( new TermVersionPanel(termId));
             }
         });
 
@@ -670,9 +676,10 @@ public class TermWindow {
         ApplicationFrameController.frameWithTerms = createFrame();
         paginatedDecorator.getContentPanel();
         JPanel jPanel = new JPanel(new BorderLayout());
+        JScrollPane scrollPane = new JScrollPane(jPanel);
         JLabel jLabel = new JLabel(String.format("Znaleziono %s haseł.",apiConnector.getResponseList().size()));
         jPanel.add(jLabel,BorderLayout.EAST);
-        frame.add(jPanel,BorderLayout.NORTH);
+        frame.add(scrollPane,BorderLayout.NORTH);
         ApplicationFrameController.frameWithTerms.add(paginatedDecorator.getContentPanel(),BorderLayout.CENTER);
         ApplicationFrameController.frameWithTerms.setLocationRelativeTo(null);
 
@@ -1048,5 +1055,23 @@ public class TermWindow {
 
     public void setTemporaryPosition(Integer temporaryPosition) {
         this.temporaryPosition = temporaryPosition;
+    }
+    public void disposeTermVersionPanels(){
+        for (TermVersionPanel t: termVersionPanels
+             ) {
+            t.dispose();
+        }
+    }
+    public void disposeReferencesPanels(){
+        for (ReferencesPanel r: referencesPanelArrayList
+        ) {
+            r.disposeReferencesPanel();
+        }
+    }
+    public void disposeChangesPanels(){
+        for (ChangesPanel r: changesPanels
+        ) {
+            r.dispose();
+        }
     }
 }

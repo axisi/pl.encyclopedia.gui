@@ -1,5 +1,6 @@
 package gui_swing.ui.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.sql.Timestamp;
@@ -12,11 +13,30 @@ public class User {
     private Timestamp modifiedDate;
     private String login;
     private UserRole userRole;
+    @JsonIgnore
     private Boolean hidden;
     private String email;
-
+    private Boolean changeRequired;
+    private String password;
 
     // Getter Methods
+
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public Boolean getChangeRequired() {
+        return changeRequired;
+    }
+
+    public void setChangeRequired(Boolean changeRequired) {
+        this.changeRequired = changeRequired;
+    }
 
     public Long getId() {
         return id;

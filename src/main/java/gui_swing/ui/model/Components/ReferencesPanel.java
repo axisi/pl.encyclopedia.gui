@@ -64,20 +64,12 @@ public class ReferencesPanel extends JFrame {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                for (ReferencesSearchPanel referencesSearchPanel : referencesSearchPanels
-                     ) {
-                    referencesSearchPanel.dispose();
-                }
-                dispose();
+                disposeReferencesPanel();
             }
 
             @Override
             public void windowClosed(WindowEvent e) {
-                for (ReferencesSearchPanel referencesSearchPanel : referencesSearchPanels
-                ) {
-                    referencesSearchPanel.dispose();
-                }
-                dispose();
+                disposeReferencesPanel();
             }
         });
         this.setTermId(termId);
@@ -147,6 +139,14 @@ public class ReferencesPanel extends JFrame {
         // options panels
         referencesPanel = this;
 
+    }
+
+    public void disposeReferencesPanel() {
+        for (ReferencesSearchPanel referencesSearchPanel : referencesSearchPanels
+        ) {
+            referencesSearchPanel.dispose();
+        }
+        dispose();
     }
 
     private void prepareOptionPanel(JPanel rootPanel, JPanel topPanel,

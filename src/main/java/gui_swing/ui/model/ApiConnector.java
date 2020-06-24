@@ -557,11 +557,11 @@ public  class ApiConnector {
        return invocationBuilder.get(new GenericType<Boolean>(){});
     }
 
-    public void updateUser(User user) {
+    public Boolean updateUser(User user) {
         webTarget = client.target(apiURI).path("user");
         invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
         Response response =  invocationBuilder.put(Entity.entity(user,MediaType.APPLICATION_JSON));
-
+        return response.readEntity(new GenericType<Boolean>(){});
 
     }
     public void addUser(User user) {
@@ -577,5 +577,43 @@ public  class ApiConnector {
         webTarget = client.target(apiURI).path("userRole/user/"+id);
         invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
         return invocationBuilder.get(new GenericType<UserRole>(){});
+    }
+
+    public boolean isUserExist(String text) {
+        webTarget = client.target(apiURI).path("user/exist/"+text);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return invocationBuilder.get(new GenericType<Boolean>(){});
+    }
+
+    public User getUser(String login) {
+        String body = "{\"login\":\""+login+"\"}";
+        webTarget = client.target(apiURI).path("user/login");
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        Response response = invocationBuilder.post(Entity.entity(body,MediaType.APPLICATION_JSON));
+        return response.readEntity(new GenericType<User>(){});
+
+
+    }
+
+    public void setNewPassword(Long id, String password) {
+        String body  = "{\"id\":\""+id+"\",\"password\":\""+password+"\"}";
+        webTarget = client.target(apiURI).path("user/setPassword");
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        Response response = invocationBuilder.put(Entity.entity(body,MediaType.APPLICATION_JSON));
+        //return response.readEntity(new GenericType<User>(){});
+    }
+
+    public ArrayList<Term> getTermsByIds(ArrayList<Long> termsArray) {
+
+        webTarget = client.target(apiURI).path("terms/getByIds");
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        Response response = invocationBuilder.post(Entity.entity(termsArray,MediaType.APPLICATION_JSON));
+        return response.readEntity(new GenericType<ArrayList<Term>>(){});
+    }
+
+    public ArrayList<TermHistory> getAllTermHistoriesOfTerm(Long id) {
+        webTarget = client.target(apiURI).path("term/termHistories/"+id);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return invocationBuilder.get(new GenericType<ArrayList<TermHistory>>(){});
     }
 }

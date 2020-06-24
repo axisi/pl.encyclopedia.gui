@@ -1,8 +1,11 @@
 package gui_swing.ui.model.Components;
 
+import gui_swing.ui.controller.ApplicationFrameController;
 import gui_swing.ui.model.*;
 import gui_swing.ui.model.tableModels.GradientButton;
 import org.apache.commons.lang3.StringUtils;
+//import org.apache.commons.lang3.StringUtils;
+//import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -60,8 +63,14 @@ public class ChangesPanel extends JFrame {
 
     public ChangesPanel(ArrayList<Long> list){
         super();
-        this.termsArray = list;
-        this.termsArrayConst = (ArrayList<Long>) list.clone();
+        this.termsArray = new ArrayList<>();
+
+        this.termsArrayConst = new ArrayList<>();
+        if(list!=null){
+            this.termsArray = list;
+            this.termsArrayConst = (ArrayList<Long>) list.clone();
+
+        }
 
 
         apiConnector = new ApiConnector();
@@ -77,6 +86,14 @@ public class ChangesPanel extends JFrame {
         rightPane = new JPanel();
         //rightPane.setBackground(Color.GREEN);
         splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,leftPane,rightPane);
+        splitPane.setOneTouchExpandable(false);
+        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+        splitPane.setDividerLocation((int)(dim.width*0.8/2));
+        //splitPane.setDividerLocation(0.5);
+        //this.setLocation(dim.width/2-this.getSize().width/2,dim.height/2-this.getSize().height/2);
+        Dimension minimumSize = new Dimension(380, 250);
+        leftPane.setMinimumSize(minimumSize);
+        rightPane.setMinimumSize(minimumSize);
         topTopPane = new JPanel();
         topPane.setLayout(new BorderLayout());
         topPane.add(topTopPane, BorderLayout.NORTH);
@@ -164,14 +181,21 @@ public class ChangesPanel extends JFrame {
 
 
 
+
         rightEditorPane.setContentType("text/html");
 
+        leftScrollPane.setMinimumSize(minimumSize);
+        rightScrollPane.setMinimumSize(minimumSize);
+        leftScrollPane.setPreferredSize(minimumSize);
+        rightScrollPane.setPreferredSize(minimumSize);
 
-        rightScrollPane.setMaximumSize(new Dimension(800,800));
-        rightScrollPane.setPreferredSize(new Dimension(600,650));
+       //leftEditorPane.setPreferredSize(new Dimension(500,600));
+       // rightEditorPane.setPreferredSize(new Dimension(500,600));
+       // rightScrollPane.setMaximumSize(new Dimension(800,800));
+        //rightScrollPane.setPreferredSize(new Dimension(600,650));
         //leftScrollPane.setMinimumSize(new Dimension(450,450));
-        leftScrollPane.setPreferredSize(new Dimension(600,650));
-        leftScrollPane.setMaximumSize(new Dimension(800,800));
+       // leftScrollPane.setPreferredSize(new Dimension(600,650));
+        //leftScrollPane.setMaximumSize(new Dimension(800,800));
         topCenterPane.setVisible(false);
         acceptButton = new GradientButton("Zatwierdź",Color.GREEN.darker());
         skipButton = new GradientButton("Odrzuć",Color.YELLOW.darker());
@@ -233,7 +257,9 @@ public class ChangesPanel extends JFrame {
         rightIdLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                new TermWindow(Integer.valueOf(rightIdLabel.getText()));
+                ApplicationFrameController.termWindows.add( new TermWindow(Integer.valueOf(rightIdLabel.getText())));
+                TermWindow termWindow = ApplicationFrameController.termWindows.get(ApplicationFrameController.termWindows.size()-1);
+                termWindow.getFrame().setTitle(apiConnector.getTerm(Integer.valueOf(rightIdLabel.getText())).getTitle());
             }
         });
 
@@ -241,11 +267,15 @@ public class ChangesPanel extends JFrame {
         this.add(mainPanel);
         this.setTitle("Zamień wiele...");
         //this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        this.setMinimumSize(new Dimension(1400, 850));
+        this.setPreferredSize(dim);
+        this.setMinimumSize(new Dimension((int)(dim.width*0.8) , (int) (dim.height*0.8)));
         // this.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        this.setMaximumSize(new Dimension(1400,1100));
-        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+        this.setMaximumSize(dim);
+        leftScrollPane.setPreferredSize(new Dimension((int) (dim.width*0.8/2-20), (int) (dim.height * 0.7)));
+        rightScrollPane.setPreferredSize(new Dimension((int) (dim.width*0.8/2-20), (int) (dim.height * 0.7)));
+       // Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         this.setLocation(dim.width/2-this.getSize().width/2,dim.height/2-this.getSize().height/2);
+        this.pack();
         this.setVisible(true);
     }
 
