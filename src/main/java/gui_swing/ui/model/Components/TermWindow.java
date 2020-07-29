@@ -438,7 +438,8 @@ public class TermWindow {
             public void actionPerformed(ActionEvent e) {
                 clearSelection();
                 Long termHistoryId;
-                commentsPanel.dispose();
+                if(null!=commentsPanel)
+                    commentsPanel.dispose();
                 String category = categoryComboBox.getModel().getSelectedItem().toString();
                 String subcategory = subCategoryComboBox.getModel().getSelectedItem().toString();
                 Term oldTerm = apiConnector.getTerm(termId);

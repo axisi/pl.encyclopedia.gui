@@ -335,6 +335,7 @@ public class ApplicationFrameController {
 
         termHistoryVersionLabel = applicationFrame.getTermHistoryVersionLabel();
         authorsTable = applicationFrame.getAuthorsTable();
+        authorsTable.setAutoCreateRowSorter(true);
         tagsTermJList = applicationFrame.getTagsTermJList();
         statusesTermJList = applicationFrame.getStatusesTermJList();
         categoryComboBox = applicationFrame.getCategoryComboBox();
@@ -384,6 +385,7 @@ public class ApplicationFrameController {
         signTextField = applicationFrame.getSignTextField();
         authorsIdLabel = applicationFrame.getAuthorsIdLabel();
         authorsMenageTable = applicationFrame.getAuthorsMenageTable();
+        authorsMenageTable.setAutoCreateRowSorter(true);
         am = (DefaultTableModel) authorsMenageTable.getModel();
         //Authors end-------------------------------------------------------------END--------------------------------------------------------------------------------
 // FUll text search -----------------------------------------------------------------------------------------------------------------------------------------------
