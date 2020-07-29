@@ -6,18 +6,24 @@ import gui_swing.ui.model.*;
 import gui_swing.ui.model.Listeners.MouseListeners;
 import gui_swing.ui.model.Listeners.TermListeners;
 import gui_swing.ui.model.tableModels.AuthorTermTableModel;
+import gui_swing.ui.model.tableModels.GradientButton;
 import net.atlanticbb.tantlinger.shef.HTMLEditorPane;
 import net.atlanticbb.tantlinger.ui.text.AbstractEditor;
+import net.atlanticbb.tantlinger.ui.text.DefaultWysiwygEditor;
 
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -74,10 +80,12 @@ public class TermWindow {
     private ArrayList<TermVersionPanel> termVersionPanels;
     private ArrayList<ChangesPanel> changesPanels;
 
-
+    private Dimension dim;
+    private Dimension widthDim;
 
     private String temporaryContent;
     private boolean temporaryIsSelected =false;
+    private boolean temporaryIsSelected1 =false;
     private Integer temporaryPosition;
     private int temporaryLength;
     private AbstractEditor htmlTextArea;
@@ -90,21 +98,110 @@ public class TermWindow {
 
     private Integer termHistoryId =-1;
 
+    private JButton printTermButton;
+
+    private JButton commentsButton;
+    private CommentPanel commentsPanel;
+    private TermWindow termFrame;
+    private String contentInComments;
+
 
     private ReferencesPanel referencesPanel;
 
+    private Boolean hasAccess;
+
     public TermWindow(Integer id, Integer ... termHistoryId){
+        apiConnector = new ApiConnector();
         if(termHistoryId.length!=0){
             this.termHistoryId = termHistoryId[0];
+        }else{
+            this.termHistoryId = apiConnector.getActualTermHistoryOfTerm(id).getId().intValue();
         }
         setTermId(id);
+        hasAccess = checkAccess(id);
         prepareForm();
         fillForm();
 
     }
 
+    public  static Boolean checkAccess(Integer id) {
+        ApiConnector apiConnector = new ApiConnector();
+        String category = apiConnector.getTermCategory(id);
+        switch (category){
+            case "Życie polityczne":
+                if(ConfigManager.getLoggedUserRole().getEditCategory1())
+                    return true;
+                else
+                    return false;
+
+            case "Życie gospodarcze":
+                if(ConfigManager.getLoggedUserRole().getEditCategory2())
+                    return true;
+                else
+                    return false;
+
+            case "Mniejszości i stowarzyszenia":
+                if(ConfigManager.getLoggedUserRole().getEditCategory3())
+                    return true;
+                else
+                    return false;
+
+            case "Sztuka":
+                if(ConfigManager.getLoggedUserRole().getEditCategory4())
+                    return true;
+                else
+                    return false;
+
+            case "Literatura, teatr, muzyka":
+                if(ConfigManager.getLoggedUserRole().getEditCategory5())
+                    return true;
+                else
+                    return false;
+
+            case "Nauka i biografistyka":
+                if(ConfigManager.getLoggedUserRole().getEditCategory6())
+                    return true;
+                else
+                    return false;
+
+            case "Historia i kalendarium":
+                if(ConfigManager.getLoggedUserRole().getEditCategory7())
+                    return true;
+                else
+                    return false;
+
+            case "Cracovia sacra":
+                if(ConfigManager.getLoggedUserRole().getEditCategory8())
+                    return true;
+                else
+                    return false;
+
+            case "Geografia i środowisko przyrodnicze":
+                if(ConfigManager.getLoggedUserRole().getEditCategory9())
+                    return true;
+                else
+                    return false;
+
+            case "Architektura i urbanizacja":
+                if(ConfigManager.getLoggedUserRole().getEditCategory10())
+                    return true;
+                else
+                    return false;
+
+            case "Odsyłaczowe":
+                if(ConfigManager.getLoggedUserRole().getEditCategory11())
+                    return true;
+                else
+                    return false;
+
+
+
+        }
+        return false;
+    }
+
     private void fillForm() {
-        apiConnector = new ApiConnector();
+
         ApplicationFrameController.comboboxFill(categoryComboBox, apiConnector.getAllCategoriesString());
         ApplicationFrameController.comboboxFill(subCategoryComboBox, apiConnector.getAllSubcategoriesString());
         Term term = apiConnector.getTerm(getTermId());
@@ -118,7 +215,7 @@ public class TermWindow {
         term.setSigned(apiConnector.isSigned(termId));
         actualVersionLabel.setText(""+term.getActualVersion().intValue());
         DefaultTableModel tableModel = (DefaultTableModel) authorsTable.getModel();
-        fillAuthorsTable(tableModel, apiConnector, termId);
+        fillAuthorsTable(tableModel, apiConnector, termId,authorsTable);
 
         for (int i = 0; i < tagsList.getModel().getSize(); i++) {
             CheckListItem checkListItem = (CheckListItem) tagsList.getModel().getElementAt(i);
@@ -164,7 +261,7 @@ public class TermWindow {
         }
     }
 
-    public static void fillAuthorsTable(DefaultTableModel tableModel, ApiConnector apiConnector, Integer termId) {
+    public static void fillAuthorsTable(DefaultTableModel tableModel, ApiConnector apiConnector, Integer termId, JTable authorsTable) {
         ArrayList<Float> authors = apiConnector.getAllAuthorsIdsFloat();
         for (Float f : authors
         ) {
@@ -180,6 +277,15 @@ public class TermWindow {
                 tableModel.addRow(new Object[]{authorId.intValue(), false, authorFullName, null});
 
         }
+        TableRowSorter<TableModel> sorter = new TableRowSorter<>(tableModel);
+        authorsTable.setRowSorter(sorter);
+        List<RowSorter.SortKey> sortKeys = new ArrayList<>();
+
+        int columnIndexToSort = 1;
+        sortKeys.add(new RowSorter.SortKey(columnIndexToSort, SortOrder.DESCENDING));
+
+        sorter.setSortKeys(sortKeys);
+        sorter.sort();
     }
 
     private void prepareForm() {
@@ -190,6 +296,8 @@ public class TermWindow {
 
             }
         });*/
+       termFrame = this;
+       dim = Toolkit.getDefaultToolkit().getScreenSize();
         this.setFrame(new JFrame());
         termVersionPanels = new ArrayList<>();
         referencesPanelArrayList = new ArrayList<>();
@@ -202,6 +310,8 @@ public class TermWindow {
                      ) {
                     referencesPanel.dispose();
                 }
+                if(commentsPanel!=null)
+                    commentsPanel.dispose();
                 jFrame.dispose();
             }
 
@@ -328,6 +438,7 @@ public class TermWindow {
             public void actionPerformed(ActionEvent e) {
                 clearSelection();
                 Long termHistoryId;
+                commentsPanel.dispose();
                 String category = categoryComboBox.getModel().getSelectedItem().toString();
                 String subcategory = subCategoryComboBox.getModel().getSelectedItem().toString();
                 Term oldTerm = apiConnector.getTerm(termId);
@@ -356,7 +467,9 @@ public class TermWindow {
                 }
             }
         });
-        bottomTopPanel.add(updateTermButton);
+        if(hasAccess) {
+            bottomTopPanel.add(updateTermButton);
+        }
         replacePhrasesButton = new JButton("Zamień wiele...");
         replacePhrasesButton.addActionListener(new ActionListener() {
             @Override
@@ -441,7 +554,7 @@ public class TermWindow {
         referencesButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                  ReferencesPanel  referencesPanel1 = new ReferencesPanel(termId);
+                  ReferencesPanel  referencesPanel1 = new ReferencesPanel(termId,hasAccess);
                     referencesPanel1.setTitle(apiConnector.getTerm(termId).getTitle());
                     //referencesPanel.setPreferredSize(new Dimension(600,400));
                     referencesPanel1.setMinimumSize(new Dimension(950,400));
@@ -464,10 +577,44 @@ public class TermWindow {
 
 
         //Versions
+        //print section
+        printTermButton = new GradientButton("Drukuj",Color.blue.brighter());
+        printTermButton.setToolTipText("Drukuj...");
+        bottomTopPanel.add(printTermButton);
+        printTermButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm-ss");
+                LocalDateTime now = LocalDateTime.now();
+                String date =(dtf.format(now));
+                new CreateWord(termId,Long.valueOf(editedVersionLabel.getText()),Color.black,Color.white,ConfigManager.getTempFolder(),date,true,false);
+            }
+        });
+        //comments section
+
+        commentsButton = new GradientButton("Komentarze",Color.GREEN.darker());
+        //commentsButton.setIcon(new ImageIcon(getClass().getResource("/img/arrows/search.png")));
+        bottomTopPanel.add(commentsButton);
+        commentsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(null!=commentsPanel)
+                    commentsPanel.dispose();
+                commentsPanel = new CommentPanel(termHistoryId,termFrame);
+                commentsPanel.setAlwaysOnTop(true);
+            }
+        });
+
+
+        //comments section
+        //print section
         //addReferencesButton add
         getStatusesToSubcategoryButton = new JButton("Pobierz statusy podkategorii");
         getStatusesToSubcategoryButton.setToolTipText("Pobierz statusy podkategorii");
-        bottomTopPanel.add(getStatusesToSubcategoryButton);
+        if(hasAccess) {
+            bottomTopPanel.add(getStatusesToSubcategoryButton);
+        }
+
         getStatusesToSubcategoryButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -541,7 +688,7 @@ public class TermWindow {
 
 
 
-        jFrame.setMinimumSize(new Dimension(1000, 600));
+        jFrame.setMinimumSize(new Dimension((int) (dim.width*0.8), (int) (dim.height*0.8)));
         jFrame.setVisible(true);
 
     }
@@ -555,6 +702,17 @@ public class TermWindow {
                 }
             });
         }
+        if(temporaryIsSelected1 &&!CommentInstance.getLockOnColor()){
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+
+                    clearSelection();
+
+                }
+            });
+        }
+
+
     }
 
     private void findInThisText(String text) {
@@ -569,11 +727,39 @@ public class TermWindow {
 
     }
 
-    private void clearSelection() {
+    public void clearSelection() {
         if(temporaryIsSelected){
             htmlEditorPane.setText(temporaryContent);
             htmlEditorPane.setCaretPosition(temporaryPosition);
             temporaryIsSelected=false;
+
+        }
+        if(temporaryIsSelected1){
+            if(null!=getContentInComments()){
+
+                getHtmlEditorPane().setText(getContentInComments());
+
+                temporaryIsSelected1= false;
+            }
+        }
+
+    }
+    public void deselectAll(){
+        for (Component c :getCommentsPanel().getComponents()
+        ) {
+            deselectComment((JPanel) c);
+        }
+    }
+    private void deselectComment(JPanel component) {
+        JPanel jpanel = component;
+        CommentInstance commentInstance = (CommentInstance) jpanel.getComponent(0);
+        if(commentInstance.getSelected()){
+
+            commentInstance.setSelected(false);
+            if(commentInstance.getPrimary())
+                commentInstance.setBackground(commentInstance.getPrimaryColor());
+            else
+                commentInstance.setBackground(commentInstance.getSecondaryColor());
         }
     }
 
@@ -597,7 +783,6 @@ public class TermWindow {
             /*ImageIcon icon = new ImageIcon("src/main/resources/img/tags/tag-black.png");
             ImageIcon icon2 = new ImageIcon("src/main/resources/img/tags/tag-blue.png");*/
 
-
                 List<Tag> tagList = t.getTags();
                 List<ImageIcon> imageIcons = new ArrayList<>();
                 List<String> imageStrings = new ArrayList<>();
@@ -614,12 +799,8 @@ public class TermWindow {
                         String iconPath = ApplicationFrameController.getColorTagIcon(color, tagColorName);
                         imageIcons.add(new ImageIcon(iconPath));
                         imageStrings.add(tag.getName());
-
                     }
-
                 }
-
-
                 TagIcon tagIcon = new TagIcon(imageIcons,imageStrings);
 
 
@@ -689,7 +870,7 @@ public class TermWindow {
     private JFrame createFrame() {
         frame = new JFrame("Hasła");
         //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(new Dimension(1000, 600));
+        frame.setSize(new Dimension((int) (dim.width *0.8), (int) (dim.height *0.7)));
         frame.setLayout(new BorderLayout());
 
 
@@ -1073,5 +1254,30 @@ public class TermWindow {
         ) {
             r.dispose();
         }
+    }
+
+    public String getContentInComments() {
+        return contentInComments;
+    }
+
+    public void setContentInComments(String contentInComments) {
+        this.contentInComments = contentInComments;
+    }
+
+    public boolean isTemporaryIsSelected1() {
+        return temporaryIsSelected1;
+    }
+
+
+    public void setTemporaryIsSelected1(boolean temporaryIsSelected1) {
+        this.temporaryIsSelected1 = temporaryIsSelected1;
+    }
+
+    public CommentPanel getCommentsPanel() {
+        return commentsPanel;
+    }
+
+    public void setCommentsPanel(CommentPanel commentsPanel) {
+        this.commentsPanel = commentsPanel;
     }
 }

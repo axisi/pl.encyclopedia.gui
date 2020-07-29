@@ -7,13 +7,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gui_swing.ui.model.filters.ListsF;
 
-import javax.swing.*;
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -615,5 +613,138 @@ public  class ApiConnector {
         webTarget = client.target(apiURI).path("term/termHistories/"+id);
         invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
         return invocationBuilder.get(new GenericType<ArrayList<TermHistory>>(){});
+    }
+
+    public Integer getVerses(Long authorId, Long termId) {
+        webTarget = client.target(apiURI).path("term/"+termId+"/author/"+authorId);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return invocationBuilder.get(new GenericType<Integer>(){});
+    }
+
+    public void termImport(Term term) throws JsonProcessingException {
+        webTarget = client.target(apiURI).path("term/import");
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        ObjectMapper objectMapper = new ObjectMapper();
+        String json = objectMapper.writeValueAsString(term);
+
+        //System.out.println(json);
+
+        //System.out.println(obj.toString());
+          invocationBuilder.post(Entity.json(json));
+
+    }
+
+    public ArrayList<UserRole> getUserRoles() {
+        webTarget = client.target(apiURI).path("userRoles");
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return invocationBuilder.get(new GenericType<ArrayList<UserRole>>(){});
+    }
+
+    public UserRole getUserRole(String name) {
+        webTarget = client.target(apiURI).path("userRole/name/"+name);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return invocationBuilder.get(new GenericType<UserRole>(){});
+    }
+
+    public Boolean updateUserRole(UserRole userRole) {
+        webTarget = client.target(apiURI).path("userRole");
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        Response response =  invocationBuilder.put(Entity.entity(userRole,MediaType.APPLICATION_JSON));
+        return response.readEntity(new GenericType<Boolean>(){});
+    }
+
+    public boolean isUserRoleExist(String text) {
+        webTarget = client.target(apiURI).path("userRole/exist/"+text);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return invocationBuilder.get(new GenericType<Boolean>(){});
+    }
+
+    public void addUserRole(String text) {
+        webTarget = client.target(apiURI).path("userRole/"+text);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        invocationBuilder.post( Entity.text(text));
+    }
+
+    public boolean isUserRoleHasUsers(String name) {
+        webTarget = client.target(apiURI).path("userRole/users/"+name);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return invocationBuilder.get(new GenericType<Boolean>(){});
+    }
+
+    public void deleteUserRole(String name) {
+        webTarget = client.target(apiURI).path("userRole/"+name);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        invocationBuilder.delete(new GenericType<String>(){});
+    }
+
+    public boolean isTermExist(String name) {
+        webTarget = client.target(apiURI).path("term/exist/"+name);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+       return  invocationBuilder.get(new GenericType<Boolean>(){});
+    }
+
+    public Term getTermOfTermHistory(Integer termHistoryId) {
+        webTarget = client.target(apiURI).path("term/termHistoryId/"+termHistoryId);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return invocationBuilder.get(new GenericType<Term>(){});
+    }
+
+    public ArrayList<TermHistoryComment> getAllCommentsOfTerm(Long id) {
+        webTarget = client.target(apiURI).path("termHistoryComments/term/"+id);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return invocationBuilder.get(new GenericType<ArrayList<TermHistoryComment>>(){});
+    }
+
+    public ArrayList<TermHistoryComment> getAllCommentsOfTermHistory(Long id) {
+        webTarget = client.target(apiURI).path("termHistoryComments/termHistory/"+id);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return invocationBuilder.get(new GenericType<ArrayList<TermHistoryComment>>(){});
+    }
+
+    public String getCommentCreatedBy(Long id) {
+        webTarget = client.target(apiURI).path("termHistoryComment/createdBy/"+id);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return invocationBuilder.get(new GenericType<String>(){});
+    }
+    public String getCommentModifiedBy(Long id) {
+        webTarget = client.target(apiURI).path("termHistoryComment/modifiedBy/"+id);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return invocationBuilder.get(new GenericType<String>(){});
+    }
+
+    public Integer getNextCommentLp(Long id) {
+        webTarget = client.target(apiURI).path("termHistoryComment/getNextLp/term/"+id);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return invocationBuilder.get(new GenericType<Integer>(){});
+    }
+
+    public void updateTermHistoryWithComment(TermHistory termHistory) {
+        webTarget = client.target(apiURI).path("termHistory/updateWithComment");
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        invocationBuilder.put(Entity.entity(termHistory,MediaType.APPLICATION_JSON));
+    }
+
+    public void createTermHistoryComment(Long id, TermHistoryComment termHistoryComment) {
+        webTarget = client.target(apiURI).path("termHistoryComment/"+id);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        invocationBuilder.post( Entity.entity(termHistoryComment,MediaType.APPLICATION_JSON));
+    }
+
+    public TermHistoryComment getTermHistoryComment(Long id, Integer commentLp) {
+        webTarget = client.target(apiURI).path("termHistoryComment/term/"+id+"/lp/"+commentLp);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return invocationBuilder.get(new GenericType<TermHistoryComment>(){});
+    }
+
+    public void updateTermHistoryComment(Long id, TermHistoryComment termHistoryComment) {
+        webTarget = client.target(apiURI).path("termHistoryComment/"+id);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        invocationBuilder.put( Entity.entity(termHistoryComment,MediaType.APPLICATION_JSON));
+    }
+
+    public void deleteComment(Long id, Integer commentLp) {
+        webTarget = client.target(apiURI).path("termHistoryComment/term/"+id+"/lp/"+commentLp);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+         invocationBuilder.delete();
     }
 }

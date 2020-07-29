@@ -174,6 +174,10 @@ public class ApplicationFrame extends JFrame {
     private JButton fullTextSearchButton;
     private JRadioButton allVersionsRadioButton;
     private JLabel fullTextSearchLabel;
+    private JList authorsJList;
+    private JPanel AuthorsPanel;
+    private JButton authorPlusButton;
+    private JButton authorMinusButton;
 
     protected String[] columnToolTips = {
             "Id hasła, pod tym numerem jest ono dostępne w bazie danych.",
@@ -181,6 +185,30 @@ public class ApplicationFrame extends JFrame {
 
             "Tagi hasła (najedź aby wyświetlić nazwy)"
     };
+
+    public JList getAuthorsJList() {
+        return authorsJList;
+    }
+
+    public void setAuthorsJList(JList authorsJList) {
+        this.authorsJList = authorsJList;
+    }
+
+    public JButton getAuthorPlusButton() {
+        return authorPlusButton;
+    }
+
+    public JButton getAuthorMinusButton() {
+        return authorMinusButton;
+    }
+
+    public void setAuthorMinusButton(JButton authorMinusButton) {
+        this.authorMinusButton = authorMinusButton;
+    }
+
+    public void setAuthorPlusButton(JButton authorPlusButton) {
+        this.authorPlusButton = authorPlusButton;
+    }
 
     public JList getTagsTermJList() {
         return tagsTermJList;
@@ -1463,12 +1491,9 @@ public class ApplicationFrame extends JFrame {
             public Class<?> getColumnClass(int columnIndex) {
                 switch (columnIndex){
                     case 0:
-                        // case 1:
 
-                        // case 3:
-                        // case 4:
                         return Long.class;
-                    // case 2:
+
                     case 1:
 
 
@@ -1491,15 +1516,7 @@ public class ApplicationFrame extends JFrame {
                         return termTable.getTitle();
                     case 2:
                         return termTable.getTags();
-                   /* case 3:
-                        return termTable.getVersionCount();
-                    case 4:
-                        return termTable.getActualVersion();
-                    case 5:
-                        return termTable.getAuthors();
-                    case 6:
-                        return termTable.getSigned();
-                    case 7:*/
+
 
 
                 }
@@ -1519,18 +1536,10 @@ public class ApplicationFrame extends JFrame {
                 switch (column) {
                     case 0:
                         return "Id";
-               /* case 1:
-                return "Id";*/
+
                     case 1:
                         return "Tytuł";
-           /* case 3:
-                return "Ilość wersji";
-            case 4:
-                return "Aktualna wersja";
-                case 5:
-                return "Autorzy";
-                case 6:
-                return "Podpis";*/
+
                     case 2:
                         return "Tagi hasła";
 
@@ -1590,98 +1599,23 @@ public class ApplicationFrame extends JFrame {
 
 
 
-       /* termsTable = new JTable(new TermTableModel(headers,0)){
 
-
-            public Component prepareRenderer(
-                    TableCellRenderer renderer, int row, int column)
-            {
-                Component c = super.prepareRenderer(renderer, row, column);
-                JComponent jc = (JComponent)c;
-
-                //  Alternate row color
-
-                if (isRowSelected(row))
-                    c.setBackground(Color.LIGHT_GRAY);
-                else c.setBackground(this.getBackground());
-
-                return c;
-            }
-
-            public String getToolTipText(MouseEvent e) {
-                String tip = null;
-                Point p = e.getPoint();
-                int rowIndex = rowAtPoint(p);
-                int colIndex = columnAtPoint(p);
-                int realColumnIndex = convertColumnIndexToModel(colIndex);
-
-                if (realColumnIndex == 7) {
-                    int rowToCast =  (int)getValueAt(rowIndex,0);
-
-
-                   //int convertedValue = Math.toIntExact(rowToCast);
-                    tip = "Tagi dla hasła '" + getValueAt(rowIndex, colIndex -5 )
-                            + "' to : "
-                            + tagsStrings.get(rowToCast-1);
-
-                }
-
-                return tip;
-            }
-            protected JTableHeader createDefaultTableHeader() {
-                return new JTableHeader(columnModel) {
-                    public String getToolTipText(MouseEvent e) {
-                        String tip = null;
-                        Point p = e.getPoint();
-                        int index = columnModel.getColumnIndexAtX(p.x);
-                        int realIndex = columnModel.getColumn(index).getModelIndex();
-                        return columnToolTips[realIndex];
-                    }
-                };
-            }
-        };*/
-
-
-
-        //DefaultTableModel tm= (DefaultTableModel) termsTable.getModel();
-        //tm.setColumnIdentifiers(headersStr);
-       // TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<DefaultTableModel>((DefaultTableModel) termsTable.getModel());
-        //termsTable.setRowSorter(sorter);
         TableColumnModel tableModel= termsTable.getColumnModel();
 
         //Width of termsTable
-       /* long sum = 0;
-        for(int i =0 ; i<7 ; i ++){
-          sum+=  tableModel.getColumn(i).getWidth();
-        }
-        System.out.println( sum);*/
+
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment( JLabel.CENTER );
         DefaultTableCellRenderer leftRenderer = new DefaultTableCellRenderer();
         leftRenderer.setHorizontalAlignment( JLabel.LEFT );
 
-       /* tableModel.getColumn(0).setPreferredWidth(15);
-        tableModel.getColumn(1).setPreferredWidth(15);
-        tableModel.getColumn(2).setPreferredWidth(230);
-        tableModel.getColumn(3).setPreferredWidth(25);
-        tableModel.getColumn(4).setPreferredWidth(40);
-        tableModel.getColumn(5).setPreferredWidth(145);
-        tableModel.getColumn(6).setPreferredWidth(25);*/
-       // tableModel.getColumn(7).setPreferredWidth(30);
-       // tableModel.getColumn(0).setCellRenderer(centerRenderer);
-        //tableModel.getColumn(1).setCellRenderer(centerRenderer);
-        //tableModel.getColumn(3).setCellRenderer(centerRenderer);
-       // tableModel.getColumn(4).setCellRenderer(centerRenderer);
-        //tableModel.getColumn(7).setCellRenderer(leftRenderer);
-        /*List<RowSorter.SortKey> sortKeys = new ArrayList<>(25);
-        sortKeys.add(new RowSorter.SortKey(4, SortOrder.ASCENDING));
-        sortKeys.add(new RowSorter.SortKey(2, SortOrder.ASCENDING));
-        sorter.setSortKeys(sortKeys);*/
+
 
          categoryJList = new JList();
          subcategoryJList = new JList(new DefaultListModel());
          tagsJList = new JList();
          statusesJList = new JList();
+         authorsJList = new JList();
 
           authorsTermJList= new JList();
           tagsTermJList= new JList();
@@ -2020,7 +1954,7 @@ public class ApplicationFrame extends JFrame {
         bottomDetailsTermsPanel.setBackground(new Color(-12511981));
         bottomDetailsTermsPanel.setName("bottomDetailsTermsPanel");
         bottomDetailsTermsPanel.setOpaque(false);
-        bottomDetailsTermsPanel.setVisible(true);
+        bottomDetailsTermsPanel.setVisible(false);
         bottomDetailsPanel.add(bottomDetailsTermsPanel, "bottomDetailsTermsPanel");
         termsTableScrollPane = new JScrollPane();
         termsTableScrollPane.setAutoscrolls(true);
@@ -2451,7 +2385,7 @@ public class ApplicationFrame extends JFrame {
         bottomDetailsFiltersPanel.setName("bottomDetailsFiltersPanel");
         bottomDetailsPanel.add(bottomDetailsFiltersPanel, "bottomDetailsFiltersPanel");
         topDetailsPanelFilters = new JPanel();
-        topDetailsPanelFilters.setLayout(new GridLayoutManager(1, 4, new Insets(0, 0, 0, 0), -1, -1));
+        topDetailsPanelFilters.setLayout(new GridLayoutManager(1, 5, new Insets(0, 0, 0, 0), -1, -1));
         topDetailsPanelFilters.setMaximumSize(new Dimension(900, 2147483647));
         topDetailsPanelFilters.setMinimumSize(new Dimension(900, 58));
         topDetailsPanelFilters.setName("topDetailsPanelFilters");
@@ -2462,7 +2396,7 @@ public class ApplicationFrame extends JFrame {
         GroupJPanel.setLayout(new GridLayoutManager(3, 1, new Insets(5, 5, 35, 5), -1, -1));
         GroupJPanel.setName("GroupJPanel");
         GroupJPanel.setOpaque(true);
-        topDetailsPanelFilters.add(GroupJPanel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        topDetailsPanelFilters.add(GroupJPanel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final JLabel label21 = new JLabel();
         label21.setText("Kategorie");
         GroupJPanel.add(label21, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -2486,7 +2420,7 @@ public class ApplicationFrame extends JFrame {
         panel16.add(categoryPlusButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, new Dimension(30, 30), new Dimension(30, 30), new Dimension(30, 30), 0, false));
         SubGroupJPanel = new JPanel();
         SubGroupJPanel.setLayout(new GridLayoutManager(3, 1, new Insets(5, 5, 35, 5), -1, -1));
-        topDetailsPanelFilters.add(SubGroupJPanel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        topDetailsPanelFilters.add(SubGroupJPanel, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final JLabel label22 = new JLabel();
         label22.setText("Podkategorie");
         SubGroupJPanel.add(label22, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -2508,7 +2442,7 @@ public class ApplicationFrame extends JFrame {
         panel17.add(subcategoryPlusButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, new Dimension(30, 30), new Dimension(30, 30), new Dimension(30, 30), 0, false));
         TagsJPanel = new JPanel();
         TagsJPanel.setLayout(new GridLayoutManager(3, 1, new Insets(5, 5, 35, 5), -1, -1));
-        topDetailsPanelFilters.add(TagsJPanel, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        topDetailsPanelFilters.add(TagsJPanel, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final JLabel label23 = new JLabel();
         label23.setText("Tagi");
         TagsJPanel.add(label23, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -2530,7 +2464,7 @@ public class ApplicationFrame extends JFrame {
         panel18.add(tagsPlusButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, new Dimension(30, 30), new Dimension(30, 30), new Dimension(30, 30), 0, false));
         StatusJPanel = new JPanel();
         StatusJPanel.setLayout(new GridLayoutManager(3, 1, new Insets(5, 5, 35, 5), -1, -1));
-        topDetailsPanelFilters.add(StatusJPanel, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        topDetailsPanelFilters.add(StatusJPanel, new GridConstraints(0, 4, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final JLabel label24 = new JLabel();
         label24.setText("Status");
         StatusJPanel.add(label24, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -2550,15 +2484,39 @@ public class ApplicationFrame extends JFrame {
         statusPlusButton.setLabel("");
         statusPlusButton.setText("");
         panel19.add(statusPlusButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, new Dimension(30, 30), new Dimension(30, 30), new Dimension(30, 30), 0, false));
+        AuthorsPanel = new JPanel();
+        AuthorsPanel.setLayout(new GridLayoutManager(3, 1, new Insets(5, 5, 35, 5), -1, -1));
+        topDetailsPanelFilters.add(AuthorsPanel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        final JLabel label25 = new JLabel();
+        label25.setText("Autorzy");
+        AuthorsPanel.add(label25, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JPanel panel20 = new JPanel();
+        panel20.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
+        AuthorsPanel.add(panel20, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        authorMinusButton = new JButton();
+        authorMinusButton.setIcon(new ImageIcon(getClass().getResource("/img/arrows/minus.png")));
+        authorMinusButton.setText("");
+        panel20.add(authorMinusButton, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, new Dimension(30, 30), new Dimension(30, 30), new Dimension(30, 30), 0, false));
+        authorPlusButton = new JButton();
+        authorPlusButton.setIcon(new ImageIcon(getClass().getResource("/img/arrows/plus.png")));
+        authorPlusButton.setText("");
+        panel20.add(authorPlusButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, new Dimension(30, 30), new Dimension(30, 30), new Dimension(30, 30), 0, false));
         final JScrollPane scrollPane14 = new JScrollPane();
-        mainPanel.add(scrollPane14, BorderLayout.WEST);
+        scrollPane14.setOpaque(true);
+        AuthorsPanel.add(scrollPane14, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        final DefaultListModel defaultListModel8 = new DefaultListModel();
+        authorsJList.setModel(defaultListModel8);
+        authorsJList.setOpaque(true);
+        scrollPane14.setViewportView(authorsJList);
+        final JScrollPane scrollPane15 = new JScrollPane();
+        mainPanel.add(scrollPane15, BorderLayout.WEST);
         leftPanel = new JPanel();
         leftPanel.setLayout(new GridLayoutManager(3, 1, new Insets(0, 5, 0, 0), 0, 0));
         leftPanel.setBackground(new Color(-14802385));
         leftPanel.setMaximumSize(new Dimension(130, 2147483647));
         leftPanel.setMinimumSize(new Dimension(130, 770));
         leftPanel.setOpaque(true);
-        scrollPane14.setViewportView(leftPanel);
+        scrollPane15.setViewportView(leftPanel);
         leftTopPanel = new JPanel();
         leftTopPanel.setLayout(new GridLayoutManager(1, 1, new Insets(20, 5, 0, 5), -1, -1));
         leftTopPanel.setOpaque(false);
@@ -2572,22 +2530,22 @@ public class ApplicationFrame extends JFrame {
         leftMiddlePanel.setLayout(new GridLayoutManager(3, 1, new Insets(0, 0, 0, 0), -1, -1));
         leftMiddlePanel.setOpaque(false);
         leftPanel.add(leftMiddlePanel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_GROW, new Dimension(-1, 500), new Dimension(-1, 500), new Dimension(-1, 500), 0, false));
-        final JLabel label25 = new JLabel();
-        Font label25Font = this.$$$getFont$$$("Arial Black", Font.BOLD, 14, label25.getFont());
-        if (label25Font != null) label25.setFont(label25Font);
-        label25.setForeground(new Color(-2829100));
-        label25.setText("Lista modułów:");
-        leftMiddlePanel.add(label25, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, new Dimension(130, -1), null, null, 0, false));
+        final JLabel label26 = new JLabel();
+        Font label26Font = this.$$$getFont$$$("Arial Black", Font.BOLD, 14, label26.getFont());
+        if (label26Font != null) label26.setFont(label26Font);
+        label26.setForeground(new Color(-2829100));
+        label26.setText("Lista modułów:");
+        leftMiddlePanel.add(label26, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, new Dimension(130, -1), null, null, 0, false));
         list1 = new JList();
         list1.setBackground(new Color(-14802385));
         Font list1Font = this.$$$getFont$$$("Arial Black", Font.BOLD, 12, list1.getFont());
         if (list1Font != null) list1.setFont(list1Font);
         list1.setForeground(new Color(-3947581));
-        final DefaultListModel defaultListModel8 = new DefaultListModel();
-        defaultListModel8.addElement("Hasła");
-        defaultListModel8.addElement("Autorzy");
-        defaultListModel8.addElement("Ustawienia");
-        list1.setModel(defaultListModel8);
+        final DefaultListModel defaultListModel9 = new DefaultListModel();
+        defaultListModel9.addElement("Hasła");
+        defaultListModel9.addElement("Autorzy");
+        defaultListModel9.addElement("Ustawienia");
+        list1.setModel(defaultListModel9);
         list1.setOpaque(false);
         list1.setSelectionMode(0);
         list1.setVisibleRowCount(5);

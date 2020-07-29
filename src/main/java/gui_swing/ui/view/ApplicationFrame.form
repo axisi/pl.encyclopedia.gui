@@ -719,7 +719,7 @@
                                   <background color="-12511981"/>
                                   <name value="bottomDetailsTermsPanel"/>
                                   <opaque value="false"/>
-                                  <visible value="true"/>
+                                  <visible value="false"/>
                                 </properties>
                                 <border type="none"/>
                                 <children>
@@ -1726,7 +1726,7 @@
                                 </properties>
                                 <border type="none"/>
                                 <children>
-                                  <grid id="ee297" binding="topDetailsPanelFilters" layout-manager="GridLayoutManager" row-count="1" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                                  <grid id="ee297" binding="topDetailsPanelFilters" layout-manager="GridLayoutManager" row-count="1" column-count="5" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                                     <margin top="0" left="0" bottom="0" right="0"/>
                                     <constraints>
                                       <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -1743,7 +1743,7 @@
                                       <grid id="51032" binding="GroupJPanel" layout-manager="GridLayoutManager" row-count="3" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                                         <margin top="5" left="5" bottom="35" right="5"/>
                                         <constraints>
-                                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                                         </constraints>
                                         <properties>
                                           <name value="GroupJPanel"/>
@@ -1818,7 +1818,7 @@
                                       <grid id="ed159" binding="SubGroupJPanel" layout-manager="GridLayoutManager" row-count="3" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                                         <margin top="5" left="5" bottom="35" right="5"/>
                                         <constraints>
-                                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                                          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                                         </constraints>
                                         <properties/>
                                         <border type="none"/>
@@ -1887,7 +1887,7 @@
                                       <grid id="8352f" binding="TagsJPanel" layout-manager="GridLayoutManager" row-count="3" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                                         <margin top="5" left="5" bottom="35" right="5"/>
                                         <constraints>
-                                          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                                          <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                                         </constraints>
                                         <properties/>
                                         <border type="none"/>
@@ -1956,7 +1956,7 @@
                                       <grid id="30690" binding="StatusJPanel" layout-manager="GridLayoutManager" row-count="3" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                                         <margin top="5" left="5" bottom="35" right="5"/>
                                         <constraints>
-                                          <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                                          <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                                         </constraints>
                                         <properties/>
                                         <border type="none"/>
@@ -2020,6 +2020,78 @@
                                               </component>
                                             </children>
                                           </grid>
+                                        </children>
+                                      </grid>
+                                      <grid id="e27ee" binding="AuthorsPanel" layout-manager="GridLayoutManager" row-count="3" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                                        <margin top="5" left="5" bottom="35" right="5"/>
+                                        <constraints>
+                                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                                        </constraints>
+                                        <properties/>
+                                        <border type="none"/>
+                                        <children>
+                                          <component id="e8fd8" class="javax.swing.JLabel">
+                                            <constraints>
+                                              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                            <properties>
+                                              <text value="Autorzy"/>
+                                            </properties>
+                                          </component>
+                                          <grid id="86c2d" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                                            <margin top="0" left="0" bottom="0" right="0"/>
+                                            <constraints>
+                                              <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="2" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                            <properties/>
+                                            <border type="none"/>
+                                            <children>
+                                              <component id="936ee" class="javax.swing.JButton" binding="authorMinusButton">
+                                                <constraints>
+                                                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false">
+                                                    <minimum-size width="30" height="30"/>
+                                                    <preferred-size width="30" height="30"/>
+                                                    <maximum-size width="30" height="30"/>
+                                                  </grid>
+                                                </constraints>
+                                                <properties>
+                                                  <icon value="img/arrows/minus.png"/>
+                                                  <text value=""/>
+                                                </properties>
+                                              </component>
+                                              <component id="e9911" class="javax.swing.JButton" binding="authorPlusButton">
+                                                <constraints>
+                                                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false">
+                                                    <minimum-size width="30" height="30"/>
+                                                    <preferred-size width="30" height="30"/>
+                                                    <maximum-size width="30" height="30"/>
+                                                  </grid>
+                                                </constraints>
+                                                <properties>
+                                                  <icon value="img/arrows/plus.png"/>
+                                                  <text value=""/>
+                                                </properties>
+                                              </component>
+                                            </children>
+                                          </grid>
+                                          <scrollpane id="1b51d">
+                                            <constraints>
+                                              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                                            </constraints>
+                                            <properties>
+                                              <opaque value="true"/>
+                                            </properties>
+                                            <border type="none"/>
+                                            <children>
+                                              <component id="2e2f7" class="javax.swing.JList" binding="authorsJList" custom-create="true">
+                                                <constraints/>
+                                                <properties>
+                                                  <model/>
+                                                  <opaque value="true"/>
+                                                </properties>
+                                              </component>
+                                            </children>
+                                          </scrollpane>
                                         </children>
                                       </grid>
                                     </children>

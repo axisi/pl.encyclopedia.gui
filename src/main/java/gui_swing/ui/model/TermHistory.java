@@ -12,7 +12,15 @@ public class TermHistory {
     private String content;
     private Long version;
     private String status;
+    private String status1;
 
+    public String getStatus1() {
+        return status1;
+    }
+
+    public void setStatus1(String status1) {
+        this.status1 = status1;
+    }
 
     public String getStatus() {
         return status;

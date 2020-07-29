@@ -48,7 +48,7 @@ public class ReferencesPanel extends JFrame {
     private JLabel rErrorLabel;
 
     private ReferencesPanel referencesPanel;
-
+    private Boolean hasAccess;
 
 
     // options panels
@@ -57,9 +57,9 @@ public class ReferencesPanel extends JFrame {
     private ArrayList<ReferencesSearchPanel> referencesSearchPanels = new ArrayList<>();
     private Integer termId;
 
-    public ReferencesPanel(Integer termId){
+    public ReferencesPanel(Integer termId,Boolean hasAccess){
         super();
-
+        this.hasAccess= hasAccess;
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             @Override
@@ -170,12 +170,12 @@ public class ReferencesPanel extends JFrame {
         deleteButton.setToolTipText("Usuń wiersz");
         errorLabel= new JLabel("Test");
 
-
-        topPanel.add(proposalButton);
-        topPanel.add(textField);
-        topPanel.add(searchButton);
-        topPanel.add(deleteButton);
-
+        if(hasAccess) {
+            topPanel.add(proposalButton);
+            topPanel.add(textField);
+            topPanel.add(searchButton);
+            topPanel.add(deleteButton);
+        }
         botPanel.setLayout(new BoxLayout(botPanel, BoxLayout.Y_AXIS));
         botPanel.setAlignmentX(Component.RIGHT_ALIGNMENT);
         botPanel.add(errorLabel);
@@ -213,7 +213,9 @@ public class ReferencesPanel extends JFrame {
                 });
             break;
             default:
-                errorLabel.setText("Aby wygenerować ewentualne propozycje wciśnij'Generuj propozycje'");
+                if(hasAccess)
+                    errorLabel.setText("Aby wygenerować ewentualne propozycje wciśnij'Generuj propozycje'");
+
                 proposalButton.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {

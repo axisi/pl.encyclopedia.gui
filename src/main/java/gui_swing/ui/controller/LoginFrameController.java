@@ -105,6 +105,7 @@ public class LoginFrameController {
                                 loginFrame.getStatusLabel().setText("Logged-in");
                                 ConfigManager.setLoggedUser(login);
                                 ConfigManager.setJwtToken(output);
+                                ConfigManager.setLoggedUserRole(apiConnector.getUser(ConfigManager.getLoggedUser()).getUserRole());
                                 /*if(apiConnector.getUser1(login).getChangeRequired()){*/
 
                                /* }else{*/

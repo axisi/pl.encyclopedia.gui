@@ -60,6 +60,8 @@ public class ChangesPanel extends JFrame {
     private JEditorPane rightEditorPane;
     private ApiConnector apiConnector;
 
+    private Boolean hasAccess = false;
+
 
     public ChangesPanel(ArrayList<Long> list){
         super();
@@ -267,14 +269,15 @@ public class ChangesPanel extends JFrame {
         this.add(mainPanel);
         this.setTitle("Zamień wiele...");
         //this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        this.setPreferredSize(dim);
+        //this.setPreferredSize(dim);
+        this.setPreferredSize(new Dimension((int)(dim.width*0.8) , (int) (dim.height*0.8)));
         this.setMinimumSize(new Dimension((int)(dim.width*0.8) , (int) (dim.height*0.8)));
         // this.setExtendedState(JFrame.MAXIMIZED_BOTH);
         this.setMaximumSize(dim);
         leftScrollPane.setPreferredSize(new Dimension((int) (dim.width*0.8/2-20), (int) (dim.height * 0.7)));
         rightScrollPane.setPreferredSize(new Dimension((int) (dim.width*0.8/2-20), (int) (dim.height * 0.7)));
        // Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-        this.setLocation(dim.width/2-this.getSize().width/2,dim.height/2-this.getSize().height/2);
+        this.setLocation((int)(dim.width*0.8/2-this.getSize().width/2),(int)(dim.height*0.8/2-this.getSize().height/2));
         this.pack();
         this.setVisible(true);
     }
@@ -344,6 +347,11 @@ public class ChangesPanel extends JFrame {
     public Integer getNextId(Integer index){
 
         Term term = apiConnector.getTerm(termsArray.get(0).intValue());
+        hasAccess= TermWindow.checkAccess(term.getId().intValue());
+        if(!hasAccess){
+            termsArray.remove(0);
+            return 0;
+        }
         TermHistory  termHistory = apiConnector.getActualTermHistoryOfTerm(term.getId().intValue());
         String tempContent;
         if(index>0)
@@ -391,5 +399,6 @@ public class ChangesPanel extends JFrame {
             }
         }
     }
+
 
 }

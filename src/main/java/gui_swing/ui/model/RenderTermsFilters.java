@@ -56,19 +56,17 @@ public class RenderTermsFilters{
 
             jLists[2].setListData(new CheckListItem[]{
                     new CheckListItem("Nowy"),
-                    new CheckListItem("U autora aktualizacji"),
-                    new CheckListItem("Zwrócone przez autora aktualizacji"),
+                    new CheckListItem("W redakcji"),
                     new CheckListItem("U autora"),
-                    new CheckListItem("Zwrócone przez autora"),
-                    new CheckListItem("U redaktora naukowego działu"),
-                    new CheckListItem("Zwrócone przez redaktora naukowego działu"),
                     new CheckListItem("U recenzenta"),
-                    new CheckListItem("Zwrócone przez recenzenta"),
+                    new CheckListItem("U redaktora merytorycznego działu"),
                     new CheckListItem("U redaktora naukowego"),
-                    new CheckListItem("Zwrócone przez redaktora naukowego"),
-                    new CheckListItem("Gotowe do redakcji"),
-                    new CheckListItem("Gotowe do druku"),
+                    new CheckListItem("W pierwszej korekcie"),
+                    new CheckListItem("W drugiej korekcie"),
+                    new CheckListItem("Gotowe do składu"),
                     new CheckListItem("Usunięte")
+
+
 
             });
             break;

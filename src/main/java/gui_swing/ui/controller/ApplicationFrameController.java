@@ -2,10 +2,7 @@ package gui_swing.ui.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import gui_swing.ui.model.*;
-import gui_swing.ui.model.Components.ChangesPanel;
-import gui_swing.ui.model.Components.TermWindow;
-import gui_swing.ui.model.Components.UsersOptionPanel;
-import gui_swing.ui.model.Components.WordGeneratePanel;
+import gui_swing.ui.model.Components.*;
 import gui_swing.ui.model.Listeners.MouseListeners;
 import gui_swing.ui.model.filters.*;
 import gui_swing.ui.model.tableModels.GradientButton;
@@ -33,7 +30,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
-import java.util.regex.Pattern;
 
 public class ApplicationFrameController {
     //    private final static String termsPanel = "bottomPropertiesTermsPanel";
@@ -63,6 +59,7 @@ public class ApplicationFrameController {
     private JLabel termsErrorLabel;
     boolean tags1 = true;
     boolean tags2 = true;
+    boolean tags3 = true;
     String newTermSuccessesAdded;
     private JButton markReferenceButton;
     private Integer lettersOnVerse = 52;
@@ -73,6 +70,7 @@ public class ApplicationFrameController {
     private JList subcategoryJList;
     private JList tagsJList;
     private JList statusesJList;
+    private JList authorsJList;
     private JPanel shefPanel;
 
     private JButton searchButton;
@@ -171,6 +169,8 @@ public class ApplicationFrameController {
     private JButton tagsMinusButton;
     private JButton statusMinusButton;
     private JButton statusPlusButton;
+    private JButton authorPlusButton;
+    private JButton authorMinusButton;
 
 
 // buttons
@@ -229,13 +229,35 @@ public class ApplicationFrameController {
     public static ArrayList<TermWindow> termWindows;
     public static ArrayList<ChangesPanel> changesPanels = new ArrayList<>();
     public static ArrayList<WordGeneratePanel> wordGenerationPanels = new ArrayList<>();
+    public static ArrayList<ImportTermWindow> importTermsWindows = new ArrayList<>();
 
     public ApplicationFrameController(MainController mainController) {
 
         initComponents(mainController);
         initListeners();
         isPasswordChangeRequired();
+        setPermissions();
 
+    }
+
+    private void setPermissions() {
+        DefaultListModel listModel = (DefaultListModel)  settingsList.getModel();
+        listModel.removeAllElements();
+
+        if(ConfigManager.getLoggedUserRole().getSubCategoriesManagement()) {
+            listModel.addElement("Podkategorie");
+        }
+        if(ConfigManager.getLoggedUserRole().getTagsManagement()) {
+            listModel.addElement("Tagi");
+        }
+        if(ConfigManager.getLoggedUserRole().getUsersVisible()) {
+            listModel.addElement("Użytkownicy");
+        }
+
+        DefaultListModel listModel1 = (DefaultListModel)authorsList.getModel();
+        listModel1.removeAllElements();
+        if(ConfigManager.getLoggedUserRole().getAuthorsManagement())
+            listModel1.addElement("Zarządzanie autorami");
     }
 
     private void isPasswordChangeRequired() {
@@ -275,6 +297,7 @@ public class ApplicationFrameController {
         subcategoryJList = applicationFrame.getSubcategoryJList();
         tagsJList = applicationFrame.getTagsJList();
         statusesJList = applicationFrame.getStatusesJList();
+        authorsJList = applicationFrame.getAuthorsJList();
         markReferenceButton = applicationFrame.getMarkReferenceButton();
         list= applicationFrame.getListOfTermTable();
         bottomDetailsFiltersPanel = applicationFrame.getBottomDetailsFiltersPanel();
@@ -287,6 +310,8 @@ public class ApplicationFrameController {
         tagsMinusButton = applicationFrame.getTagsMinusButton();
         statusMinusButton = applicationFrame.getStatusMinusButton();
         statusPlusButton = applicationFrame.getStatusPlusButton();
+        authorPlusButton = applicationFrame.getAuthorPlusButton();
+        authorMinusButton = applicationFrame.getAuthorMinusButton();
 
 
         //termTableModel= applicationFrame.getTermTableModel();
@@ -414,6 +439,18 @@ public class ApplicationFrameController {
 
 
         termsList = applicationFrame.getTermsList();
+        DefaultListModel listModel = new DefaultListModel();
+
+        listModel.addElement("Wszystkie");
+        listModel.addElement("Filtruj");
+        listModel.addElement("Dodaj hasło");
+        listModel.addElement("Importuj hasła");
+
+        termsList.setModel(listModel);
+
+
+
+
 
         backToMainPanel();
         loggedUserLabel = applicationFrame.getLoggedUserLabel();
@@ -540,6 +577,16 @@ public class ApplicationFrameController {
                                         renderTermsFilters.setJListCheckBoxFeatures(tagsJList, 1);
                                         tags2 = false;
                                     }
+
+                                    /*DefaultListModel defaultListModel1 = (DefaultListModel) authorsJList.getModel();
+                                    defaultListModel1.removeAllElements();*/
+                                    ArrayList<String> authors = apiConnector.getAllAuthors();
+                                    renderTermsFilters.setTagsJList(authorsJList,authors);
+
+                                    if(tags3){
+                                        renderTermsFilters.setJListCheckBoxFeatures(authorsJList,1);
+                                        tags3 = false;
+                                    }
                                     DefaultListModel defaultListModel = (DefaultListModel) subcategoryJList.getModel();
                                     defaultListModel.removeAllElements();
                                     ArrayList<String> subcategoriesList = apiConnector.getAllSubcategoriesString();
@@ -556,9 +603,12 @@ public class ApplicationFrameController {
                                 }
                                 //System.out.println(topDetailsPanel.getWidth());
                                 break;
-                            case "Pokaż według autorów":
+                            case "Importuj hasła":
                                 hideFiltersSearchPanels();
-                                cardLayout1.show(bottomDetailsPanel, bottomDetailsBlankPanel.getName());
+                                //cardLayout1.show(bottomDetailsPanel, bottomDetailsBlankPanel.getName());
+                                ImportTermWindow importTermWindow = new ImportTermWindow();
+                                importTermWindow.setAlwaysOnTop(true);
+                                importTermsWindows.add(importTermWindow);
                                 break;
 
                             case "Dodaj hasło":
@@ -809,17 +859,20 @@ public class ApplicationFrameController {
                     SubcategoryF<String> subcategoriesList = new SubcategoryF<String>();
                     TagF<String> tagsList = new TagF<String>();
                     StatusesF<String> statusesList = new StatusesF<>();
+                    AuthorsF<String> authorsList = new AuthorsF<>();
 
 
                     generateLists(categoriesList, categoryJList);
                     generateLists(subcategoriesList, subcategoryJList);
                     generateLists(tagsList, tagsJList);
                     generateLists(statusesList, statusesJList);
-                    if (!(categoriesList.isEmpty() && subcategoriesList.isEmpty() && tagsList.isEmpty() && statusesList.isEmpty())) {
+                    generateLists(authorsList,authorsJList);
+                    if (!(categoriesList.isEmpty() && subcategoriesList.isEmpty() && tagsList.isEmpty() && statusesList.isEmpty()&&authorsList.isEmpty())) {
                         searchMatrix.setCategoryF(categoriesList);
                         searchMatrix.setSubcategoryF(subcategoriesList);
                         searchMatrix.setTagF(tagsList);
                         searchMatrix.setStatusesF(statusesList);
+                        searchMatrix.setAuthorsF(authorsList);
 
                         try {
                             apiConnector.getTermsByFilter(searchMatrix);
@@ -849,38 +902,43 @@ public class ApplicationFrameController {
         addTermButton.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                versesTermLabel.setText("");
+                versesTermLabel.setForeground(Color.RED.darker());
+                if(apiConnector.isTermExist( textField1.getText().trim())){
+                    versesTermLabel.setText("Hasło o tytule: '"+textField1.getText().trim()+"' już istnieje!");
+                }else{
+                    if (String.valueOf(categoryComboBox.getSelectedItem()) == "") {
+                        versesTermLabel.setText("Hasło musi mieć ustawioną kategorię.");
+                    } else {
 
-                if (String.valueOf(categoryComboBox.getSelectedItem()) == "") {
-                    versesTermLabel.setText("Hasło musi mieć ustawioną kategorię.");
-                } else {
+
+                        Term term = new Term();
+                        TermHistory termHistory = new TermHistory();
+                        termHistory.setVersion(1L);
+                        term.setActualVersion(termHistory.getVersion());
+                        term.setTitle(textField1.getText());
+                        term.setSigned(isSignedCheckBox.isSelected());
+                        termHistory.setContent(NCRConverter.convertNcrToText (htmlEditorPane.getText()));
+                        term.setCategory(String.valueOf(categoryComboBox.getSelectedItem()));
+                        term.setSubcategory(String.valueOf(subcategoryComboBox.getSelectedItem()));
+                        //System.out.println("a");
+
+                        TermWindow.packFormDataToEntity(termHistory, term,statusesJList,tagsJList,authorsTable);
+
+                        prepareTermForm(true);
+                        try {
+
+                            versesTermLabel.setText(apiConnector.addNewTerm(term));
+                            tagsStrings.clear();
+                            categoryComboBox.setSelectedIndex(0);
+                            subcategoryComboBox.setSelectedIndex(0);
+                        } catch (JsonProcessingException ex) {
+                            ex.printStackTrace();
+                            logoutBecauseOfError();
+                        }
 
 
-                    Term term = new Term();
-                    TermHistory termHistory = new TermHistory();
-                    termHistory.setVersion(1L);
-                    term.setActualVersion(termHistory.getVersion());
-                    term.setTitle(textField1.getText());
-                    term.setSigned(isSignedCheckBox.isSelected());
-                    termHistory.setContent(NCRConverter.convertNcrToText (htmlEditorPane.getText()));
-                    term.setCategory(String.valueOf(categoryComboBox.getSelectedItem()));
-                    term.setSubcategory(String.valueOf(subcategoryComboBox.getSelectedItem()));
-                    //System.out.println("a");
-
-                    TermWindow.packFormDataToEntity(termHistory, term,statusesJList,tagsJList,authorsTable);
-
-                    prepareTermForm(true);
-                    try {
-
-                        versesTermLabel.setText(apiConnector.addNewTerm(term));
-                        tagsStrings.clear();
-                        categoryComboBox.setSelectedIndex(0);
-                        subcategoryComboBox.setSelectedIndex(0);
-                    } catch (JsonProcessingException ex) {
-                        ex.printStackTrace();
-                        logoutBecauseOfError();
                     }
-
-
                 }
             }
         });
@@ -1377,6 +1435,19 @@ public class ApplicationFrameController {
                 plusMinusMethod(statusesJList,false);
             }
         });
+        authorPlusButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                plusMinusMethod(authorsJList,true);
+            }
+        });
+        authorMinusButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                plusMinusMethod(authorsJList,false);
+            }
+        });
+
         // plus&minusesListeners -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -1504,42 +1575,7 @@ public class ApplicationFrameController {
         fillDataToTermForm(term, false, integerId);
     }
 
-    /*private void packFormDataToEntity(TermHistory termHistory, Term term) {
-        ArrayList<String> statuses = new ArrayList<>();
-        ArrayList<String> tags = new ArrayList<>();
-        ArrayList<String> authors = new ArrayList<>();
-        if (statusesTermJList.getModel().getSize() > 0)
-            termHistory.setStatus(statusesTermJList.getModel().getElementAt(0).toString());
-        for (int i = 0; i < statusesTermJList.getModel().getSize(); i++) {
-            statuses.add(statusesTermJList.getModel().getElementAt(i).toString());
-            CheckListItem checkListItem = (CheckListItem) statusesTermJList.getModel().getElementAt(i);
-            if (checkListItem.isSelected())
-                termHistory.setStatus(checkListItem.toString());
-        }
-        for (int i = 0; i < tagsTermJList.getModel().getSize(); i++) {
-            CheckListItem checkListItem = (CheckListItem) tagsTermJList.getModel().getElementAt(i);
-            if (checkListItem.isSelected())
-                tags.add(checkListItem.toString());
-        }
-        for (int i = 0; i < authorsTableModelInTermDetails.getRowCount(); i++) {
-            if ((boolean) authorsTableModelInTermDetails.getValueAt(i, 1)) {
 
-                Integer numberOfVerses = 0;
-                if (!(authorsTableModelInTermDetails.getValueAt(i, 3) == null)) {
-                    Object numbersOfVersesLong = authorsTableModelInTermDetails.getValueAt(i, 3);
-                    numberOfVerses = Integer.valueOf(numbersOfVersesLong.toString());
-                }
-                authors.add(authorsTableModelInTermDetails.getValueAt(i, 0) + "|" + numberOfVerses);
-            }
-        }
-        ArrayList<TermHistory> termHistories = new ArrayList<>();
-        termHistories.add(termHistory);
-
-        term.setTermHistories(termHistories);
-        term.setAuthors(authors);
-        term.setTagsString(tags);
-        term.setStatuses(statuses);
-    }*/
 
     private void clearAuthorPanel() {
         nameTextField.setText("");
@@ -1552,13 +1588,13 @@ public class ApplicationFrameController {
 
     private void clearTermPanel() {
         termHistoryVersionLabel.setText("");
-        //editorPane1.setText("");
+
         htmlEditorPane.getGraphics();
         htmlEditorPane.setText("");
         textField1.setText("");
         actualTermHistoryVersionLabel.setText("");
         isSignedCheckBox.setSelected(false);
-        //versesTermLabel.setText("");
+
         termDetailsIdLabel.setText("");
 
 
@@ -1570,7 +1606,7 @@ public class ApplicationFrameController {
                 tagsModel.removeRow(i);
             }
         }
-        //tagsSettingsList.setEnabled(false);
+
         tagsNameField.setText(tagsSettingsList.getSelectedValue().toString());
         Long tagId = apiConnector.getTagId(tagsSettingsList.getSelectedValue().toString());
         Tag tag = apiConnector.getTag(apiConnector.getTagId(tagsSettingsList.getSelectedValue().toString()));
@@ -1582,19 +1618,14 @@ public class ApplicationFrameController {
         selectedTagColorName = selectedTagColor.getRed() + "-" + selectedTagColor.getGreen() + "-" + selectedTagColor.getBlue();
         String tagIconPath = getColorTagIcon(color, tagColorName);
         tagIconLabel.setIcon(new ImageIcon(tagIconPath));
-        //List<Term> terms;
+
         List<Term> termsMatched;
 
-            //terms  = apiConnector.getAllTerm();
             termsMatched = apiConnector.getTermsMatchedToTag(tag.getId());
-
-
-
 
             for (Term tt: termsMatched){
                 tagsModel.addRow(new Object[]{true, tt.getId().intValue(), tt.getTitle()});
             }
-
 
         TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(termsTagsTable.getModel());
         termsTagsTable.setRowSorter(sorter);
@@ -1617,25 +1648,19 @@ public class ApplicationFrameController {
 
     public static String getColorTagIcon(Color selectedTagColor, String selectedTagColorName) {
         BufferedImage bufferedImage = new BufferedImage(12, 12, BufferedImage.TYPE_INT_RGB);
-        //imageIcons.add(new ImageIcon("src/main/resources/img/tags/"+tag.getIconName()));
 
-        /*String path = getClass().getResource("/img/tags/0-0-0.png").getPath();
-        path = path.replace("%20"," ");
-        path = path.substring(path.indexOf("C:"));
-        path     = path.substring(0,path.length()-9);*/
         String path = ConfigManager.getTagsFolder();
         File iconFile = new File(path + selectedTagColorName + ".png");
         if (!iconFile.exists()) {
-            // System.out.println("mamy to");
-            //System.out.println(path);
+
 
             Graphics2D g2d = bufferedImage.createGraphics();
             g2d.setColor(selectedTagColor);
             g2d.fillRect(0, 0, bufferedImage.getWidth(), bufferedImage.getHeight());
-            //tagIconLabel.setIcon();
+
             try {
                 if (ImageIO.write(bufferedImage, "png", new File(path + selectedTagColorName + ".png"))) {
-                    //System.out.println("-- saved");
+
                     return path + selectedTagColorName + ".png";
                 }
             } catch (IOException exception) {
@@ -1779,7 +1804,7 @@ public class ApplicationFrameController {
     }
 
     private void fillTermAuthorTable(Integer integerId) {
-        TermWindow.fillAuthorsTable(authorsTableModelInTermDetails, apiConnector, integerId);
+        TermWindow.fillAuthorsTable(authorsTableModelInTermDetails, apiConnector, integerId,authorsTable);
     }
 
     private void hideButtonsAndRefreshViewAfterAuthorsAction() {
@@ -1826,6 +1851,7 @@ public class ApplicationFrameController {
         backToMainPanel();
         ConfigManager.setLoggedUser("");
         ConfigManager.setJwtToken("");
+        ConfigManager.setLoggedUserRole(null);
         applicationFrame.dispose();
         //applicationFrame.setVisible(false);
         mainController.setLoginFrameController(new LoginFrameController(mainController));
@@ -2113,10 +2139,15 @@ public class ApplicationFrameController {
                     ArrayList<Long>longs = new ArrayList<>();
                     for (Term term:apiConnector.getResponseList()) {
                         longs.add(term.getId());
+
                     }
-                    wordGenerationPanels.add(new WordGeneratePanel(longs));
+                   WordGeneratePanel wordGeneratePanel = new WordGeneratePanel(longs);
 
+                    wordGenerationPanels.add(wordGeneratePanel);
 
+                   //frameWithTerms.setState(Frame.ICONIFIED);
+                   // wordGeneratePanel.setState(Frame.NORMAL);
+                    wordGeneratePanel.setAlwaysOnTop(true);
 
                     // mimic some long-running process here...
 
@@ -2140,6 +2171,7 @@ public class ApplicationFrameController {
                     }
                 }
             });
+
             mySwingWorker.execute();
 
 

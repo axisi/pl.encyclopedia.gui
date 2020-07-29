@@ -1,9 +1,15 @@
 package gui_swing.ui.model;
 
 
-import java.io.FileInputStream;
-import java.io.IOException;
+import com.google.common.io.Resources;
+
+import javax.swing.*;
+import java.io.*;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Properties;
 
 public class ConfigManager {
@@ -13,13 +19,62 @@ public class ConfigManager {
     private static String apiURI;
     private static String tagsFolder;
     private static String tempFolder;
+    private static String thunderbirdFolder;
+    private static URL url = ClassLoader.getSystemResource("config/inputs.properties");
+    private static UserRole loggedUserRole;
 
     public ConfigManager() {
         setApiURI();
+        setTranslations();
+    }
+
+    private static void setTranslations() {
+        UIManager.put("FileChooser.newFolderToolTipText","Nowy folder");
+        UIManager.put("FileChooser.homeFolderToolTipText","Folder startowy");
+        UIManager.put("FileChooser.filesOfTypeLabelText","Typ plików:");
+        UIManager.put("FileChooser.lookInLabelText","Szukaj w:");
+
     }
 
     public static String getApiURI() {
         return apiURI;
+    }
+
+    public static void setCompareURI(String oldPath, String newPath){
+       /*
+        URL url = ClassLoader.getSystemResource("config/inputs.properties");
+
+        if (url != null) {
+           *//* try{
+               // BufferedWriter bufferedWriter = Files.newBufferedWriter(Paths.get(Resources.getResource("config/inputs.properties").toURI()));
+
+
+                resources.setProperty("oldPath", oldPath);
+                resources.setProperty("newPath", newPath);
+
+                //FileWriter writer = new FileWriter(new File(url.getPath()));
+                //resources.store(bufferedWriter,"RAZDWA");
+                //writer.close();
+            } catch (IOException | URISyntaxException e) {
+                e.printStackTrace();
+            }*//*
+        }*/
+      /*  final Properties resources = new Properties();
+        if (url != null){
+            try {
+
+
+                resources.setProperty("oldPath", oldPath);
+                resources.setProperty("newPath", newPath);
+                FileWriter writer = new FileWriter(new File(url.toURI().getPath()));
+                resources.store(writer, "");
+                writer.close();
+            } catch (IOException | URISyntaxException e) {
+                e.printStackTrace();
+            }
+
+        }*/
+
     }
 
     public static void setApiURI() {
@@ -30,7 +85,7 @@ public class ConfigManager {
         } catch (IOException e) {
             e.printStackTrace();
         }*/
-        URL url = ClassLoader.getSystemResource("config/inputs.properties");
+
         if (url != null) {
             try {
                 resources.load(url.openStream());
@@ -59,7 +114,16 @@ public class ConfigManager {
         ConfigManager.setApiURI (resources.getProperty("apiUri"));
         ConfigManager.setTagsFolder( resources.getProperty("tagsFolder"));
         ConfigManager.setTempFolder( resources.getProperty("tempFolder"));
-        System.out.println(resources.getProperty("tagsFolder"));
+        ConfigManager.setThunderbirdFolder( resources.getProperty("thunderbirdFolder"));
+        //System.out.println(resources.getProperty("tagsFolder"));
+    }
+
+    public static String getThunderbirdFolder() {
+        return thunderbirdFolder;
+    }
+
+    public static void setThunderbirdFolder(String thunderbirdFolder) {
+        ConfigManager.thunderbirdFolder = thunderbirdFolder;
     }
 
     public static String getJwtToken() {
@@ -68,6 +132,14 @@ public class ConfigManager {
 
     public static void setJwtToken(String jwtToken) {
         ConfigManager.jwtToken = jwtToken;
+    }
+
+    public static UserRole getLoggedUserRole() {
+        return loggedUserRole;
+    }
+
+    public static void setLoggedUserRole(UserRole loggedUserRole) {
+        ConfigManager.loggedUserRole = loggedUserRole;
     }
 
     public static String getLoggedUser() {

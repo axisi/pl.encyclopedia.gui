@@ -5,6 +5,15 @@ public class ListsF {
     private StatusesF statusesF;
     private  SubcategoryF subcategoryF;
     private TagF tagF;
+    private  AuthorsF authorsF;
+
+    public AuthorsF getAuthorsF() {
+        return authorsF;
+    }
+
+    public void setAuthorsF(AuthorsF authorsF) {
+        this.authorsF = authorsF;
+    }
 
     public CategoryF getCategoryF() {
         return categoryF;

@@ -1,34 +1,249 @@
 package gui_swing.ui.model;
 
 
+import gui_swing.ui.model.Components.WordGeneratePanel;
+import net.atlanticbb.tantlinger.shef.HTMLEditorPane;
 import org.apache.poi.xwpf.usermodel.*;
+import org.docx4j.XmlUtils;
+import org.docx4j.convert.in.xhtml.XHTMLImporterImpl;
+import org.docx4j.openpackaging.exceptions.Docx4JException;
+import org.docx4j.openpackaging.exceptions.InvalidFormatException;
+import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.graalvm.compiler.word.Word;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.*;
 
 import javax.swing.*;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.awt.*;
+import java.io.*;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+
 
 public class CreateWord {
     private JTable jTable;
     private ApiConnector apiConnector;
-    public CreateWord(JTable jTable) {
+    private StringBuilder xhtml;
+    private String fontColor;
+    private String backGroundColor;
+    private String path;
+    private String fileName;
+    private Boolean isSelected;
+    private WordGeneratePanel parentPanel;
+    private Boolean printIt;
+    private String fullPath;
+
+
+    public CreateWord(JTable jTable, Color foreground, Color background, String path, String fileName , WordGeneratePanel wordGeneratePanel,Boolean isSelected) {
+        //String hex = String.format("#%02x%02x%02x", r, g, b);
+        printIt = false;
         this.jTable = jTable;
-        apiConnector= new ApiConnector();
-        
-        createEmptyFile();
+        staticConstructorPart(foreground, background, path, fileName);
+        parentPanel =wordGeneratePanel;
+        this.isSelected = isSelected;
+        //createEmptyFile();
+        createEmptyFile1();
     }
 
-    private void createEmptyFile() {
+    private void staticConstructorPart(Color foreground, Color background, String path, String fileName) {
+        apiConnector= new ApiConnector();
+        fontColor = String.format("#%02x%02x%02x", foreground.getRed(), foreground.getGreen(), foreground.getBlue());
+        backGroundColor = String.format("#%02x%02x%02x", background.getRed(), background.getGreen(), background.getBlue());
+        this.path = path;
+        this.fileName = fileName;
+    }
+
+    public CreateWord(){
+
+    }
+
+    public CreateWord(Integer termId, Long versionNumber, Color black, Color white, String tempFolder, String date,Boolean isSelected , Boolean printIt) {
+        staticConstructorPart(black,white,tempFolder,date);
+        this.isSelected= isSelected;
+        this.printIt = printIt;
+        createEmptyFile2(termId,versionNumber);
+    }
+
+    public CreateWord (Term term , Color black , Color white , String tempFolder , String date){
+        staticConstructorPart(black,white,tempFolder,date+"new");
+        isSelected = false;
+        printIt = false;
+        createEmptyFile2(term);
+
+    }
+
+    private void createEmptyFile2(Term term) {
+        xhtml = new StringBuilder();
+        addHeader();
+        addBody2(term);
+        addFooter();
+        convertAndGenerateFile();
+    }
+
+    private void addBody2(Term term) {
+        fillTermEntity(term.getId(),-1l,term.getTitle(),term);
+    }
+
+
+
+    private void createEmptyFile2(Integer termId, Long versionNumber) {
+        xhtml = new StringBuilder();
+        addHeader();
+        addBody2(termId,versionNumber);
+        addFooter();
+        convertAndGenerateFile();
+    }
+
+    private void addBody2(Integer termId, Long versionNumber) {
+        Term term = apiConnector.getTerm(termId);
+        String termTitle = term.getTitle();
+        fillTermEntity(termId.longValue(),versionNumber.longValue(),termTitle);
+
+    }
+
+
+    private void createEmptyFile1() {
+        xhtml = new StringBuilder();
+        addHeader();
+        addBody();
+        addFooter();
+        convertAndGenerateFile();
+
+
+
+
+    }
+
+
+
+    private void convertAndGenerateFile()  {
+        try {
+            //xhtml = xhtml.replaceAll("(\\r|\\n)", "");
+            //xhtml = xhtml.replaceAll("     ", " ");
+           // xhtml = xhtml.trim().replaceAll(" +"," ");
+
+
+        WordprocessingMLPackage wordMLPackage = WordprocessingMLPackage.createPackage();
+        XHTMLImporterImpl XHTMLImporter = new XHTMLImporterImpl(wordMLPackage);
+        wordMLPackage.getMainDocumentPart().getContent().addAll(
+                    XHTMLImporter.convert(String.valueOf(xhtml), null) );
+        fullPath = path +File.separator+ fileName+".docx";
+        File file = new File(fullPath);
+            wordMLPackage.save(new FileOutputStream(file));
+            if(isSelected){
+                Desktop desktop = Desktop.getDesktop();
+
+                if(printIt) {
+                    desktop.print(file);
+                }else{
+                    desktop.open(file);
+                }
+            }
+            if(!printIt&&parentPanel!=null){
+                parentPanel.dispose();
+            }
+        } catch (Docx4JException  e) {
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            byte[] bytes = e.getMessage().getBytes(StandardCharsets.UTF_8);
+            String s1 = null;
+            s1 = new String(bytes, Charset.forName("UTF-8"));;
+
+
+            JOptionPane.showMessageDialog(parentPanel, s1 );
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private void addFooter() {
+        xhtml.append("</html>");
+
+    }
+
+    private void addBody() {
+        for (int i = 0; i < jTable.getRowCount(); i++) {
+            if((Boolean) jTable.getValueAt(i,0)) {
+                Long termId = Long.valueOf(jTable.getValueAt(i, 1).toString());
+                Long version = Long.valueOf(jTable.getValueAt(i, 4).toString());
+                String termTitle = jTable.getValueAt(i, 2).toString();
+                fillTermEntity(termId, version, termTitle);
+            }
+
+        }
+    }
+
+    private void fillTermEntity(Long termId, Long version, String termTitle,Term ... term) {
+        TermHistory termHistory;
+        String authorString;
+        if(version!=-1l){
+             termHistory = apiConnector.getTermHistoryToTermWidthVersion(termId.intValue(), version.intValue());
+             authorString = "";
+
+            for (Author a: apiConnector.getAuthorsOfTerm(termId)
+            ) {
+                authorString+= a.getName() +" "+ a.getSurname();
+                Integer verses =  apiConnector.getVerses((long) a.getId(),termId);
+                if (verses >-1 ){
+                    authorString+= " - "+verses;
+                }
+                authorString+="; ";
+            }
+        }else {
+            termHistory = term[0].getTermHistories().get(0);
+            authorString = "";
+
+        }
+        HTMLEditorPane htmlEditorPane = new HTMLEditorPane();
+        htmlEditorPane.setText(termHistory.getContent());
+        String content = htmlEditorPane.getText() ;
+        content = content.replaceAll("(\n)","");
+        content= content.trim().replaceAll(" +", " ");
+        content= content.trim().replaceAll("<br>", "<br></br>");
+        xhtml.append("<table style=\"width:100%;border: 1px solid black;border-collapse: collapse;page-break-inside:auto;\">");
+        xhtml.append("<tr>");
+        xhtml.append("<td style=\"border: 1px solid black;color:"+fontColor+";background-color:"+backGroundColor+";\">Id:</td>");
+        xhtml.append("<td style=\"border: 1px solid black;color:"+fontColor+";background-color:"+backGroundColor+";\">"+termId.toString()+"</td>");
+        System.out.println(termId.toString());
+        xhtml.append("<td style=\"border: 1px solid black;color:"+fontColor+";background-color:"+backGroundColor+";\">Wersja:</td>");
+        xhtml.append("<td style=\"border: 1px solid black;color:"+fontColor+";background-color:"+backGroundColor+";\">"+version.toString()+"</td>");
+        xhtml.append("<td style=\"border: 1px solid black;color:"+fontColor+";background-color:"+backGroundColor+";\">Tytuł:</td>");
+        xhtml.append("<td style=\"border: 1px solid black;color:"+fontColor+";background-color:"+backGroundColor+";\">"+termTitle+"</td>");
+        xhtml.append("</tr>");
+        xhtml.append("<tr>");
+        xhtml.append("<td style=\"border: 1px solid black;color:"+fontColor+";background-color:"+backGroundColor+";\">Autorzy:</td>");
+        xhtml.append("<td colspan=\"5\" style=\"border: 1px solid black;color:"+fontColor+";background-color:"+backGroundColor+";\">"+authorString +"</td>");
+        xhtml.append("</tr>");
+        xhtml.append("<tr>");
+        xhtml.append("<td colspan=\"6\" style=\"border: 1px solid black;\">"+content+"</td>");
+        xhtml.append("</tr>");
+        xhtml.append("</table>");
+        xhtml.append("<br></br>");
+    }
+
+    private void addHeader() {
+        xhtml.append("<html>");
+        /*xhtml.append("<style type=\"text/css\">\n" +
+                "table { page-break-inside:auto }" +
+                "table {border-style: solid;}" +
+                "</style>";*/
+    }
+
+    public String getFullPath() {
+        return fullPath;
+    }
+
+    /*private void createEmptyFile() {
         XWPFDocument document= new XWPFDocument();
         try {
 
             String path = ConfigManager.getTempFolder();
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmmss");
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm-ss");
             LocalDateTime now = LocalDateTime.now();
             String date =(dtf.format(now));
             FileOutputStream out = new FileOutputStream(new File(path + date+".docx"));
@@ -58,7 +273,17 @@ public class CreateWord {
                     XWPFTableRow tableRowTwo = table.createRow();
                     mergeCellHorizontally(table, 1, 0, 5);
                     TermHistory termHistory = apiConnector.getTermHistoryToTermWidthVersion(termId.intValue(), version.intValue());
-                    tableRowTwo.getCell(0).setText(termHistory.getContent());
+
+
+                    String xhtml = termHistory.getContent();
+                    WordprocessingMLPackage wordMLPackage = WordprocessingMLPackage.createPackage();
+                    XHTMLImporterImpl XHTMLImporter = new XHTMLImporterImpl(wordMLPackage);
+                    wordMLPackage.getMainDocumentPart().getContent().addAll(
+                            XHTMLImporter.convert( xhtml, null) );
+                    ;
+
+                    tableRowTwo.getCell(0).setText((XmlUtils.marshaltoString(wordMLPackage
+                            .getMainDocumentPart().getJaxbElement(), false, false)));
                     //table.setWidthType();
                     XWPFParagraph paragraph = document.createParagraph();
                     paragraph.setPageBreak(true);
@@ -71,6 +296,10 @@ public class CreateWord {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InvalidFormatException e) {
+            e.printStackTrace();
+        } catch (Docx4JException e) {
             e.printStackTrace();
         }
 
@@ -102,6 +331,6 @@ public class CreateWord {
                 cell.getCTTc().setTcPr(tcPr);
             }
         }
-    }
+    }*/
 
 }

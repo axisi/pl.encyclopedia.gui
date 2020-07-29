@@ -1,9 +1,11 @@
 package gui_swing.ui.model.Components;
 
 import gui_swing.ui.model.ApiConnector;
+import gui_swing.ui.model.ConfigManager;
 import gui_swing.ui.model.User;
 import gui_swing.ui.model.tableModels.GradientButton;
 import gui_swing.ui.model.tableModels.UserOptionTableModel;
+import net.atlanticbb.tantlinger.ui.text.Entities;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -28,13 +30,15 @@ public class UsersOptionPanel extends JFrame {
     private JButton addButton;
     private JButton editButton;
     private JButton deleteButton;
+    private JButton editRolesButton;
 
     private ApiConnector apiConnector;
 
     private ArrayList<UserForm> userForms;
     private UsersOptionPanel usersOptionPanel;
+    private ArrayList<RolesEditPanel> rolesEditPanels;
 
-     public void disposeUserForms(){
+    public void disposeUserForms(){
          for (UserForm u: userForms
               ) {
              u.dispose();
@@ -47,9 +51,20 @@ public class UsersOptionPanel extends JFrame {
         buildForm();
 
         insertData();
-
+        setPermissions();
         showForm();
 
+    }
+
+    private void setPermissions() {
+        if(!ConfigManager.getLoggedUserRole().getUsersEditable()){
+            addButton.setEnabled(false);
+            deleteButton.setEnabled(false);
+            editButton.setEnabled(false);
+        }
+        if(!ConfigManager.getLoggedUserRole().getRolesModification()){
+            editRolesButton.setEnabled(false);
+        }
     }
 
     public void insertData() {
@@ -79,6 +94,7 @@ public class UsersOptionPanel extends JFrame {
     private void buildForm() {
         apiConnector = new ApiConnector();
         userForms = new ArrayList<>();
+        rolesEditPanels = new ArrayList<>();
         mainJPanel = new JPanel();
         getContentPane().add(mainJPanel);
         mainJPanel.setLayout(new BorderLayout());
@@ -102,9 +118,11 @@ public class UsersOptionPanel extends JFrame {
         addButton = new GradientButton("Dodaj użytkownika" , Color.GREEN.darker());
         editButton = new GradientButton("Edytuj użytkownika" , Color.YELLOW.darker());
         deleteButton = new GradientButton("Usuń użytkownika" , Color.RED.darker());
+        editRolesButton = new GradientButton("Zarządzaj rolami",Color.blue.darker());
         topTopPanel.add(addButton);
         topTopPanel.add(editButton);
         topTopPanel.add(deleteButton);
+        topTopPanel.add(editRolesButton);
         usersOptionPanel = this;
         addButton.addActionListener(new ActionListener() {
             @Override
@@ -139,6 +157,12 @@ public class UsersOptionPanel extends JFrame {
                    }
 
                 }
+            }
+        });
+        editRolesButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                rolesEditPanels.add(new RolesEditPanel());
             }
         });
     }
