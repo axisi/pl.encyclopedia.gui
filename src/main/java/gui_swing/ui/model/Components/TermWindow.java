@@ -3,13 +3,14 @@ package gui_swing.ui.model.Components;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import gui_swing.ui.controller.ApplicationFrameController;
 import gui_swing.ui.model.*;
+import gui_swing.ui.model.Components.KeyBindings.TermWindowKeyBindings;
 import gui_swing.ui.model.Listeners.MouseListeners;
 import gui_swing.ui.model.Listeners.TermListeners;
+import gui_swing.ui.model.pojo.*;
 import gui_swing.ui.model.tableModels.AuthorTermTableModel;
 import gui_swing.ui.model.tableModels.GradientButton;
 import net.atlanticbb.tantlinger.shef.HTMLEditorPane;
 import net.atlanticbb.tantlinger.ui.text.AbstractEditor;
-import net.atlanticbb.tantlinger.ui.text.DefaultWysiwygEditor;
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -17,11 +18,10 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import javax.swing.undo.CannotRedoException;
+import javax.swing.undo.CannotUndoException;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -30,7 +30,10 @@ import java.util.Objects;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
-public class TermWindow {
+public class TermWindow  {
+
+
+
     private ArrayList<String> tagsStrings = ApplicationFrameController.getApplicationFrame().getTagsStrings();
     public  List<TermTable> list = ApplicationFrameController.getApplicationFrame().getListOfTermTable();
 
@@ -67,6 +70,8 @@ public class TermWindow {
     private JComboBox categoryComboBox;
     private JComboBox subCategoryComboBox;
     private JCheckBox isSignedCheckBox;
+    private JLabel versesLabel;
+    private Integer lettersOnVerse = 52;
 
     private JLabel actualVersionLabel;
     private JLabel editedVersionLabel;
@@ -111,6 +116,7 @@ public class TermWindow {
     private Boolean hasAccess;
 
     public TermWindow(Integer id, Integer ... termHistoryId){
+
         apiConnector = new ApiConnector();
         if(termHistoryId.length!=0){
             this.termHistoryId = termHistoryId[0];
@@ -120,7 +126,44 @@ public class TermWindow {
         setTermId(id);
         hasAccess = checkAccess(id);
         prepareForm();
+        initializeKeyBinding(jFrame.getRootPane(),htmlEditorPane);
+
+            initializeKeyBindingForTermWindowOnly();
         fillForm();
+
+    }
+
+    private void initializeKeyBindingForTermWindowOnly() {
+        if (hasAccess) {
+            jFrame.getRootPane().getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke("control S"), "save");
+            jFrame.getRootPane().getRootPane().getActionMap().put("save", TermWindowKeyBindings.keyBindingSave(htmlEditorPane, getActualVersionLabel(), getEditedVersionLabel(), updateTermButton));
+        }
+        jFrame.getRootPane().getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke("control P"), "print");
+        jFrame.getRootPane().getRootPane().getActionMap().put("print", TermWindowKeyBindings.keyBindingPrint(printTermButton));
+    }
+
+    public static void initializeKeyBinding(JRootPane jFrame, HTMLEditorPane htmlEditorPane) {
+
+        jFrame.getRootPane().getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke("control B"), "bold");
+        jFrame.getRootPane().getRootPane().getActionMap().put("bold", TermWindowKeyBindings.keyBindingBold(htmlEditorPane));
+        jFrame.getRootPane().getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke("control I"), "italic");
+        jFrame.getRootPane().getRootPane().getActionMap().put("italic", TermWindowKeyBindings.keyBindingItalic(htmlEditorPane));
+        jFrame.getRootPane().getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke("control U"), "underline");
+        jFrame.getRootPane().getRootPane().getActionMap().put("underline", TermWindowKeyBindings.keyBindingUnderline(htmlEditorPane));
+        jFrame.getRootPane().getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke("shift control V"), "Paste formatted");
+        jFrame.getRootPane().getRootPane().getActionMap().put("Paste formatted", TermWindowKeyBindings.keyBindingPasteFormatted(htmlEditorPane));
+        try {
+            jFrame.getRootPane().getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke("control Z"), "undo");
+            jFrame.getRootPane().getRootPane().getActionMap().put("undo", TermWindowKeyBindings.keyBindingUndo(htmlEditorPane));
+        } catch (
+                CannotUndoException e1) {        }
+        try {
+            jFrame.getRootPane().getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke("control Y"), "redo");
+            jFrame.getRootPane().getRootPane().getActionMap().put("redo", TermWindowKeyBindings.keyBindingRedo(htmlEditorPane));
+        } catch (
+                CannotRedoException e1) {        }
+
+
 
     }
 
@@ -232,11 +275,14 @@ public class TermWindow {
 
         editedVersionLabel.setText( termHistory.getVersion().intValue() + "");
         htmlEditorPane.setText(termHistory.getContent());
+
         titleTextField.setText(term.getTitle());
         categoryComboBox.setSelectedItem(apiConnector.getTermCategory(termId));
         subCategoryComboBox.setSelectedItem(apiConnector.getTermSubcategory(termId));
+        versesLabel.setText( "Hasło zawiera "+htmlEditorPane.getSelectedEditor().getText().length()+" znaków czyli "+htmlEditorPane.getSelectedEditor().getText().length() / lettersOnVerse+" wersetów" );
 
     }
+
 
     public static void fillTermHistoryDetailsIntoForm(ApiConnector apiConnector, Integer termId, JLabel editedVersionLabel, JList statusesList) {
         TermHistory termHistory = apiConnector.getActualTermHistoryOfTerm(termId);
@@ -272,9 +318,9 @@ public class TermWindow {
 
             if (isAuthorAssignToTerm >= -0L)
 
-               tableModel.addRow(new Object[]{authorId.intValue(), true, authorFullName, isAuthorAssignToTerm});
+               tableModel.addRow(new Object[]{authorId.intValue(), true, author.getName(),author.getSurname(), isAuthorAssignToTerm});
             else
-                tableModel.addRow(new Object[]{authorId.intValue(), false, authorFullName, null});
+                tableModel.addRow(new Object[]{authorId.intValue(), false, author.getName(),author.getSurname(), null});
 
         }
         TableRowSorter<TableModel> sorter = new TableRowSorter<>(tableModel);
@@ -398,7 +444,8 @@ public class TermWindow {
 
         authorHeaders.addElement("Id");
         authorHeaders.addElement("Wybierz");
-        authorHeaders.addElement("Imię i nazwisko");
+        authorHeaders.addElement("Imię");
+        authorHeaders.addElement("Nazwisko");
         authorHeaders.addElement("Ilość wersetów");
 
         authorsTable = new JTable(new AuthorTermTableModel(authorHeaders,0));
@@ -431,8 +478,8 @@ public class TermWindow {
         topRightPanel.add(statusesScrollPane,BorderLayout.CENTER);
         //end of statuses Panel
         // buttonsPanel start
-        updateTermButton = new JButton("Aktualizuj hasło");
-        bottomTopPanel.setLayout(new GridLayout(0,12));
+        updateTermButton = new JButton("Aktualizuj hasło (CTRL+S)");
+        bottomTopPanel.setLayout(new GridLayout(0,10));
         updateTermButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -468,8 +515,10 @@ public class TermWindow {
                 }
             }
         });
+
         if(hasAccess) {
             bottomTopPanel.add(updateTermButton);
+
         }
         replacePhrasesButton = new JButton("Zamień wiele...");
         replacePhrasesButton.addActionListener(new ActionListener() {
@@ -497,6 +546,9 @@ public class TermWindow {
 
         JPanel fullTextPanel = new JPanel(new FlowLayout());
         JLabel fullTextLabel = new JLabel();
+         versesLabel = new JLabel();
+        fullTextPanel.add(versesLabel);
+
         fullTextLabel.setForeground(Color.RED);
         fullTextPanel.add(fullTextLabel);
         fullTextPanel.add(findInCurrentText);
@@ -579,7 +631,7 @@ public class TermWindow {
 
         //Versions
         //print section
-        printTermButton = new GradientButton("Drukuj",Color.blue.brighter());
+        printTermButton = new GradientButton("Drukuj (CTRL+P)",Color.blue.brighter());
         printTermButton.setToolTipText("Drukuj...");
         bottomTopPanel.add(printTermButton);
         printTermButton.addActionListener(new ActionListener() {
@@ -659,12 +711,71 @@ public class TermWindow {
 
         textPanel.setLayout(new BorderLayout());
         htmlEditorPane= new HTMLEditorPane();
+
         findInCurrentText.addActionListener(new TermListeners.RadioButtonsActionListener(findInCurrentText,findInOtherTerms,findInOtherTermsAllVersions));
         findInOtherTerms.addActionListener(new TermListeners.RadioButtonsActionListener(findInOtherTerms,findInOtherTermsAllVersions,findInCurrentText));
         findInOtherTermsAllVersions.addActionListener(new TermListeners.RadioButtonsActionListener(findInOtherTermsAllVersions,findInOtherTerms,findInCurrentText));
         textPanel.add(htmlEditorPane,BorderLayout.CENTER);
         htmlTextArea = htmlEditorPane.getSelectedEditor();
+       // DefaultWysiwygEditor defaultWysiwygEditor = (DefaultWysiwygEditor) htmlEditorPane.getSelectedEditor();
+        //defaultWysiwygEditor.getTextArea().addKeyListener(keyListener);
 
+        /* JFrame frame = new JFrame();
+        HTMLEditorPane html = new HTMLEditorPane();
+        frame.setLayout(new BorderLayout());
+        JButton btn = new JButton("nwewwe");
+        btn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println( html.getSelectedEditor());
+                AbstractEditor editor = html.getSelectedEditor();
+                AbstractToolBar abstractToolBar = editor.getToolBar();
+                DefaultWysiwygToolBar  defaultWysiwygToolBar= (DefaultWysiwygToolBar) abstractToolBar;
+                System.out.println(abstractToolBar);
+                System.out.println( abstractToolBar.getActionMap());
+
+
+                for (Object a: defaultWysiwygToolBar.getActionList()
+                     ) {
+                    Action aa = (Action) a;
+                    if(aa!=null && aa.getValue("Name").equals("Pogrubienie")){
+                        aa.actionPerformed(new ActionEvent(this,ActionEvent.ACTION_PERFORMED,null));
+                        System.out.println("aa");
+                    }
+                }
+
+
+
+            }
+        });
+        frame.add(btn,BorderLayout.NORTH);
+        frame.add(html,BorderLayout.CENTER);
+        frame.setVisible(true);
+        frame.setSize(new Dimension(600,600));*/
+
+       /* JButton boldButton = new JButton();
+        fullTextPanel.add(boldButton);
+        boldButton.setVisible(true);*/
+
+
+
+       /* String key = "Bold";
+
+        InputMap inputMap = frame.getRootPane().getInputMap();
+
+
+        inputMap.put(KeyStroke.getKeyStroke(Character.valueOf('a'), 0), "bold");
+        inputMap.put(KeyStroke.getKeyStroke("control B"), "bold");
+
+        textPanel.getActionMap().put("bold",boldAction);*/
+       /* boldButton.setAction(boldButtonAction);
+
+       // boldButtonAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_B);
+
+        boldButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+                KeyStroke.getKeyStroke(KeyEvent.VK_B , 0), key);
+
+        boldButton.getActionMap().put(key, boldButtonAction);*/
 
 
 
@@ -672,16 +783,22 @@ public class TermWindow {
              @Override
              public void insertUpdate(DocumentEvent e) {
                  markListenerMethod(true);
+                 versesLabel.setText( "Hasło zawiera "+htmlEditorPane.getSelectedEditor().getText().length()+" znaków czyli "+htmlEditorPane.getSelectedEditor().getText().length() / lettersOnVerse+" wersetów" );
+
              }
 
              @Override
              public void removeUpdate(DocumentEvent e) {
                  markListenerMethod(false);
+                 versesLabel.setText( "Hasło zawiera "+htmlEditorPane.getSelectedEditor().getText().length()+" znaków czyli "+htmlEditorPane.getSelectedEditor().getText().length() / lettersOnVerse+" wersetów" );
+
              }
 
              @Override
              public void changedUpdate(DocumentEvent e) {
                  //markListenerMethod();
+                 versesLabel.setText( "Hasło zawiera "+htmlEditorPane.getSelectedEditor().getText().length()+" znaków czyli "+htmlEditorPane.getSelectedEditor().getText().length() / lettersOnVerse+" wersetów" );
+
              }
          });
 
@@ -870,6 +987,7 @@ public class TermWindow {
 
     private JFrame createFrame() {
         frame = new JFrame("Hasła");
+       //frame.addKeyListener(this);
         //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(new Dimension((int) (dim.width *0.8), (int) (dim.height *0.7)));
         frame.setLayout(new BorderLayout());
@@ -926,8 +1044,8 @@ public class TermWindow {
             if ((boolean) authorsTable.getValueAt(i, 1)) {
 
                 Integer numberOfVerses = 0;
-                if (!(authorsTable.getValueAt(i, 3) == null)) {
-                    Object numbersOfVersesLong = authorsTable.getValueAt(i, 3);
+                if (!(authorsTable.getValueAt(i, 4) == null)) {
+                    Object numbersOfVersesLong = authorsTable.getValueAt(i, 4);
                     numberOfVerses = Integer.valueOf(numbersOfVersesLong.toString());
                 }
                 authors.add(authorsTable.getValueAt(i, 0) + "|" + numberOfVerses);

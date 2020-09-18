@@ -1,7 +1,8 @@
 package gui_swing.ui.model.Components;
 
 import gui_swing.ui.model.ApiConnector;
-import gui_swing.ui.model.UserRole;
+
+import gui_swing.ui.model.pojo.UserRole;
 import gui_swing.ui.model.tableModels.GradientButton;
 
 import javax.swing.*;

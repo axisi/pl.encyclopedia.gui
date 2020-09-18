@@ -2,6 +2,8 @@ package gui_swing.ui.model.Components;
 
 import gui_swing.ui.controller.ApplicationFrameController;
 import gui_swing.ui.model.*;
+import gui_swing.ui.model.pojo.Term;
+import gui_swing.ui.model.pojo.TermHistory;
 import gui_swing.ui.model.tableModels.GradientButton;
 import org.apache.commons.lang3.StringUtils;
 //import org.apache.commons.lang3.StringUtils;

@@ -1,6 +1,8 @@
 package gui_swing.ui.model.Components;
 
 import gui_swing.ui.model.*;
+import gui_swing.ui.model.pojo.Term;
+import gui_swing.ui.model.pojo.TermHistory;
 import gui_swing.ui.model.tableModels.GradientButton;
 import org.jsoup.Jsoup;
 
@@ -8,6 +10,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -128,7 +133,27 @@ public class CompareTwoVersionsPanel extends JFrame {
                 String word2 = new CreateWord(newTerm,Color.black,Color.WHITE,ConfigManager.getTempFolder(),date).getFullPath();
                // word1.replaceAll("/","\\");
                 //word2.replaceAll("/","\\");
-                ConfigManager.setCompareURI(word1,word2);
+               // ConfigManager.setCompareURI(word1,word2);
+                File file = new File(ConfigManager.getScriptsFolder()+"files.txt");
+                try {
+                    FileWriter myWriter = new FileWriter(file);
+                    myWriter.write(word1);
+                    myWriter.write("\r\n");
+                    myWriter.write(word2);
+                    myWriter.close();
+                }catch (Exception e1){
+
+                }
+                file = new File(ConfigManager.getScriptsFolder()+"script.docm");
+
+                Desktop desktop = Desktop.getDesktop();
+                if(file.exists()) {
+                    try {
+                        desktop.open(file);
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                }
             }
         });
         bottomJPanel.add(compareInWordButton);

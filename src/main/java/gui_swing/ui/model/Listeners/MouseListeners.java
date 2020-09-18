@@ -38,10 +38,14 @@ public class MouseListeners {
             JList list = (JList) event.getSource();
             int index = list.locationToIndex(event.getPoint());// Get index of item
             // clicked
+            if (index > -1) {
+
+
             CheckListItem item = (CheckListItem) list.getModel()
                     .getElementAt(index);
             item.setSelected(!item.isSelected()); // Toggle selected state
             list.repaint(list.getCellBounds(index, index));// Repaint cell
+            }
         }
 
 

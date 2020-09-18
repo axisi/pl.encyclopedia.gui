@@ -2,6 +2,10 @@ package gui_swing.ui.model;
 
 
 import gui_swing.ui.model.Components.WordGeneratePanel;
+import gui_swing.ui.model.pojo.Author;
+import gui_swing.ui.model.pojo.Term;
+import gui_swing.ui.model.pojo.TermHistory;
+import gui_swing.ui.model.pojo.TermHistoryComment;
 import net.atlanticbb.tantlinger.shef.HTMLEditorPane;
 import org.apache.poi.xwpf.usermodel.*;
 import org.docx4j.XmlUtils;
@@ -9,7 +13,12 @@ import org.docx4j.convert.in.xhtml.XHTMLImporterImpl;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.exceptions.InvalidFormatException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.docx4j.openpackaging.parts.WordprocessingML.CommentsPart;
+import org.docx4j.wml.Comments;
 import org.graalvm.compiler.word.Word;
+
+import org.json.JSONArray;
+import org.json.simple.JSONObject;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.*;
 
 import javax.swing.*;
@@ -21,6 +30,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 
 public class CreateWord {
@@ -35,6 +46,7 @@ public class CreateWord {
     private WordGeneratePanel parentPanel;
     private Boolean printIt;
     private String fullPath;
+    private Boolean attachComments = true;
 
 
     public CreateWord(JTable jTable, Color foreground, Color background, String path, String fileName , WordGeneratePanel wordGeneratePanel,Boolean isSelected) {
@@ -127,12 +139,43 @@ public class CreateWord {
 
 
         WordprocessingMLPackage wordMLPackage = WordprocessingMLPackage.createPackage();
-        XHTMLImporterImpl XHTMLImporter = new XHTMLImporterImpl(wordMLPackage);
+
+            /*CommentsPart commentsPart = new CommentsPart();
+            wordMLPackage.addTargetPart(commentsPart);
+            Comments comments = new Comments();
+            commentsPart.setJaxbElement(comments);
+            Comments.Comment comment = new Comments.Comment();
+            comment.setInitials("aaa");
+            comment.setAuthor("Grześ");
+            comments.getComment().add(comment);*/
+
+
+
+
+            XHTMLImporterImpl XHTMLImporter = new XHTMLImporterImpl(wordMLPackage);
+
+
         wordMLPackage.getMainDocumentPart().getContent().addAll(
                     XHTMLImporter.convert(String.valueOf(xhtml), null) );
+
+
         fullPath = path +File.separator+ fileName+".docx";
         File file = new File(fullPath);
+
+
+            if(attachComments){
+                if(jTable!=null)
+                    generateComments();
+            }
+
             wordMLPackage.save(new FileOutputStream(file));
+
+            if(attachComments){
+                if(jTable!=null)
+                    insertCommentsIntoWord();
+            }
+
+
             if(isSelected){
                 Desktop desktop = Desktop.getDesktop();
 
@@ -140,6 +183,7 @@ public class CreateWord {
                     desktop.print(file);
                 }else{
                     desktop.open(file);
+
                 }
             }
             if(!printIt&&parentPanel!=null){
@@ -150,7 +194,7 @@ public class CreateWord {
         } catch (FileNotFoundException e) {
             byte[] bytes = e.getMessage().getBytes(StandardCharsets.UTF_8);
             String s1 = null;
-            s1 = new String(bytes, Charset.forName("UTF-8"));;
+            s1 = new String(bytes, Charset.forName("UTF-8"));
 
 
             JOptionPane.showMessageDialog(parentPanel, s1 );
@@ -159,6 +203,80 @@ public class CreateWord {
             e.printStackTrace();
         }
 
+    }
+
+    private void insertCommentsIntoWord() {
+        File file = new File(ConfigManager.getScriptsFolder()+"file.txt");
+        try {
+            FileWriter myWriter = new FileWriter(file);
+            myWriter.write(fullPath);
+            myWriter.close();
+        }catch (Exception e1){
+
+        }
+        file = new File(ConfigManager.getScriptsFolder()+"script2.docm");
+        Desktop desktop = Desktop.getDesktop();
+        if(file.exists()) {
+            try {
+                desktop.open(file);
+                try {
+                    TimeUnit.SECONDS.sleep(2);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+        boolean isFileLocked = true;
+        File thisFile = new File(fullPath);
+        while (isFileLocked) {
+            try {
+                org.apache.commons.io.FileUtils.touch(thisFile);
+                isFileLocked = false;
+            } catch (IOException e) {
+                isFileLocked = true;
+            }
+        }
+
+    }
+
+    private void generateComments() throws IOException {
+        FileWriter fileJSON = new FileWriter(ConfigManager.getScriptsFolder()+"comments.json");
+        JSONObject json = new JSONObject();
+        JSONArray array = new JSONArray();
+        for (int i = 0; i < jTable.getRowCount(); i++) {
+            if ((Boolean) jTable.getValueAt(i, 0)) {
+                JSONObject term = new JSONObject();
+               JSONArray array1 = new JSONArray();
+                ArrayList<TermHistoryComment> termHistoryComments = apiConnector.getAllCommentsOfTerm((Long) jTable.getValueAt(i,1));
+                for (TermHistoryComment t:termHistoryComments
+                     ) {
+                    JSONObject comment = new JSONObject();
+                    comment.put("Lp",t.getLp());
+                    comment.put("Deadline",t.getDeadlineDate());
+                    comment.put("ModifiedBy",apiConnector.getLoginOfCommentModifier(t.getId()));
+                    comment.put("Content",t.getContent());
+                    array1.put(comment);
+                }
+                term.put("Id",jTable.getValueAt(i, 1).toString());
+                term.put("comments",array1);
+                array.put(term);
+            }
+
+        }
+        json.put("data",array);
+        try{
+            fileJSON.write(json.toJSONString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            fileJSON.flush();
+            fileJSON.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void addFooter() {

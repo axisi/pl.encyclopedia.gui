@@ -6,6 +6,7 @@ package gui_swing.ui.model;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gui_swing.ui.model.filters.ListsF;
+import gui_swing.ui.model.pojo.*;
 
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.GenericType;
@@ -746,5 +747,11 @@ public  class ApiConnector {
         webTarget = client.target(apiURI).path("termHistoryComment/term/"+id+"/lp/"+commentLp);
         invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
          invocationBuilder.delete();
+    }
+
+    public String getLoginOfCommentModifier(Long id) {
+        webTarget = client.target(apiURI).path("termHistoryComment/"+id+"/ModifiedBy");
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return invocationBuilder.get(new GenericType<String>(){} );
     }
 }

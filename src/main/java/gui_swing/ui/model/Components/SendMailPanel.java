@@ -9,6 +9,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.*;
 import java.util.ArrayList;
 
@@ -22,6 +24,7 @@ public class SendMailPanel extends JFrame {
     private JPanel bottomPanel;
     private String filePath;
     private ArrayList <Long> sendTermsIdList;
+    private ArrayList <Long> sendTermsVersionList;
     private Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 
     private JButton sendButton;
@@ -39,10 +42,18 @@ public class SendMailPanel extends JFrame {
     private JScrollPane scrollPane;
     private HTMLEditorPane htmlEditorPane;
 
+    private JButton toButton;
+    private JButton ccButton;
 
-    public SendMailPanel(String filePath, ArrayList<Long> sendTermsIdList) {
+    private SendMailPanel sendMailPanel;
+    private AddressBookPanel addressBookPanel;
+
+
+    public SendMailPanel(String filePath, ArrayList<Long> sendTermsIdList,ArrayList<Long> sendTermsVersionList) {
         this.filePath = filePath;
         this.sendTermsIdList = sendTermsIdList;
+        this.sendTermsVersionList = sendTermsVersionList;
+        this.sendMailPanel = this;
         prepareForm();
         fillData();
         showForm();
@@ -74,7 +85,12 @@ public class SendMailPanel extends JFrame {
         mainJPanel.add(topPanel,BorderLayout.NORTH);
         topLeftPanel = new JPanel(new GridLayout(0,1));
         topCenterPanel = new JPanel(new GridLayout(0,1));
-        topRightPanel = new JPanel(new GridLayout(0,1));
+        JPanel topRightLeftPanel = new JPanel(new GridLayout(0,1));
+
+        JPanel topRightRightPanel = new JPanel(new GridLayout(0,1));
+        topRightPanel = new JPanel(new BorderLayout());
+        topRightPanel.add(topRightLeftPanel,BorderLayout.WEST);
+        topRightPanel.add(topRightRightPanel,BorderLayout.EAST);
         topPanel.add(topLeftPanel);
         topPanel.add(topCenterPanel);
         topPanel.add(topRightPanel);
@@ -91,6 +107,10 @@ public class SendMailPanel extends JFrame {
         statusChangeCBLabel.setPreferredSize(new Dimension(150,30));
         attachmentLabel = new JLabel("Załączniki: ",SwingConstants.RIGHT);
         attachmentLabel.setPreferredSize(new Dimension(150,30));
+        toButton = new GradientButton("Do",Color.blue.brighter());
+        ccButton = new GradientButton("DW",Color.CYAN.brighter());
+        toButton.setPreferredSize(new Dimension(60,30));
+        ccButton.setPreferredSize(new Dimension(60,30));
 
         topCenterPanel.add(toLabel);
         topCenterPanel.add(ccLabel);
@@ -107,11 +127,18 @@ public class SendMailPanel extends JFrame {
         attachmentText.setEnabled(false);
         attachmentText.setPreferredSize(new Dimension((int) (dim.width*0.6),30));
         statusChangeCB = new JComboBox();
-        topRightPanel.add(toText);
-        topRightPanel.add(ccText);
-        topRightPanel.add(subjectText);
-        topRightPanel.add(statusChangeCB);
-        topRightPanel.add(attachmentText);
+
+        topRightLeftPanel.add(toButton);
+        topRightRightPanel.add(toText);
+        topRightLeftPanel.add(ccButton);
+
+        topRightRightPanel.add(ccText);
+        topRightLeftPanel.add(new JLabel());
+        topRightRightPanel.add(subjectText);
+        topRightLeftPanel.add(new JLabel());
+        topRightRightPanel.add(statusChangeCB);
+        topRightLeftPanel.add(new JLabel());
+        topRightRightPanel.add(attachmentText);
 
         bottomPanel= new JPanel();
         mainJPanel.add(bottomPanel,BorderLayout.CENTER);
@@ -132,7 +159,33 @@ public class SendMailPanel extends JFrame {
             }
         });
 
+        toButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (addressBookPanel != null) {
+                    addressBookPanel.dispose();
+                }
+                addressBookPanel = new AddressBookPanel(sendMailPanel,true);
+            }
+        });
+        ccButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (addressBookPanel != null) {
+                    addressBookPanel.dispose();
+                }
+                addressBookPanel = new AddressBookPanel(sendMailPanel,false);
+            }
+        });
 
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                if (addressBookPanel != null) {
+                    addressBookPanel.dispose();
+                }
+            }
+        });
     }
 
     private void sendMail() {
@@ -167,7 +220,7 @@ public class SendMailPanel extends JFrame {
         } catch (IOException e) {
             e.printStackTrace();
         }*/
-        String filePath = ConfigManager.getTempFolder()+File.separator+"sendMail.bat";
+        String filePath = ConfigManager.getScriptsFolder()+File.separator+"sendMail.bat";
         try {
             PrintWriter writer = new PrintWriter(filePath, "UTF-8");
             writer.println(command);
@@ -211,5 +264,11 @@ public class SendMailPanel extends JFrame {
             e.printStackTrace();
         }*/
 
+    }
+    public void addAddressesTo (String addresses){
+        toText.setText(toText.getText()+addresses);
+    }
+    public void addAddressesCC (String addresses){
+        ccText.setText(ccText.getText()+addresses);
     }
 }

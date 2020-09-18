@@ -2,6 +2,7 @@ package gui_swing.ui.model;
 
 
 import com.google.common.io.Resources;
+import gui_swing.ui.model.pojo.UserRole;
 
 import javax.swing.*;
 import java.io.*;
@@ -20,6 +21,7 @@ public class ConfigManager {
     private static String tagsFolder;
     private static String tempFolder;
     private static String thunderbirdFolder;
+    private static String scriptsFolder;
     private static URL url = ClassLoader.getSystemResource("config/inputs.properties");
     private static UserRole loggedUserRole;
 
@@ -115,6 +117,7 @@ public class ConfigManager {
         ConfigManager.setTagsFolder( resources.getProperty("tagsFolder"));
         ConfigManager.setTempFolder( resources.getProperty("tempFolder"));
         ConfigManager.setThunderbirdFolder( resources.getProperty("thunderbirdFolder"));
+        ConfigManager.setScriptsFolder( resources.getProperty("scriptsFolder"));
         //System.out.println(resources.getProperty("tagsFolder"));
     }
 
@@ -164,6 +167,14 @@ public class ConfigManager {
 
     public static void setTagsFolder(String tagsFolder) {
         ConfigManager.tagsFolder = tagsFolder;
+    }
+
+    public static String getScriptsFolder() {
+        return scriptsFolder;
+    }
+
+    public static void setScriptsFolder(String scriptsFolder) {
+        ConfigManager.scriptsFolder = scriptsFolder;
     }
 
     public static void setLoggedUser(String loggedUser) {

@@ -2,6 +2,7 @@ package gui_swing.ui.model;
 
 import gui_swing.ui.model.Components.ReferencesPanel;
 import gui_swing.ui.model.Listeners.TermListeners;
+import gui_swing.ui.model.pojo.Term;
 import gui_swing.ui.model.tableModels.ReferencesTermTableModel;
 
 import javax.swing.*;

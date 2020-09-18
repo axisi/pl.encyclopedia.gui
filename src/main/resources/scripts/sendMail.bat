@@ -1,0 +1,1 @@
+"C:/Program Files (x86)/Mozilla Thunderbird/"thunderbird -compose "to=';hubert.chudzio@up.krakow.pl',cc=';chaczko@wp.pl;gmacala92@gmail.com ',body='<html></html>',subject='',format='1',attachment='C:\Users\axisii\IdeaProjects\Nowy folder\GUI\src\main\resources\temp\2020-09-18 00-19-25.docx'"

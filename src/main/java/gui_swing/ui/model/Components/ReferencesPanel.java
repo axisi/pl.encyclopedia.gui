@@ -4,7 +4,8 @@ import gui_swing.ui.model.ApiConnector;
 import gui_swing.ui.model.Listeners.TermListeners;
 import gui_swing.ui.model.NCRConverter;
 import gui_swing.ui.model.ReferencesSearchPanel;
-import gui_swing.ui.model.Term;
+
+import gui_swing.ui.model.pojo.Term;
 import gui_swing.ui.model.tableModels.ReferencesTermTableModel;
 
 import javax.swing.*;

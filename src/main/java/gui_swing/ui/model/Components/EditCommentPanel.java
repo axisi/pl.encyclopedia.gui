@@ -1,9 +1,12 @@
 package gui_swing.ui.model.Components;
 
+import gui_swing.ui.controller.ApplicationFrameController;
 import gui_swing.ui.model.ApiConnector;
-import gui_swing.ui.model.TermHistory;
-import gui_swing.ui.model.TermHistoryComment;
+
+import gui_swing.ui.model.pojo.TermHistory;
+import gui_swing.ui.model.pojo.TermHistoryComment;
 import gui_swing.ui.model.tableModels.GradientButton;
+import gui_swing.ui.view.ApplicationFrame;
 import net.atlanticbb.tantlinger.ui.text.DefaultWysiwygEditor;
 import net.sourceforge.jdatepicker.impl.JDatePanelImpl;
 import net.sourceforge.jdatepicker.impl.JDatePickerImpl;
@@ -180,26 +183,31 @@ public class EditCommentPanel<pirivate> extends JFrame {
                     parentFrame.clearSelection();
 
                 }
+                parentFrame.getCommentsPanel().dispose();
                 if(editing){
                     if(!(startGlobal==endGlobal||startGlobal==-1)){
 
                         updateTermContent();
                     }
                     TermHistoryComment termHistoryComment = getTermHistoryComment();
+                    parentFrame.clearSelection();
                     apiConnector.updateTermHistoryComment(termHistory.getId(),termHistoryComment);
                 }else{
                     if(!(startGlobal==endGlobal||startGlobal==-1)) {
+
                         updateTermContent();
                     }
                     TermHistoryComment termHistoryComment = getTermHistoryComment();
-
+                    parentFrame.clearSelection();
                     apiConnector.createTermHistoryComment(termHistory.getId(), termHistoryComment);
                 }
                 dispose();
+
                 //parentFrame.setTemporaryIsSelected1(false);
                 //parentFrame.setContentInComments("");
-                parentFrame.getCommentsPanel().dispose();
+               // parentFrame.getCommentsPanel().dispose();
                 parentFrame.setCommentsPanel(new CommentPanel(termHistory.getId().intValue(),parentFrame));
+                parentFrame.getCommentsPanel().setAlwaysOnTop(true);
             }
         });
         deleteButton.addActionListener(new ActionListener() {
@@ -232,17 +240,18 @@ public class EditCommentPanel<pirivate> extends JFrame {
         }
         TermHistoryComment termHistoryComment;
         if(null!=sqlDate)
-           termHistoryComment = new TermHistoryComment(commentLp, new java.sql.Timestamp(sqlDate.getTime()), jTextArea.getText(), jCheckbox.isSelected());
+           termHistoryComment = new TermHistoryComment(commentLp, new java.sql.Timestamp(sqlDate.getTime()), jTextArea.getText(), true /*jCheckbox.isSelected()*/);
         else
-            termHistoryComment = new TermHistoryComment(commentLp, null, jTextArea.getText(), jCheckbox.isSelected());
+            termHistoryComment = new TermHistoryComment(commentLp, null, jTextArea.getText(), true /*jCheckbox.isSelected()*/);
         return termHistoryComment;
     }
 
     public void deleteTags() {
-        parentFrame.getHtmlEditorPane().getWysEditor().setText(parentFrame.getHtmlEditorPane().getWysEditor().getText().replaceAll("[*]+[" + commentLp + "]+[*]", ""));
+        parentFrame.getHtmlEditorPane().getWysEditor().setText(parentFrame.getHtmlEditorPane().getWysEditor().getText().replaceAll("[*]" + commentLp + "[*]", ""));
     }
 
     private void updateTermContent() {
+
         String marble = "*" + commentLp + "*";
 
             parentFrame.getHtmlEditorPane().getWysEditor().insertText(marble, startGlobal);
@@ -255,9 +264,12 @@ public class EditCommentPanel<pirivate> extends JFrame {
         //text = CommentInstance.insertString(text,endGlobal+marble.length(),marble);
         //parentFrame.getHtmlEditorPane().getWysEditor().getTextArea().setText(text);
 
-        parentFrame.getHtmlEditorPane().getWysEditor().setText(parentFrame.getHtmlEditorPane().getWysEditor().getText().replaceAll("[*]+[" + commentLp + "]+[*]", "<sup>*" + commentLp + "*</sup>"));
+        parentFrame.getHtmlEditorPane().getWysEditor().setText(parentFrame.getHtmlEditorPane().getWysEditor().getText().replaceAll("[*]" + commentLp + "[*]", "<sup>*" + commentLp + "*</sup>"));
         termHistory.setContent(parentFrame.getHtmlEditorPane().getWysEditor().getText());
-        apiConnector.updateTermHistoryWithComment(termHistory);
+        parentFrame.clearSelection();
+
+        parentFrame.getUpdateTermButton().doClick();
+        parentFrame = ApplicationFrameController.termWindows.get(ApplicationFrameController.termWindows.size()-1);
         parentFrame.setContentInComments(parentFrame.getHtmlEditorPane().getWysEditor().getText());
     }
 

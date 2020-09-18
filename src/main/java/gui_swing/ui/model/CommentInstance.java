@@ -1,6 +1,7 @@
 package gui_swing.ui.model;
 
 import gui_swing.ui.model.Components.TermWindow;
+import gui_swing.ui.model.pojo.TermHistoryComment;
 
 
 import javax.swing.*;
@@ -162,11 +163,13 @@ private static Boolean lockOnColor = false;
 
             @Override
             public void mouseClicked(MouseEvent e) {
-                if(e.getClickCount()==1){
+                if(e.getClickCount()==2){
 
                     // parentFrame.clearSelection();
+                    unsetCommentColor();
                     JPanel panel = (JPanel) e.getSource();
                     //unsetCommentColor();
+                    //deselectAll();
                     if(isSelected){
                         isSelected = false;
                         if(isPrimary)
@@ -192,22 +195,23 @@ private static Boolean lockOnColor = false;
     private void deselectComment(JPanel component) {
         JPanel jpanel = component;
         CommentInstance commentInstance = (CommentInstance) jpanel.getComponent(0);
-        if(commentInstance.isSelected){
+        /*if(commentInstance.isSelected){*/
 
             commentInstance.isSelected = false;
-            if(commentInstance.isPrimary)
+            /*if(commentInstance.isPrimary)*/
                 commentInstance.setBackground(primaryColor);
-            else
-                commentInstance.setBackground(secondaryColor);
-        }
+            /*else
+                commentInstance.setBackground(secondaryColor);*/
+
     }
 
     public void unsetCommentColor(){
 
         //if(null!=parentFrame.getContentInComments()){
         if(parentFrame.isTemporaryIsSelected1()){
-            parentFrame.getHtmlEditorPane().setText(parentFrame.getContentInComments());
             parentFrame.setTemporaryIsSelected1(false);
+            parentFrame.getHtmlEditorPane().setText(parentFrame.getContentInComments());
+
         }
 
     }
@@ -219,7 +223,7 @@ private static Boolean lockOnColor = false;
     }
     public void setCommentColor(Integer lp){
 
-        unsetCommentColor();
+      //  unsetCommentColor();
 
        String text =  parentFrame.getHtmlEditorPane().getText();
 

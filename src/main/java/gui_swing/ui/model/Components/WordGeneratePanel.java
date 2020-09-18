@@ -2,6 +2,8 @@ package gui_swing.ui.model.Components;
 
 import gui_swing.ui.controller.ApplicationFrameController;
 import gui_swing.ui.model.*;
+import gui_swing.ui.model.pojo.Term;
+import gui_swing.ui.model.pojo.TermHistory;
 import gui_swing.ui.model.tableModels.GradientButton;
 import gui_swing.ui.model.tableModels.WordGenerateTableModel;
 
@@ -56,7 +58,8 @@ public class WordGeneratePanel extends JFrame {
     private  JCheckBox openAfterGeneration;
 
     private WordGeneratePanel wordGeneratePanel;
-    private ArrayList<Long> sendTermsIdList;
+    private ArrayList<Long> sendTermsIdList = new ArrayList<>();
+    private ArrayList<Long> sendTermsVersionList = new ArrayList<>();
 
     private String filePath;
 
@@ -235,6 +238,7 @@ public class WordGeneratePanel extends JFrame {
                             for (int i = 0; i < jTable.getRowCount(); i++) {
                                 if ((Boolean) jTable.getValueAt(i, 0)) {
                                     sendTermsIdList.add(Long.valueOf(jTable.getValueAt(i, 1).toString()));
+                                    sendTermsVersionList.add(Long.valueOf(jTable.getValueAt(i, 4).toString()));
                                 }
                             }
                         }
@@ -280,7 +284,7 @@ public class WordGeneratePanel extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 openAfterGeneration.setSelected(false);
                 startGenerateButton.doClick();
-                new SendMailPanel(filePath,sendTermsIdList);
+                new SendMailPanel(filePath,sendTermsIdList,sendTermsVersionList);
             }
         });
         foregroundColor.addActionListener(new ActionListener() {

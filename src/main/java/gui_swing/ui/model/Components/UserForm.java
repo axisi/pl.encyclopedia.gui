@@ -2,8 +2,9 @@ package gui_swing.ui.model.Components;
 
 import gui_swing.ui.model.Actions.ShowWaitAction;
 import gui_swing.ui.model.ApiConnector;
-import gui_swing.ui.model.User;
-import gui_swing.ui.model.UserRole;
+
+import gui_swing.ui.model.pojo.User;
+import gui_swing.ui.model.pojo.UserRole;
 import gui_swing.ui.model.tableModels.GradientButton;
 import org.glassfish.jersey.internal.jsr166.Flow;
 //import org.xlsx4j.sml.Col;

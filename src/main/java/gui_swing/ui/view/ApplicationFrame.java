@@ -5,7 +5,8 @@ package gui_swing.ui.view;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-import gui_swing.ui.model.TermTable;
+
+import gui_swing.ui.model.pojo.TermTable;
 import gui_swing.ui.model.tableModels.*;
 
 import javax.swing.*;
@@ -1462,7 +1463,8 @@ public class ApplicationFrame extends JFrame {
 
         authorHeaders.addElement("Id");
         authorHeaders.addElement("Wybierz");
-        authorHeaders.addElement("Imię i nazwisko");
+        authorHeaders.addElement("Imię");
+        authorHeaders.addElement("Nazwisko");
         authorHeaders.addElement("Ilość wersetów");
 
         authorsTable = new JTable(new AuthorTermTableModel(authorHeaders,0)){};

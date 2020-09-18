@@ -1,6 +1,10 @@
 package gui_swing.ui.model.Components;
 
+import gui_swing.ui.controller.ApplicationFrameController;
 import gui_swing.ui.model.*;
+import gui_swing.ui.model.pojo.Term;
+import gui_swing.ui.model.pojo.TermHistory;
+import gui_swing.ui.model.pojo.TermHistoryComment;
 import gui_swing.ui.model.tableModels.GradientButton;
 import net.atlanticbb.tantlinger.ui.text.DefaultSourceEditor;
 import net.atlanticbb.tantlinger.ui.text.DefaultWysiwygEditor;
@@ -176,10 +180,15 @@ public class CommentPanel extends JFrame {
                 }
                 if(commentLp>0){
                     parentFrame.clearSelection();
-                    parentFrame.getHtmlEditorPane().getWysEditor().setText(parentFrame.getHtmlEditorPane().getWysEditor().getText().replaceAll("[<sup>*]+[" + commentLp + "]+[*</sup>]", ""));
+                    parentFrame.getHtmlEditorPane().getWysEditor().setText(parentFrame.getHtmlEditorPane().getWysEditor().getText().replaceAll("[<sup>*]" + commentLp + "[*</sup>]", ""));
                     apiConnector.deleteComment(term.getId(),commentLp);
                     parentFrame.getCommentsPanel().dispose();
+                    parentFrame.getUpdateTermButton().doClick();
+                    parentFrame = ApplicationFrameController.termWindows.get(ApplicationFrameController.termWindows.size()-1);
+
+
                     parentFrame.setCommentsPanel(new CommentPanel(termHistory.getId().intValue(),parentFrame));
+
                 }
             }
         });

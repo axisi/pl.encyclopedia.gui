@@ -3,8 +3,9 @@ package gui_swing.ui.model.Components;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import gui_swing.ui.controller.ApplicationFrameController;
 import gui_swing.ui.model.ApiConnector;
-import gui_swing.ui.model.Term;
-import gui_swing.ui.model.TermHistory;
+
+import gui_swing.ui.model.pojo.Term;
+import gui_swing.ui.model.pojo.TermHistory;
 import gui_swing.ui.model.tableModels.GradientButton;
 import gui_swing.ui.model.tableModels.ImportedTermsTableModel;
 import org.jsoup.Jsoup;

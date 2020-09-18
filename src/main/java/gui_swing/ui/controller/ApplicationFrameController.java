@@ -3,8 +3,10 @@ package gui_swing.ui.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import gui_swing.ui.model.*;
 import gui_swing.ui.model.Components.*;
+import gui_swing.ui.model.Components.KeyBindings.TermWindowKeyBindings;
 import gui_swing.ui.model.Listeners.MouseListeners;
 import gui_swing.ui.model.filters.*;
+import gui_swing.ui.model.pojo.*;
 import gui_swing.ui.model.tableModels.GradientButton;
 import gui_swing.ui.model.tableModels.ObjectTableModel;
 import gui_swing.ui.view.ApplicationFrame;
@@ -21,6 +23,8 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.table.*;
 import javax.swing.text.Document;
+import javax.swing.undo.CannotRedoException;
+import javax.swing.undo.CannotUndoException;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -145,7 +149,7 @@ public class ApplicationFrameController {
     private JTable authorsMenageTable;
     private JTextField nameTextField;
     private JTextField surnameTextField;
-    private JTextField signTextField;
+    private JTextField mobileTextField;
     private JTextField emailTextField;
     private JButton addAuthorButton;
     private JButton updateAuthorButton;
@@ -382,7 +386,7 @@ public class ApplicationFrameController {
         nameTextField = applicationFrame.getNameTextField();
         surnameTextField = applicationFrame.getSurnameTextField();
         emailTextField = applicationFrame.getEmailTextField();
-        signTextField = applicationFrame.getSignTextField();
+        mobileTextField = applicationFrame.getSignTextField();
         authorsIdLabel = applicationFrame.getAuthorsIdLabel();
         authorsMenageTable = applicationFrame.getAuthorsMenageTable();
         authorsMenageTable.setAutoCreateRowSorter(true);
@@ -434,7 +438,7 @@ public class ApplicationFrameController {
         saveTermsToTagButton = applicationFrame.getSaveTermsToTagButton();
 
 
-
+      TermWindow.initializeKeyBinding(bottomDetailsTermPanel.getRootPane(),htmlEditorPane);
 
         //------------------------------------------------tags
         // settings tab----------------------------------------------------------END---------------------------------------------------------------------------------
@@ -669,10 +673,10 @@ public class ApplicationFrameController {
                     if (!apiConnector.isAuthorExist(nameTextField.getText(), surnameTextField.getText())) {
 
                         Author author = new Author();
-                        author.setName(nameTextField.getText());
-                        author.setSurname(surnameTextField.getText());
+                        author.setName(nameTextField.getText().trim());
+                        author.setSurname(surnameTextField.getText().trim());
                         author.setEmail(emailTextField.getText());
-                        author.setTelephone(signTextField.getText());
+                        author.setTelephone(mobileTextField.getText());
 
                         authorPanelErrorLabel.setText(apiConnector.addNewAuthor(author));
 
@@ -705,7 +709,7 @@ public class ApplicationFrameController {
                     nameTextField.setText(author.getName());
                     surnameTextField.setText(author.getSurname());
                     emailTextField.setText(author.getEmail());
-                    signTextField.setText(author.getTelephone());
+                    mobileTextField.setText(author.getTelephone());
                     if (!updateAuthorButton.isVisible()) {
                         updateAuthorButton.setVisible(true);
                     }
@@ -735,15 +739,15 @@ public class ApplicationFrameController {
                     String message = "Czy chcesz zaktualizować autora o id: '" + (int) author.getId() + "' \nObecne imię : '" +
                             author.getName() + "', nazwisko: '" + author.getSurname() + "', telefon: '" + author.getTelephone() + "', email: '" +
                             author.getEmail() + "'.\n Nowe dane autora będą następujące - imię: '" + nameTextField.getText() + "', nazwisko: '" +
-                            surnameTextField.getText() + "', telefon: '" + signTextField.getText() + "', email: '" + emailTextField.getText() + "'?";
+                            surnameTextField.getText() + "', telefon: '" + mobileTextField.getText() + "', email: '" + emailTextField.getText() + "'?";
                     result = JOptionPane.showOptionDialog(applicationFrame, message, "Aktualizacja autora", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
                 } else
                     authorPanelErrorLabel.setText("Dla autora o id " + (int) author.getId() + "  nie zostały zmienione żadne dane.");
 
                 if (result == 0) {
-                    author.setName(nameTextField.getText());
-                    author.setSurname(surnameTextField.getText());
-                    author.setTelephone(signTextField.getText());
+                    author.setName(nameTextField.getText().trim());
+                    author.setSurname(surnameTextField.getText().trim());
+                    author.setTelephone(mobileTextField.getText());
                     author.setEmail(emailTextField.getText());
                     authorPanelErrorLabel.setText(apiConnector.updateAuthor(author));
                     hideButtonsAndRefreshViewAfterAuthorsAction();
@@ -885,8 +889,9 @@ public class ApplicationFrameController {
                             renderTermTable();
 
                         } else {
-                            termsErrorLabel.setText("Żadne z haseł nie spełnia zadanych kryteriów.");
-                            cardLayout1.show(bottomDetailsPanel, bottomDetailsBlankPanel.getName());
+                            //termsErrorLabel.setText("Żadne z haseł nie spełnia zadanych kryteriów.");
+                                JOptionPane.showMessageDialog (applicationFrame,"Żadne z haseł nie spełnia zadanych kryteriów.","Brak wyników!",JOptionPane.WARNING_MESSAGE);
+                            //cardLayout1.show(bottomDetailsPanel, bottomDetailsBlankPanel.getName());
 
                         /*if (tm.getRowCount() != 0) {
                             for (int i = tm.getRowCount() - 1; i > -1; i--) {
@@ -1583,7 +1588,7 @@ public class ApplicationFrameController {
         nameTextField.setText("");
         surnameTextField.setText("");
         emailTextField.setText("");
-        signTextField.setText("");
+        mobileTextField.setText("");
 
         authorsIdLabel.setText("");
     }
@@ -1763,11 +1768,13 @@ public class ApplicationFrameController {
         for (Author s : authors
         ) {
             Float idAuthor = s.getId();
-            authorsTableModelInTermDetails.addRow(new Object[]{idAuthor.intValue(), false, s.getName() + " " + s.getSurname(), null});
+            authorsTableModelInTermDetails.addRow(new Object[]{idAuthor.intValue(), false, s.getName()  ,  s.getSurname(), null});
         }
         tableColumnModel.getColumn(0).setMaxWidth(40);
         tableColumnModel.getColumn(1).setMaxWidth(40);
-        tableColumnModel.getColumn(3).setPreferredWidth(30);
+        /*tableColumnModel.getColumn(2).setMaxWidth(40);
+        tableColumnModel.getColumn(3).setMaxWidth(40);*/
+        tableColumnModel.getColumn(4).setPreferredWidth(30);
     }
 
     private void fillDataToTermForm(Term term, boolean isEditable, Integer termId) {
@@ -1817,7 +1824,7 @@ public class ApplicationFrameController {
         nameTextField.setText("");
         surnameTextField.setText("");
         emailTextField.setText("");
-        signTextField.setText("");
+        mobileTextField.setText("");
     }
 
     private void renderAuthorTable() {

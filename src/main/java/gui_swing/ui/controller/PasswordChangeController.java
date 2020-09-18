@@ -1,7 +1,8 @@
 package gui_swing.ui.controller;
 
 import gui_swing.ui.model.ApiConnector;
-import gui_swing.ui.model.User;
+
+import gui_swing.ui.model.pojo.User;
 import gui_swing.ui.model.tableModels.GradientButton;
 import gui_swing.ui.view.LoginFrame;
 

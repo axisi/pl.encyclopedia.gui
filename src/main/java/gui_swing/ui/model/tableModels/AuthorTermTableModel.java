@@ -18,6 +18,7 @@ public class AuthorTermTableModel extends DefaultTableModel {
             case 1:
                 return Boolean.class;
             case 2:
+            case 3:
                 return String.class;
             default:
                 return Integer.class;
@@ -29,6 +30,7 @@ public class AuthorTermTableModel extends DefaultTableModel {
         switch (column) {
             case 0:
             case 2:
+            case 3:
                 return false;
             default:
                 return true;
