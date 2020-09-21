@@ -754,4 +754,42 @@ public  class ApiConnector {
         invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
         return invocationBuilder.get(new GenericType<String>(){} );
     }
+
+    public ArrayList<Long> getEditorAuthorsId(String chosenCategory) {
+        webTarget = client.target(apiURI).path("editors/"+chosenCategory);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return invocationBuilder.get(new GenericType<ArrayList<Long>>(){} );
+    }
+
+    public void updateEditorsForCategory(String chosenCategory, ArrayList<Integer> chosenAuthorsIdList) {
+        webTarget = client.target(apiURI).path("editors/"+chosenCategory);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        invocationBuilder.put(Entity.entity(chosenAuthorsIdList,MediaType.APPLICATION_JSON));
+    }
+
+    public ArrayList<Author> getAuthorsOfTerms(ArrayList<Long> sendTermsIdList) {
+        webTarget = client.target(apiURI).path("terms/authors");
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        Response response = invocationBuilder.post( Entity.entity(sendTermsIdList,MediaType.APPLICATION_JSON));
+        return response.readEntity(new GenericType<ArrayList<Author>>(){});
+    }
+
+    public ArrayList<Author> getTermsCategoryEditors(ArrayList<Long> sendTermsIdList) {
+        webTarget = client.target(apiURI).path("terms/categoryEditors");
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        Response response = invocationBuilder.post( Entity.entity(sendTermsIdList,MediaType.APPLICATION_JSON));
+        return response.readEntity(new GenericType<ArrayList<Author>>(){});
+    }
+
+    public ArrayList<Author> getAllMainAuthors() {
+        webTarget = client.target(apiURI).path("terms/mainAuthor");
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+        return invocationBuilder.get(new GenericType<ArrayList<Author>>(){} );
+    }
+
+    public void updateTermWithStatusAndAddTermHistory(Long id, Long version, String status) {
+        webTarget = client.target(apiURI).path("term/"+id+"/version/"+version+"/status/"+status);
+        invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, "Bearer " + ConfigManager.getJwtToken());
+         invocationBuilder.get();
+    }
 }

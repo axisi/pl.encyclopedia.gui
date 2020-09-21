@@ -112,12 +112,11 @@ public class AddressBookPanel extends JFrame {
 
 
     private void initializeForm() {
-        this.setMinimumSize(new Dimension((int) (dim.width*0.5), (int) (dim.height * 0.6)));
+        this.setMinimumSize(new Dimension((int) (dim.width*0.8), (int) (dim.height * 0.8)));
         this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
         this.setVisible(true);
 
         this.setTitle(String.format("Dodaj odbiorców do pola %s.", isTo? "Do":"DW") );
-
 
     }
 

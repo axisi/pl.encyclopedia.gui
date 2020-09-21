@@ -179,6 +179,7 @@ public class ApplicationFrame extends JFrame {
     private JPanel AuthorsPanel;
     private JButton authorPlusButton;
     private JButton authorMinusButton;
+    private JButton categoriesEditorsButton;
 
     protected String[] columnToolTips = {
             "Id hasła, pod tym numerem jest ono dostępne w bazie danych.",
@@ -1144,10 +1145,15 @@ public class ApplicationFrame extends JFrame {
         this.termsTableScrollPane = termsTableScrollPane;
     }
 
+    public JButton getCategoriesEditorsButton() {
+        return categoriesEditorsButton;
+    }
 
+    public void setCategoriesEditorsButton(JButton categoriesEditorsButton) {
+        this.categoriesEditorsButton = categoriesEditorsButton;
+    }
 
-
-    /*public TermTableModel getTermTableModel() {
+/*public TermTableModel getTermTableModel() {
         return termTableModel;
     }
 
@@ -2017,12 +2023,15 @@ public class ApplicationFrame extends JFrame {
         authorsIdLabel.setText("ID:");
         panel5.add(authorsIdLabel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel6 = new JPanel();
-        panel6.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+        panel6.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
         panel6.setOpaque(false);
         panel5.add(panel6, new GridConstraints(2, 0, 1, 8, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         authorPanelErrorLabel = new JLabel();
         authorPanelErrorLabel.setText("");
-        panel6.add(authorPanelErrorLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_SOUTHEAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel6.add(authorPanelErrorLabel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_SOUTHEAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        categoriesEditorsButton = new JButton();
+        categoriesEditorsButton.setText("Redaktorzy działów");
+        panel6.add(categoriesEditorsButton, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel7 = new JPanel();
         panel7.setLayout(new GridLayoutManager(1, 1, new Insets(10, 10, 60, 20), -1, -1));
         panel7.setOpaque(false);

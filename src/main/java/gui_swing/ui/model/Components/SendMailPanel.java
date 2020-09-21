@@ -2,6 +2,7 @@ package gui_swing.ui.model.Components;
 
 import gui_swing.ui.model.ApiConnector;
 import gui_swing.ui.model.ConfigManager;
+import gui_swing.ui.model.pojo.Author;
 import gui_swing.ui.model.tableModels.GradientButton;
 import net.atlanticbb.tantlinger.shef.HTMLEditorPane;
 
@@ -22,10 +23,14 @@ public class SendMailPanel extends JFrame {
     private JPanel topCenterPanel;
     private JPanel topRightPanel;
     private JPanel bottomPanel;
+    private JPanel buttonsJPanel;
     private String filePath;
     private ArrayList <Long> sendTermsIdList;
     private ArrayList <Long> sendTermsVersionList;
     private Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+    private JButton sendToAuthors;
+    private JButton sendToEditors;
+    private JButton sendToMainEditor;
 
     private JButton sendButton;
     private JLabel toLabel;
@@ -76,6 +81,8 @@ public class SendMailPanel extends JFrame {
         this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
         this.setVisible(true);
         this.setTitle("Generowanie wiadomości mailowej");
+        this.setAlwaysOnTop(true);
+        this.setAlwaysOnTop(false);
     }
 
     private void prepareForm() {
@@ -140,21 +147,37 @@ public class SendMailPanel extends JFrame {
         topRightLeftPanel.add(new JLabel());
         topRightRightPanel.add(attachmentText);
 
-        bottomPanel= new JPanel();
+        bottomPanel= new JPanel(new BorderLayout());
         mainJPanel.add(bottomPanel,BorderLayout.CENTER);
         //bodyText = new JTextArea();
         //scrollPane = new JScrollPane(bodyText);
         htmlEditorPane = new HTMLEditorPane();
         htmlEditorPane.setPreferredSize(new Dimension((int) (dim.width*0.7),(int) (dim.height*0.4)));
-        bottomPanel.add(htmlEditorPane);
+        bottomPanel.add(htmlEditorPane,BorderLayout.CENTER);
         //scrollPane.setPreferredSize(new Dimension((int) (dim.width*0.7),(int) (dim.height*0.4)));
         //bottomPanel.add(scrollPane);
+        buttonsJPanel = new JPanel();
+        bottomPanel.add(buttonsJPanel,BorderLayout.NORTH);
+        sendToAuthors= new GradientButton("Pobierz email do autorów",Color.green.brighter());
+        sendToEditors= new GradientButton("Pobierz email do redaktorów działu",Color.green.brighter());
+        sendToMainEditor= new GradientButton("Pobierz email do redaktora naukowego",Color.green.brighter());
+        buttonsJPanel.add(sendToAuthors);
+        buttonsJPanel.add(sendToEditors);
+        buttonsJPanel.add(sendToMainEditor);
+
 
         this.pack();
 
         sendButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if(!statusChangeCB.getSelectedItem().toString().equals("Nie zmieniaj statusów")){
+                    for (int i = 0; i <sendTermsIdList.size() ; i++) {
+
+                        apiConnector.updateTermWithStatusAndAddTermHistory(sendTermsIdList.get(i),sendTermsVersionList.get(i),statusChangeCB.getSelectedItem().toString());
+
+                    }
+                }
                 sendMail();
             }
         });
@@ -184,6 +207,42 @@ public class SendMailPanel extends JFrame {
                 if (addressBookPanel != null) {
                     addressBookPanel.dispose();
                 }
+            }
+        });
+        sendToAuthors.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ArrayList<Author> authors = apiConnector.getAuthorsOfTerms(sendTermsIdList);
+                String temp="";
+                for (Author a: authors
+                     ) {
+                    temp+=";"+a.getEmail();
+                };
+                toText.setText(toText.getText()+temp);
+            }
+        });
+        sendToEditors.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ArrayList<Author> authors = apiConnector.getTermsCategoryEditors(sendTermsIdList);
+                String temp="";
+                for (Author a: authors
+                ) {
+                    temp+=";"+a.getEmail();
+                };
+                toText.setText(toText.getText()+temp);
+            }
+        });
+        sendToMainEditor.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ArrayList<Author> authors = apiConnector.getAllMainAuthors();
+                String temp="";
+                for (Author a: authors
+                ) {
+                    temp+=";"+a.getEmail();
+                };
+                toText.setText(toText.getText()+temp);
             }
         });
     }

@@ -161,6 +161,10 @@ public class ApplicationFrameController {
     private DefaultTableModel am;
     private static  JFrame frame;
 
+    private JButton categoriesEditorsButton;
+
+    private CategoryEditorsPanel categoryEditorsPanel;
+
     //Authors end----------------------------------------------------------------END-----------------------------------------------------------------------------
 
 // buttons
@@ -391,6 +395,7 @@ public class ApplicationFrameController {
         authorsMenageTable = applicationFrame.getAuthorsMenageTable();
         authorsMenageTable.setAutoCreateRowSorter(true);
         am = (DefaultTableModel) authorsMenageTable.getModel();
+        categoriesEditorsButton= applicationFrame.getCategoriesEditorsButton();
         //Authors end-------------------------------------------------------------END--------------------------------------------------------------------------------
 // FUll text search -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -654,8 +659,6 @@ public class ApplicationFrameController {
                             addAuthorButton.setVisible(true);
                             renderAuthorTable();
                             break;
-
-
                     }
 
                 }
@@ -727,6 +730,15 @@ public class ApplicationFrameController {
                     hideButtonsAndRefreshViewAfterAuthorsAction();
                 } else
                     authorPanelErrorLabel.setText("Autor o id: '" + selectedAuthorId + "' nie może zostać usunięty ponieważ są do niego przypisane hasła.");
+            }
+        });
+        categoriesEditorsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(categoryEditorsPanel!=null){
+                    categoryEditorsPanel.dispose();
+                }
+                categoryEditorsPanel = new CategoryEditorsPanel();
             }
         });
         updateAuthorButton.addActionListener(new AbstractAction() {
