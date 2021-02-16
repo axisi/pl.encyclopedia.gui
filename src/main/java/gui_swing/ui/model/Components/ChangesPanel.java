@@ -52,6 +52,8 @@ public class ChangesPanel extends JFrame {
     private GradientButton acceptButton;
     private GradientButton skipButton;
     private GradientButton cancelButton;
+    private GradientButton openTermsWithErrorsButton;
+    private Integer termsWithErrorsCounter;
 
     private JCheckBox caseSensitiveCheckBox;
 
@@ -63,6 +65,8 @@ public class ChangesPanel extends JFrame {
     private ApiConnector apiConnector;
 
     private Boolean hasAccess = false;
+
+    private ArrayList<Long> termsWithErrors ;
 
 
     public ChangesPanel(ArrayList<Long> list){
@@ -215,8 +219,15 @@ public class ChangesPanel extends JFrame {
         startButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                termsWithErrors = new ArrayList<>();
+                if(openTermsWithErrorsButton!=null){
+                    Container parent = openTermsWithErrorsButton.getParent();
+                    parent.remove(openTermsWithErrorsButton);
+                    openTermsWithErrorsButton=null;
+                }
                 counter = 0;
                 index = 0;
+                termsWithErrorsCounter = 0;
                 searchedString = searchedText.getText();
                 replacedString = replacedText.getText();
                 if(termsArray.size()==0){
@@ -320,8 +331,8 @@ public class ChangesPanel extends JFrame {
             isFound=false;
             rightIdLabel.setText(apiConnector.getTerm(termsArray.get(0).intValue()).getId().toString());
             rightTermLabel.setText(apiConnector.getTerm(termsArray.get(0).intValue()).getTitle());
-            counter++;
-            errorLabel.setText("Wystąpienie "+counter+".");
+
+            errorLabel.setText("Wystąpienie "+ ++counter+".");
 
         }else{
 
@@ -331,16 +342,36 @@ public class ChangesPanel extends JFrame {
 
     private void endOfReplacing() {
         termsArray.clear();
-        errorLabel.setText("Nie znaleziono więcej wystąpień. Możesz rozpocząć nową zamianę.");
-        topBottomPane.setVisible(false);
+        errorLabel.setText("Nie znaleziono więcej wystąpień. Możesz rozpocząć nową zamianę. Znaleziono " + counter +" haseł.");
+
         topCenterPane.setVisible(false);
         replacedText.setEditable(true);
         searchedText.setEditable(true);
         caseSensitiveCheckBox.setEnabled(true);
 
         startButton.setEnabled(true);
+        isAnyErrors();
         leftEditorPane.setText("");
         rightEditorPane.setText("");
+    }
+
+    private void isAnyErrors() {
+        if(termsWithErrorsCounter>0){
+            openTermsWithErrorsButton = new GradientButton("Pokaż hasła z błędami:" +termsWithErrorsCounter+".",Color.orange.darker());
+            topBottomPane.add(openTermsWithErrorsButton);
+            openTermsWithErrorsButton.setVisible(true);
+            openTermsWithErrorsButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    for (Long i : termsWithErrors
+                         ) {
+                        new TermWindow(i.intValue());
+                    }
+                }
+            });
+        }else{
+            topBottomPane.setVisible(false);
+        }
     }
 
     public String replaceString(String str, String string, int index, String searchedString) {
@@ -352,6 +383,8 @@ public class ChangesPanel extends JFrame {
         hasAccess= TermWindow.checkAccess(term.getId().intValue());
         if(!hasAccess){
             termsArray.remove(0);
+            JOptionPane.showMessageDialog(this,"Użytkownik nie ma uprawnień do modyfikacji hasła: " + term.getId() +" - "+ term.getTitle()+". Hasło jest przypisane do kategorii "+apiConnector.getTermCategory(term.getId().intValue()));
+
             return 0;
         }
         TermHistory  termHistory = apiConnector.getActualTermHistoryOfTerm(term.getId().intValue());
@@ -371,33 +404,44 @@ public class ChangesPanel extends JFrame {
                 return index+ tempContent.indexOf(searchedString);
             }
         }else{
-            Integer tempIndex = tempContent.indexOf(searchedString);
-            Integer decision = -1;
-            String tempTempContent = tempContent.substring(tempIndex);
-            Integer tempTempIndex= 0;
-            for (char ch: tempTempContent.toCharArray()
-                 ) {
-                switch(ch){
-                    case '<':
-                    decision = 1;
-                    break;
-                    case '>':
-                    decision = 2;
-                    break;
-                    default:
-                    break;
+            if(countInHTML<countInText){
+                JOptionPane.showMessageDialog(this, "Niestety dla hasła " + term.getId() +" - "+ term.getTitle()+" zmianę należy wprowadzić ręcznie, poprzez edycję tego hasła. Po zakończeniu wyszukiwania system otworzy je automatycznie");
+                termsWithErrorsCounter++;
+                termsWithErrors.add(term.getId());
+                counter++;
+                termsArray.remove(0);
+                return 0;
+            }else {
+
+
+                Integer tempIndex = tempContent.indexOf(searchedString);
+                Integer decision = -1;
+                String tempTempContent = tempContent.substring(tempIndex);
+                Integer tempTempIndex = 0;
+                for (char ch : tempTempContent.toCharArray()
+                ) {
+                    switch (ch) {
+                        case '<':
+                            decision = 1;
+                            break;
+                        case '>':
+                            decision = 2;
+                            break;
+                        default:
+                            break;
+                    }
+                    if (decision > 0) {
+                        break;
+                    } else {
+                        tempTempIndex++;
+                    }
                 }
-                if(decision>0){
-                    break;
-                }else{
-                    tempTempIndex++;
+                if (decision == 1) {
+                    isFound = true;
+                    return index + tempContent.indexOf(searchedString);
+                } else {
+                    return index + tempTempIndex - 1;
                 }
-            }
-            if(decision==1){
-                isFound = true;
-                return index+ tempContent.indexOf(searchedString);
-            }else{
-                return index + tempTempIndex-1;
             }
         }
     }
