@@ -144,8 +144,8 @@ public class CategoryEditorsPanel extends JFrame {
         leftJTable.getColumnModel().getColumn(3).setPreferredWidth(300);
         rightJTable.getColumnModel().getColumn(0).setPreferredWidth(30);
         rightJTable.getColumnModel().getColumn(3).setPreferredWidth(300);
-        leftJTable.setAutoCreateRowSorter(true);
-        rightJTable.setAutoCreateRowSorter(true);
+        //leftJTable.setAutoCreateRowSorter(true);
+        //rightJTable.setAutoCreateRowSorter(true);
         leftJTable.getTableHeader().setReorderingAllowed(false);
         rightJTable.getTableHeader().setReorderingAllowed(false);
         leftScrollPane.setBorder(BorderFactory.createEmptyBorder(0,0,0,15));
