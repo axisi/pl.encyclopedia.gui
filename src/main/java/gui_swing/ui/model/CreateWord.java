@@ -154,11 +154,16 @@ public class CreateWord {
 
             XHTMLImporterImpl XHTMLImporter = new XHTMLImporterImpl(wordMLPackage);
 
+        try{
 
-        wordMLPackage.getMainDocumentPart().getContent().addAll(
+            wordMLPackage.getMainDocumentPart().getContent().addAll(
                     XHTMLImporter.convert(String.valueOf(xhtml), null) );
+        }catch (Exception e1){
+            e1.printStackTrace();
+            System.out.println("AA");
+        }
 
-
+        xhtml.setLength(0);
         fullPath = path +File.separator+ fileName+".docx";
         File file = new File(fullPath);
 
@@ -169,6 +174,7 @@ public class CreateWord {
             }
 
             wordMLPackage.save(new FileOutputStream(file));
+            wordMLPackage.reset();
 
             if(attachComments){
                 if(jTable!=null)

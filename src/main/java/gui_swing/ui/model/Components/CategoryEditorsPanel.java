@@ -76,7 +76,7 @@ public class CategoryEditorsPanel extends JFrame {
     }
 
     private void showForm() {
-        this.setMinimumSize(new Dimension((int) (dim.width*0.8), (int) (dim.height * 0.8)));
+        this.setMinimumSize(new Dimension((int) (dim.width*0.8), (int) (dim.height * 0.95)));
         this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
         this.setVisible(true);
 

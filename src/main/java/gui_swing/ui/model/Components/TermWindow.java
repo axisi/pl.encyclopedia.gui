@@ -279,7 +279,7 @@ public class TermWindow  {
         titleTextField.setText(term.getTitle());
         categoryComboBox.setSelectedItem(apiConnector.getTermCategory(termId));
         subCategoryComboBox.setSelectedItem(apiConnector.getTermSubcategory(termId));
-        versesLabel.setText( "Hasło zawiera "+htmlEditorPane.getSelectedEditor().getText().length()+" znaków czyli "+htmlEditorPane.getSelectedEditor().getText().length() / lettersOnVerse+" wersetów" );
+        versesLabel.setText( "Hasło zawiera "+NCRConverter.html2text(htmlEditorPane.getSelectedEditor().getText()).length()+" znaki - "+NCRConverter.html2text(htmlEditorPane.getSelectedEditor().getText()).length() / lettersOnVerse+" wersety" );
 
     }
 
@@ -483,6 +483,8 @@ public class TermWindow  {
         updateTermButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+
+                {
                 clearSelection();
                 Long termHistoryId;
                 if(null!=commentsPanel)
@@ -501,7 +503,7 @@ public class TermWindow  {
                     }
                 }
                 termHistory.setContent(NCRConverter.convertNcrToText(htmlEditorPane.getText()));
-                packFormDataToEntity(termHistory, newTerm,statusesList,tagsList,authorsTable);
+                packFormDataToEntity(termHistory, newTerm,statusesList,tagsList,authorsTable,null);
                 try {
                     Integer termId1 = apiConnector.updateTerm(newTerm);
                     ApplicationFrameController.termWindows.add( new TermWindow(termId));
@@ -513,6 +515,7 @@ public class TermWindow  {
                     ex.printStackTrace();
 
                 }
+            }
             }
         });
 
@@ -783,21 +786,21 @@ public class TermWindow  {
              @Override
              public void insertUpdate(DocumentEvent e) {
                  markListenerMethod(true);
-                 versesLabel.setText( "Hasło zawiera "+htmlEditorPane.getSelectedEditor().getText().length()+" znaków czyli "+htmlEditorPane.getSelectedEditor().getText().length() / lettersOnVerse+" wersetów" );
+                 versesLabel.setText( "Hasło zawiera "+NCRConverter.html2text(htmlEditorPane.getSelectedEditor().getText()).length()+" znaki - "+NCRConverter.html2text(htmlEditorPane.getSelectedEditor().getText()).length() / lettersOnVerse+" wersety" );
 
              }
 
              @Override
              public void removeUpdate(DocumentEvent e) {
                  markListenerMethod(false);
-                 versesLabel.setText( "Hasło zawiera "+htmlEditorPane.getSelectedEditor().getText().length()+" znaków czyli "+htmlEditorPane.getSelectedEditor().getText().length() / lettersOnVerse+" wersetów" );
+                 versesLabel.setText( "Hasło zawiera "+NCRConverter.html2text(htmlEditorPane.getSelectedEditor().getText()).length()+" znaki - "+NCRConverter.html2text(htmlEditorPane.getSelectedEditor().getText()).length() / lettersOnVerse+" wersety" );
 
              }
 
              @Override
              public void changedUpdate(DocumentEvent e) {
                  //markListenerMethod();
-                 versesLabel.setText( "Hasło zawiera "+htmlEditorPane.getSelectedEditor().getText().length()+" znaków czyli "+htmlEditorPane.getSelectedEditor().getText().length() / lettersOnVerse+" wersetów" );
+                 versesLabel.setText( "Hasło zawiera "+NCRConverter.html2text(htmlEditorPane.getSelectedEditor().getText()).length()+" znaki - "+NCRConverter.html2text(htmlEditorPane.getSelectedEditor().getText()).length() / lettersOnVerse+" wersety" );
 
              }
          });
@@ -1023,7 +1026,7 @@ public class TermWindow  {
         }
     }
 
-    public static void packFormDataToEntity(TermHistory termHistory, Term term,JList statusesList,JList tagsList,JTable authorsTable) {
+    public static void packFormDataToEntity(TermHistory termHistory, Term term,JList statusesList,JList tagsList,JTable authorsTable,String currentStatus) {
         ArrayList<String> statuses = new ArrayList<>();
         ArrayList<String> tags = new ArrayList<>();
         ArrayList<String> authors = new ArrayList<>();
@@ -1032,8 +1035,15 @@ public class TermWindow  {
         for (int i = 0; i < statusesList.getModel().getSize(); i++) {
             statuses.add(statusesList.getModel().getElementAt(i).toString());
             CheckListItem checkListItem = (CheckListItem) statusesList.getModel().getElementAt(i);
-            if (checkListItem.isSelected())
-                termHistory.setStatus(checkListItem.toString());
+            if(currentStatus==null){
+                if (checkListItem.isSelected())
+                    termHistory.setStatus(checkListItem.toString());
+
+            }else{
+                if(checkListItem.toString().equals(currentStatus)){
+                    termHistory.setStatus(checkListItem.toString());
+                }
+            }
         }
         for (int i = 0; i < tagsList.getModel().getSize(); i++) {
             CheckListItem checkListItem = (CheckListItem) tagsList.getModel().getElementAt(i);

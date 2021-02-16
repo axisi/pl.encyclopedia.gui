@@ -230,6 +230,29 @@ public class ApplicationFrameController {
     //----------------------------------------------------------------------------------------------
 
 
+    //key listener
+
+
+    KeyListener keyListener = new KeyListener() {
+        @Override
+        public void keyTyped(KeyEvent e) {
+
+        }
+
+        @Override
+        public void keyPressed(KeyEvent e) {
+            if(e.getKeyCode() == KeyEvent.VK_ENTER){
+            searchButton.doClick();
+            }
+        }
+
+        @Override
+        public void keyReleased(KeyEvent e) {
+
+        }
+    };
+
+    //key
     private JButton getStatusesForSubcategoryButton;
     public static JFrame frameWithTerms;
 
@@ -495,6 +518,61 @@ public class ApplicationFrameController {
     }
 
     private void initListeners() {
+        authorsJList.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                authorsJList.addKeyListener(keyListener);
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                authorsJList.removeKeyListener(keyListener);
+            }
+        });
+        categoryJList.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                categoryJList.addKeyListener(keyListener);
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                categoryJList.removeKeyListener(keyListener);
+            }
+        });
+        subcategoryJList.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                subcategoryJList.addKeyListener(keyListener);
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                subcategoryJList.removeKeyListener(keyListener);
+            }
+        });
+        tagsJList.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                tagsJList.addKeyListener(keyListener);
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                tagsJList.removeKeyListener(keyListener);
+            }
+        });
+        statusesJList.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                statusesJList.addKeyListener(keyListener);
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                statusesJList.removeKeyListener(keyListener);
+            }
+        });
         topPanel.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
@@ -576,6 +654,7 @@ public class ApplicationFrameController {
                                 // System.out.println( bottomDetailsBlankPanel.getName());
                                 cardLayout1.show(bottomDetailsPanel, bottomDetailsBlankPanel.getName());
                                 searchButton.setVisible(true);
+                                //bottomDetailsFiltersPanel.addKeyListener(keyListener);
                                 JList[] jlist = new JList[3];
                                 jlist[0] = categoryJList;
                                 jlist[1] = subcategoryJList;
@@ -676,8 +755,8 @@ public class ApplicationFrameController {
                     if (!apiConnector.isAuthorExist(nameTextField.getText(), surnameTextField.getText())) {
 
                         Author author = new Author();
-                        author.setName(nameTextField.getText().trim());
-                        author.setSurname(surnameTextField.getText().trim());
+                        author.setName(nameTextField.getText().replaceAll("\\s+",""));
+                        author.setSurname(surnameTextField.getText().replaceAll("\\s+",""));
                         author.setEmail(emailTextField.getText());
                         author.setTelephone(mobileTextField.getText());
 
@@ -757,8 +836,8 @@ public class ApplicationFrameController {
                     authorPanelErrorLabel.setText("Dla autora o id " + (int) author.getId() + "  nie zostały zmienione żadne dane.");
 
                 if (result == 0) {
-                    author.setName(nameTextField.getText().trim());
-                    author.setSurname(surnameTextField.getText().trim());
+                    author.setName(nameTextField.getText().replaceAll("\\s+",""));
+                    author.setSurname(surnameTextField.getText().replaceAll("\\s+",""));
                     author.setTelephone(mobileTextField.getText());
                     author.setEmail(emailTextField.getText());
                     authorPanelErrorLabel.setText(apiConnector.updateAuthor(author));
@@ -884,7 +963,7 @@ public class ApplicationFrameController {
                     generateLists(subcategoriesList, subcategoryJList);
                     generateLists(tagsList, tagsJList);
                     generateLists(statusesList, statusesJList);
-                    generateLists(authorsList,authorsJList);
+                    generateListsAuthors(authorsList,authorsJList);
                     if (!(categoriesList.isEmpty() && subcategoriesList.isEmpty() && tagsList.isEmpty() && statusesList.isEmpty()&&authorsList.isEmpty())) {
                         searchMatrix.setCategoryF(categoriesList);
                         searchMatrix.setSubcategoryF(subcategoriesList);
@@ -930,7 +1009,6 @@ public class ApplicationFrameController {
                         versesTermLabel.setText("Hasło musi mieć ustawioną kategorię.");
                     } else {
 
-
                         Term term = new Term();
                         TermHistory termHistory = new TermHistory();
                         termHistory.setVersion(1L);
@@ -942,7 +1020,20 @@ public class ApplicationFrameController {
                         term.setSubcategory(String.valueOf(subcategoryComboBox.getSelectedItem()));
                         //System.out.println("a");
 
-                        TermWindow.packFormDataToEntity(termHistory, term,statusesJList,tagsJList,authorsTable);
+                        String currentStatus="";
+                        for (int i = 0; i < statusesTermJList.getModel().getSize(); i++) {
+                            CheckListItem checkListItem1 = (CheckListItem)statusesTermJList.getModel().getElementAt(i);
+                            if(checkListItem1.isSelected()){
+                                currentStatus=checkListItem1.toString();
+                            }
+                        }
+                        ArrayList<String> chosenTags = new ArrayList<>();
+                        for (int i = 0; i < tagsTermJList.getModel().getSize(); i++){
+
+                        }
+
+                        TermWindow.packFormDataToEntity(termHistory, term,statusesTermJList,tagsTermJList,authorsTable,null);
+                       // TermWindow.packFormDataToEntity(termHistory, term,statusesJList,tagsJList,authorsTable,currentStatus);
 
                         prepareTermForm(true);
                         try {
@@ -951,6 +1042,18 @@ public class ApplicationFrameController {
                             tagsStrings.clear();
                             categoryComboBox.setSelectedIndex(0);
                             subcategoryComboBox.setSelectedIndex(0);
+                           /* // wkłądanie do bazy ułatwienie
+
+                            categoryComboBox.setSelectedItem("Sztuka");
+                            subcategoryComboBox.setSelectedItem("Hasło w całości przenoszone");
+                            CheckListItem     checkListItem = (CheckListItem) tagsTermJList.getModel().getElementAt(0);
+                            checkListItem.setSelected(true);
+                            CheckListItem     checkListItem1 = (CheckListItem) statusesTermJList.getModel().getElementAt(8);
+                            checkListItem1.setSelected(true);
+
+                            // wkłądanie do bazy ułatwienie*/
+
+
                         } catch (JsonProcessingException ex) {
                             ex.printStackTrace();
                             logoutBecauseOfError();
@@ -1410,6 +1513,7 @@ public class ApplicationFrameController {
             @Override
             public void actionPerformed(ActionEvent e) {
                 plusMinusMethod(categoryJList,true);
+
             }
         });
         categoryMinusButton.addActionListener(new ActionListener() {
@@ -1479,9 +1583,53 @@ public class ApplicationFrameController {
             }
         });
 
+        KeyListener enterFullTextSearchListener = new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if(e.getKeyCode()==KeyEvent.VK_ENTER){
+                    fullTextSearchButton.doClick();
+
+                }
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+
+            }
+        };
+
+        fullTextSearchField.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                fullTextSearchField.addKeyListener(enterFullTextSearchListener);
+                System.out.println("focus on");
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                System.out.println("focus off");
+                fullTextSearchField.removeKeyListener(enterFullTextSearchListener);
+            }
+        });
+
         // FUll text search -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
+    }
+
+    private void generateListsAuthors(AuthorsF<String> authorsList, JList authorsJList) {
+
+        for (int i = 0; i < authorsJList.getModel().getSize(); i++) {
+            CheckListItem checkListItem = (CheckListItem) authorsJList.getModel().getElementAt(i);
+            if (checkListItem.isSelected()) {
+                authorsList.add(checkListItem.toString());
+            }
+        }
     }
 
     private void fullTextSearchButtonMethod(String text, boolean headers, boolean contents, boolean versions) {
@@ -1527,6 +1675,7 @@ public class ApplicationFrameController {
                     item.setSelected(false);
             }
         }
+        jList.requestFocus();
         cardLayout1.show(bottomDetailsPanel, bottomDetailsBlankPanel.getName());
         cardLayout1.show(bottomDetailsPanel, bottomDetailsFiltersPanel.getName());
 
@@ -1760,6 +1909,9 @@ public class ApplicationFrameController {
             }
 
 
+
+
+
         } catch (Exception ex) {
 
             System.out.println(ex.getMessage());
@@ -1915,6 +2067,7 @@ public class ApplicationFrameController {
     }
 
     private void hideFiltersSearchPanels() {
+       // bottomDetailsFiltersPanel.removeKeyListener(keyListener);
         addTermButton.setVisible(false);
         searchButton.setVisible(false);
         getStatusesForSubcategoryButton.setVisible(false);
@@ -1940,7 +2093,7 @@ public class ApplicationFrameController {
 
         dataProvider = createDataProvide();
         PaginatedTableDecorator<TermTable> paginatedDecorator = PaginatedTableDecorator.decorate(termsTable,
-                dataProvider, new int[]{5, 10, 20, 50, 75, 100}, 50);
+                dataProvider, new int[]{5, 10, 20, 50, 75, 100,10000}, 50);
         frameWithTerms = createFrame();
         paginatedDecorator.getContentPanel();
         JPanel jPanel = new JPanel(new BorderLayout());

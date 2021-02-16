@@ -5,10 +5,13 @@ import gui_swing.ui.model.ApiConnector;
 
 import gui_swing.ui.model.pojo.Term;
 import gui_swing.ui.model.pojo.TermHistory;
+import gui_swing.ui.model.tableModels.GradientButton;
 import gui_swing.ui.model.tableModels.TermVersionTableModel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.format.DateTimeFormatter;
@@ -26,11 +29,14 @@ public class TermVersionPanel extends JFrame {
        this.termId = termId;
        apiConnector = new ApiConnector();
 
-       mainPanel = new JPanel();
+       mainPanel = new JPanel(new BorderLayout());
        jTable = new JTable(new TermVersionTableModel());
        scrollPane = new JScrollPane(jTable);
        getContentPane().add(mainPanel);
-       mainPanel.add(scrollPane);
+       mainPanel.add(scrollPane,BorderLayout.CENTER);
+       JButton compareVersionsJButton = new GradientButton("Porównaj wersje", Color.GRAY);
+       mainPanel.add(compareVersionsJButton,BorderLayout.NORTH);
+
        Term term = apiConnector.getTerm(termId.intValue());
        setTitle("Wersje hasła: "+term.getTitle());
        TermVersionTableModel termVersionTableModel= (TermVersionTableModel) jTable.getModel();
@@ -66,6 +72,13 @@ public class TermVersionPanel extends JFrame {
                    TermWindow termFrame =ApplicationFrameController.termWindows.get(ApplicationFrameController.termWindows.size()-1);
                    termFrame.getFrame().setTitle(apiConnector.getTerm(termId).getTitle());
                }
+           }
+       });
+
+       compareVersionsJButton.addActionListener(new ActionListener() {
+           @Override
+           public void actionPerformed(ActionEvent e) {
+               new CompareTwoVersionsPanel(termId.longValue());
            }
        });
 

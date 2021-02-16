@@ -42,6 +42,8 @@ public class ImportHTMLFile extends JFrame {
     private JPanel rightJPanel;
     private JPanel bottomJPanel;
 
+    private boolean errorOccurred = false;
+
     private JButton updateTermsButton;
 
     private JTable table;
@@ -124,30 +126,44 @@ public class ImportHTMLFile extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 ImportedTermsTableModel tableModel = (ImportedTermsTableModel) table.getModel();
-                for (int i = 0; i <tableModel.getRowCount() ; i++) {
-                    if((boolean)tableModel.getValueAt(i,0)){
-                        Long id = (Long) tableModel.getValueAt(i,1);
-                        String status = tableModel.getValueAt(i,6).toString().trim();
+                try {
+                    for (int i = 0; i < tableModel.getRowCount(); i++) {
+                        if ((boolean) tableModel.getValueAt(i, 0)) {
+                            Long id = (Long) tableModel.getValueAt(i, 1);
+                            String status = tableModel.getValueAt(i, 6).toString().trim();
 
-                        Term contentTerm = terms.stream().filter(term1->id.equals(term1.getId())).findAny().orElse(null);
-                        String content = contentTerm.getTermHistories().get(0).getContent();
-                        Term term = apiConnector.getTerm(id.intValue());
-                        TermHistory termHistory = new TermHistory();
-                        termHistory.setContent(content);
-                        termHistory.setStatus1(status);
-                        termHistory.setVersion(term.getActualVersion()+1);
-                        term.setActualVersion(termHistory.getVersion());
-                        term.getTermHistories().add(termHistory);
-                        try {
-                            apiConnector.termImport(term);
-                        } catch (JsonProcessingException ex) {
-                            ex.printStackTrace();
+                            Term contentTerm = terms.stream().filter(term1 -> id.equals(term1.getId())).findAny().orElse(null);
+                            String content = contentTerm.getTermHistories().get(0).getContent();
+                            Term term = apiConnector.getTerm(id.intValue());
+                            TermHistory termHistory = new TermHistory();
+                            termHistory.setContent(content);
+                            termHistory.setStatus1(status);
+                            termHistory.setVersion(term.getActualVersion() + 1);
+                            term.setActualVersion(termHistory.getVersion());
+                            term.getTermHistories().add(termHistory);
+                            try {
+                                apiConnector.termImport(term);
+
+                            } catch (JsonProcessingException ex) {
+                                errorOccurred = true;
+                                ex.printStackTrace();
+
+                            }
 
                         }
-
                     }
+                } catch (Exception e1) {
+                    errorOccurred = true;
+                    e1.printStackTrace();
                 }
                 dispose();
+                if(!errorOccurred){
+
+                    JOptionPane.showMessageDialog(null,"Wersje zaznaczonych haseł zostały poprawnie zaimportowane","Sukces",JOptionPane.PLAIN_MESSAGE);
+                }else{
+                    JOptionPane.showMessageDialog(null,"Podczas impoortu wystąpił błąd","Błąd",JOptionPane.ERROR_MESSAGE);
+
+                }
             }
 
         });

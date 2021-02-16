@@ -180,6 +180,7 @@ public class ApplicationFrame extends JFrame {
     private JButton authorPlusButton;
     private JButton authorMinusButton;
     private JButton categoriesEditorsButton;
+    private JLabel versionLabel;
 
     protected String[] columnToolTips = {
             "Id hasła, pod tym numerem jest ono dostępne w bazie danych.",
@@ -2565,7 +2566,7 @@ public class ApplicationFrame extends JFrame {
         final Spacer spacer14 = new Spacer();
         leftMiddlePanel.add(spacer14, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, new Dimension(-1, 200), new Dimension(-1, 400), new Dimension(-1, 400), 0, false));
         leftBottomPanel = new JPanel();
-        leftBottomPanel.setLayout(new GridLayoutManager(2, 1, new Insets(0, 25, 15, 0), -1, -1));
+        leftBottomPanel.setLayout(new GridLayoutManager(3, 1, new Insets(0, 25, 15, 0), -1, -1));
         leftBottomPanel.setBackground(new Color(-14802385));
         leftBottomPanel.setOpaque(true);
         leftPanel.add(leftBottomPanel, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
@@ -2583,6 +2584,15 @@ public class ApplicationFrame extends JFrame {
         logoutLabel.setForeground(new Color(-3947581));
         logoutLabel.setText("Wyloguj");
         leftBottomPanel.add(logoutLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_SOUTHWEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        versionLabel = new JLabel();
+        versionLabel.setBackground(new Color(-1247233));
+        Font versionLabelFont = this.$$$getFont$$$("Arial Black", Font.BOLD, 12, versionLabel.getFont());
+        if (versionLabelFont != null) versionLabel.setFont(versionLabelFont);
+        versionLabel.setForeground(new Color(-3947581));
+        versionLabel.setText("V1.210214");
+        versionLabel.setVerticalAlignment(3);
+        versionLabel.setVerticalTextPosition(3);
+        leftBottomPanel.add(versionLabel, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_SOUTHWEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         label7.setLabelFor(nameTextField);
         label8.setLabelFor(surnameTextField);
         label9.setLabelFor(signTextField);

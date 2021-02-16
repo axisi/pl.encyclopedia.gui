@@ -57,7 +57,7 @@ public class ImportTermWindow extends JFrame {
         importTermWindow = this;
         apiConnector = new ApiConnector();
         dim = Toolkit.getDefaultToolkit().getScreenSize();
-        widthDim = new Dimension((int) (dim.width*0.3), (int) (dim.height * 0.3));
+        widthDim = new Dimension((int) (dim.width*0.8), (int) (dim.height * 0.8));
         mainJPanel=new JPanel(new BorderLayout());
         getContentPane().add(mainJPanel);
         centerJPanel = new JPanel(new GridLayout(0,1));
@@ -167,7 +167,8 @@ public class ImportTermWindow extends JFrame {
             OutputStream os;
             importedFileHtml = ConfigManager.getTempFolder() +importedFile.getName() + ".html";
             os = new FileOutputStream(ConfigManager.getTempFolder() +importedFile.getName() + ".html");
-            Docx4J.toHTML(htmlSettings, os, Docx4J.FLAG_EXPORT_PREFER_XSL);
+            //Docx4J.toHTML(htmlSettings, os, Docx4J.FLAG_EXPORT_PREFER_XSL);
+            Docx4J.toHTML(htmlSettings, os, Docx4J.FLAG_EXPORT_PREFER_NONXSL);
 
             Docx4jProperties.setProperty("docx4j.Convert.Out.HTML.OutputMethodXML", true);
 

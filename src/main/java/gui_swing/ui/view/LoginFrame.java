@@ -21,6 +21,7 @@ public class LoginFrame extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setUndecorated(true);
         setResizable(false);
+        mainPanel.getRootPane().setDefaultButton(loginButton);
 
 
     }
