@@ -343,7 +343,7 @@ public class ChangesPanel extends JFrame {
     private void endOfReplacing() {
         termsArray.clear();
         errorLabel.setText("Nie znaleziono więcej wystąpień. Możesz rozpocząć nową zamianę. Znaleziono " + counter +" haseł.");
-
+        topBottomPane.setVisible(false);
         topCenterPane.setVisible(false);
         replacedText.setEditable(true);
         searchedText.setEditable(true);
@@ -358,7 +358,7 @@ public class ChangesPanel extends JFrame {
     private void isAnyErrors() {
         if(termsWithErrorsCounter>0){
             openTermsWithErrorsButton = new GradientButton("Pokaż hasła z błędami:" +termsWithErrorsCounter+".",Color.orange.darker());
-            topBottomPane.add(openTermsWithErrorsButton);
+            topTopPane.add(openTermsWithErrorsButton);
             openTermsWithErrorsButton.setVisible(true);
             openTermsWithErrorsButton.addActionListener(new ActionListener() {
                 @Override
@@ -370,7 +370,7 @@ public class ChangesPanel extends JFrame {
                 }
             });
         }else{
-            topBottomPane.setVisible(false);
+
         }
     }
 
